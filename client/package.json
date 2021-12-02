@@ -67,7 +67,7 @@
     "not bb <= 10",
     "not op_mob <= 12.1"
   ],
-  "proxy": "http://localhost:4000/",
+  "proxy": "http://localhost:8080/",
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "babel-loader": "^8.1.0",
