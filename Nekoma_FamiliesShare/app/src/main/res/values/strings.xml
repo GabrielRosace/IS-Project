@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Nekoma_FamiliesShare</string>
+    <string name="login_string">Fill in the form to use the modded app by Nekoma</string>
+    <string name="email">Email:</string>
+    <string name="password">Password:</string>
+    <string name="login">Login</string>
+
+
+</resources>
