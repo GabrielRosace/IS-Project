@@ -13,6 +13,12 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ListaBambiniAmici"
+            android:exported="true" />
+        <activity
+            android:name=".Bambino_soloinfo"
+            android:exported="true" />
+        <activity
             android:name=".Guide"
             android:exported="true" />
         <activity

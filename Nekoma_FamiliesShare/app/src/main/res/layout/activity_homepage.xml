@@ -160,6 +160,7 @@
         android:layout_width="46dp"
         android:layout_height="40dp"
         android:layout_marginTop="6dp"
+        android:onClick="logout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/toolbar"
         app:srcCompat="@drawable/logout" />
@@ -169,6 +170,7 @@
         android:layout_width="57dp"
         android:layout_height="55dp"
         android:layout_marginEnd="58dp"
+        android:onClick="getBambini"
         app:layout_constraintEnd_toEndOf="@+id/toolbar"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/lista_bambini" />
