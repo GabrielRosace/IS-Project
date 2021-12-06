@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/recycle_view_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="168dp"
@@ -108,7 +108,7 @@
         android:layout_marginStart="68dp"
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toEndOf="@+id/imageView3"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/recycle_view_text"
         app:srcCompat="@drawable/servizi" />
 
     <ImageView
@@ -156,7 +156,7 @@
         app:srcCompat="@drawable/event" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/recycle_view_img"
         android:layout_width="46dp"
         android:layout_height="40dp"
         android:layout_marginTop="6dp"
