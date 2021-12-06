@@ -222,5 +222,9 @@ public class Profile extends AppCompatActivity {
     }
 
 
+    public void getHomepage(View v){
+        Intent  homepage= new Intent(Profile.this,Homepage.class);
+        startActivity(homepage);
+    }
 
 }
