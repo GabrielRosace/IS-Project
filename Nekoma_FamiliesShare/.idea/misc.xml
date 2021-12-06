@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Cae/Desktop/IS-Project/Nekoma_FamiliesShare/app/src/main/res/layout/activity_homepage.xml" value="0.5" />
+        <entry key="..\:/Users/Cae/Desktop/IS-Project/Nekoma_FamiliesShare/app/src/main/res/layout/activity_main.xml" value="0.28396739130434784" />
+        <entry key="..\:/Users/Cae/Desktop/IS-Project/Nekoma_FamiliesShare/app/src/main/res/layout/activity_profile.xml" value="0.33" />
         <entry key="app/src/main/res/drawable-v24/icon_logout_e0e0e0.xml" value="0.11927083333333334" />
         <entry key="app/src/main/res/layout/activity_guida.xml" value="0.19519927536231885" />
         <entry key="app/src/main/res/layout/activity_guide.xml" value="0.25" />

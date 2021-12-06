@@ -10,5 +10,15 @@
     <string name="eventi">Gli eventi possono essere comodamente creati attraverso l\'apposita sezione. Sono riservati al gruppo con cui si decide di condividere l\'evento.</string>
     <string name="servizi">I servizi possono essere comodamente creati attraverso l\'apposita sezione. Vengono proposti anche dei template, come per il servizio di car sharing, sono riservati al gruppo con cui si decide di condividere il servizio.</string>
     <string name="bambini">La nuova estensione ti permette di definire alcune preferenze del tuo bambino in modo da permettere agli utenti amichevoli di sapere a priori cosa piace al bambino specificatamente inserito nella sezione.</string>
-
+    <string name="profilepictureLabel">Profile Picture</string>
+    <string name="emailLabel">Email</string>
+    <string name="nameLabel">Name</string>
+    <string name="surnameLabel">Surname</string>
+    <string name="phonenumberLabel">Phone Number</string>
+    <string name="addressLabel">Address</string>
+    <string name="cityLabel">City</string>
+    <string name="enableEdit">Enable Edit</string>
+    <string name="disableEdit">Disable Edit</string>
+    <string name="savechanges">Save Changes</string>
+    <string name="deleteProfile">Delete Profile</string>
 </resources>

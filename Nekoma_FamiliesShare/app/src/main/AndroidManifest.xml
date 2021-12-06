@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Profile"
+            android:exported="false" />
+        <activity
             android:name=".Guide"
             android:exported="true" />
         <activity
