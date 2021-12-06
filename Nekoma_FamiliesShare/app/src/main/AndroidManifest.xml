@@ -19,6 +19,9 @@
             android:name=".Bambino_soloinfo"
             android:exported="true" />
         <activity
+            android:name=".Profile"
+            android:exported="false" />
+        <activity
             android:name=".Guide"
             android:exported="true" />
         <activity

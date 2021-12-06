@@ -29,4 +29,9 @@ public class Homepage extends AppCompatActivity {
         startActivity(logout);
     }
 
+
+    public void getProfile(View v){
+        Intent profile = new Intent(Homepage.this,Profile.class);
+        startActivity(profile);
+    }
 }
