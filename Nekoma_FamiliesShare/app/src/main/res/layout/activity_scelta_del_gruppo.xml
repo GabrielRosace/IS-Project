@@ -11,22 +11,40 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar5"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme"
-            app:navigationIcon="@drawable/abc_vector_test"
-            app:title="Scegli un gruppo"
-            app:titleTextColor="@color/white" />
+            android:layout_height="56dp">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="?attr/actionBarTheme"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:title="Scegli un gruppo"
+                app:titleTextColor="@color/white" />
+
+            <ImageView
+                android:id="@+id/imageView10"
+                android:layout_width="70dp"
+                android:layout_height="52dp"
+                android:onClick="logout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/logout" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/grouplist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/recycler_view_item_group" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

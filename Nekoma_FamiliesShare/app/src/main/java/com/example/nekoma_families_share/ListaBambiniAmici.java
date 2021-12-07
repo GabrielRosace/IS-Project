@@ -54,7 +54,9 @@ public class ListaBambiniAmici extends AppCompatActivity {
 
         RequestQueue groupuser = Volley.newRequestQueue(this);
         // sostituire 61acf9c4908415ca04000001 con l'id del gruppo
+
         String id_group = "61acf9c4908415ca04000001";
+        // String id_group = Utilities.getPrefs("group");
         String url = getString(R.string.url) + "/groups/"+id_group+"/children"; // lista di tutti i bambini che sono dentro al gruppo
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override

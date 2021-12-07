@@ -41,6 +41,10 @@ import java.util.List;
 import java.util.Map;
 
 public class SceltaDelGruppo extends AppCompatActivity {
+    public void logout(View v){
+        Intent logout = new Intent(SceltaDelGruppo.this,MainActivity.class);
+        startActivity(logout);
+    }
 
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
@@ -55,6 +59,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
             this.mData = data;
             this.mFoto = foto;
         }
+
 
         // inflates the row layout from xml when needed
         @NonNull
