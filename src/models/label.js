@@ -8,12 +8,12 @@ const labelSchema = new mongoose.Schema(
     },
     name: {
         type : String,
-        unique : true,
+        // unique : true,
         required : true
     },
     group_id: {
         type : String,
-        unique: true,
+        // unique: true,
         required : true
     }
 }
