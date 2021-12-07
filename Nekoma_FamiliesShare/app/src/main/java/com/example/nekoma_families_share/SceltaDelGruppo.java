@@ -50,14 +50,16 @@ public class SceltaDelGruppo extends AppCompatActivity {
 
         private List<String> mData;
         private List<String> mFoto;
+        private List<String> mId;
 
         private LayoutInflater mInflater;
 
         // data is passed into the constructor
-        MyRecyclerViewAdapter(Context context, List<String> data, List<String> foto) {
+        MyRecyclerViewAdapter(Context context, List<String> data, List<String> foto, List<String> id) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
             this.mFoto = foto;
+            this.mId = id;
         }
 
 
@@ -73,12 +75,13 @@ public class SceltaDelGruppo extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             String name = mData.get(position);
+            String id = mId.get(position);
             holder.myTextView.setText(name);
             holder.btn.setText("Entra");
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getSharedPreferences("myPrefs", Context.MODE_PRIVATE).edit().putString("group",name);
+                    getSharedPreferences("myPrefs", Context.MODE_PRIVATE).edit().putString("group",id);
                     Intent homepageA = new Intent(SceltaDelGruppo.this,Homepage.class);
                     startActivity(homepageA);
                 }
@@ -156,6 +159,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
 
         ArrayList<String> groupName = new ArrayList<>();
         ArrayList<String> groupPhoto = new ArrayList<>();
+        ArrayList<String> groupId = new ArrayList<>();
 
         String user_id;
         String userToken = Utilities.getToken(SceltaDelGruppo.this);
@@ -178,10 +182,12 @@ public class SceltaDelGruppo extends AppCompatActivity {
                                     JSONObject object = new JSONObject((String) response1);
                                     groupName.add(object.getString("name"));
                                     groupPhoto.add(new JSONObject(object.getString("image")).getString("path"));
+                                    groupId.add(group_id);
+
 
                                     RecyclerView grouplist = (RecyclerView) findViewById(R.id.grouplist);
                                     LinearLayoutManager grouplistManager = new LinearLayoutManager(SceltaDelGruppo.this);
-                                    MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(SceltaDelGruppo.this, groupName,groupPhoto);
+                                    MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(SceltaDelGruppo.this, groupName,groupPhoto,groupId);
 
                                     grouplist.setLayoutManager(grouplistManager);
                                     grouplist.setAdapter(adapter);
