@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
+            android:onClick="getLista"
             android:theme="?attr/actionBarTheme"
             app:collapseIcon="?attr/actionModeCloseDrawable"
             app:navigationIcon="@drawable/abc_vector_test"
@@ -42,7 +43,7 @@
             app:cardCornerRadius="150dp">
 
             <ImageView
-                android:id="@+id/imageView8"
+                android:id="@+id/img_bambino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="false"
