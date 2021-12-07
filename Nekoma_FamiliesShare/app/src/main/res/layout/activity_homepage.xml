@@ -15,7 +15,7 @@
         android:minHeight="?attr/actionBarSize"
         android:onClick="getProfile"
         android:theme="?attr/actionOverflowMenuStyle"
-        app:layout_constraintBottom_toTopOf="@+id/textView4"
+        app:layout_constraintBottom_toTopOf="@+id/description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -49,6 +49,7 @@
         android:layout_height="56dp"
         android:layout_marginStart="144dp"
         android:layout_marginTop="18dp"
+        android:onClick="getActivities"
         android:text="FIND"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView6" />
@@ -64,7 +65,7 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView4" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/enddate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
@@ -100,11 +101,11 @@
         android:layout_marginStart="87dp"
         android:layout_marginTop="23dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/enddate"
         app:srcCompat="@drawable/persone" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="163dp"
@@ -170,7 +171,7 @@
         app:layout_constraintBottom_toTopOf="@+id/info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
+        app:layout_constraintTop_toBottomOf="@+id/description"
         app:srcCompat="@drawable/allevent_services" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

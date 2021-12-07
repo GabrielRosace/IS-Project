@@ -36,4 +36,9 @@ public class Homepage extends AppCompatActivity {
         Intent profile = new Intent(Homepage.this,Profile.class);
         startActivity(profile);
     }
+
+    public void getActivities(View v){
+        Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);
+        startActivity(activities);
+    }
 }

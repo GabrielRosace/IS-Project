@@ -13,6 +13,12 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".DettagliEvento"
+            android:exported="false" />
+        <activity
+            android:name=".VisualizzazioneEventi"
+            android:exported="false" />
+        <activity
             android:name=".SceltaDelGruppo"
             android:exported="false" />
         <activity

@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -81,7 +82,21 @@ public class Utilities {
     }
 
 
-    //TODO parse token
+    public static String getUserID(Context context){
+        String user_id = "";
+        String userToken = getToken(context);
+        String[] split_token = userToken.split("\\.");
+        String base64Body = split_token[1];
+        String body = new String(Base64.getDecoder().decode(base64Body));
+        try {
+            JSONObject res = new JSONObject(body);
+            user_id = res.getString("user_id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return user_id;
+    }
+
 
     /*public static class ImageDownloader<T> extends AsyncTask<String, Void, Bitmap> {
         T holder;
