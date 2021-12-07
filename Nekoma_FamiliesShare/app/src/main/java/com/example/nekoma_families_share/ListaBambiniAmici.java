@@ -14,10 +14,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -180,7 +178,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
 
             ViewHolder(View itemView) {
                 super(itemView);
-                myTextView = itemView.findViewById(R.id.recycle_view_text);
+                myTextView = itemView.findViewById(R.id.info);
                 btn = itemView.findViewById(R.id.recycle_view_btn);
                 img =  itemView.findViewById(R.id.recycle_view_img);
             }
