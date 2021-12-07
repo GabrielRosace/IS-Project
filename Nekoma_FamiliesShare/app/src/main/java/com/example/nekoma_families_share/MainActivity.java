@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // solo per il token
                 // ci spostiamo nella homepage
-                Intent homepageA = new Intent(MainActivity.this,Homepage.class);
+                Intent homepageA = new Intent(MainActivity.this,SceltaDelGruppo.class);
                 startActivity(homepageA);
             }
         }, new Response.ErrorListener() {
