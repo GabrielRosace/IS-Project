@@ -63,7 +63,7 @@ public class Profile extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Utilities.httpRequest(this,"/users/"+user_id+"/profile",response -> {
+        Utilities.httpRequest(this,Request.Method.GET,"/users/"+user_id+"/profile",response -> {
             try {
                 JSONObject user_response = new JSONObject((String) response);
                 // user_response.getJSONObject("address") viene usato per prendere tutti oggetti contenuti nell'oggetto JSON principale in modo tale da non dover fare chiamate aggiuntive

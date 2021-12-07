@@ -23,5 +23,8 @@
     <string name="savechanges">Save Changes</string>
     <string name="deleteProfile">Delete Profile</string>
     <string name="urlnoapi">http://10.0.2.2:8080</string>
-    <string-array name="etichette"><item>aa</item><item>bb</item></string-array>
+    <string-array name="etichette">
+        <item>aa</item>
+        <item>bb</item>
+    </string-array>
 </resources>
