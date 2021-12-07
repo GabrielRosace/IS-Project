@@ -1,3 +1,4 @@
+import * as label from './label'
 const mongoose = require('mongoose')
 
 const childSchema = new mongoose.Schema(
@@ -34,6 +35,10 @@ const childSchema = new mongoose.Schema(
     suspended: {
       type: Boolean,
       required: true
+    },
+    labels: {
+      type: [label.getSchema()],
+      required : false
     },
     allergies: String,
     special_needs: String,
