@@ -142,10 +142,11 @@
         android:layout_width="46dp"
         android:layout_height="40dp"
         android:layout_marginTop="6dp"
-        android:onClick="logout"
+        android:onClick="getGroup"
+        android:tint="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/toolbar"
-        app:srcCompat="@drawable/logout" />
+        app:srcCompat="?android:attr/actionModeFindDrawable" />
 
     <ImageView
         android:id="@+id/imageView5"

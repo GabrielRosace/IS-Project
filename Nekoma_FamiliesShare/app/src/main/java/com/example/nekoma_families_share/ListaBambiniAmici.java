@@ -19,13 +19,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,37 +31,123 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ListaBambiniAmici extends AppCompatActivity {
     private List<String> save = new ArrayList<>();
     private List<Bambini> l = new ArrayList<>();
-
+    private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_bambini_amici);
         //lista degli utenti nel gruppo
+        TabLayout t = (TabLayout)findViewById(R.id.bambini_tab);
+        t.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                System.out.println(tab.getPosition());
+                l = new ArrayList<>();
+                if(tab.getPosition()==1){
+                    System.out.println("sono qui dentro prima della getMyKids");
+                    ListaBambiniAmici.this.getMyKids();
+                }else{
+                    ListaBambiniAmici.this.getFriendKids();
+                }
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        this.getFriendKids();
+    }
+
+    protected String getToken(){
+        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        return  prefs.getString("token","");
+    }
+
+    public void getMyKids(){
+        RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
+        String user_id;
+        String userToken = Utilities.getToken(ListaBambiniAmici.this);
+        String[] split_token = userToken.split("\\.");
+        String base64Body = split_token[1];
+        String body = new String(Base64.getDecoder().decode(base64Body));
+        try {
+            JSONObject res = new JSONObject(body);
+            user_id = res.getString("user_id");
+            Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, "/users/" + user_id + "/children", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try{
+                        JSONArray tmp = new JSONArray(response);
+                        for(int i=0;i<tmp.length();++i){
+                            Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+new JSONObject(tmp.getString(i)).getString("child_id")+"&searchBy=ids",new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response1) {
+                                    try {
+                                        JSONArray kid = new JSONArray(response1);
+                                        for(int i=0;i<kid.length();++i){
+                                            l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
+                                        }
+                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
+                                        System.out.println(l);
+                                        System.out.println("*********************150");
+                                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
+                                        grouplist.setAdapter(adapter);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            },new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
+                                    System.err.println(error.getMessage());
+                                }
+                            }, new HashMap<>());
+                        }
+                    }catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            },new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
+                    System.err.println(error.getMessage());
+                }
+            }, new HashMap<>());
 
 
-        RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambini);
-        LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-        RequestQueue groupuser = Volley.newRequestQueue(this);
-        // sostituire 61acf9c4908415ca04000001 con l'id del gruppo
-        String id_group = "61acf9c4908415ca04000001";
-        String url = getString(R.string.url) + "/groups/"+id_group+"/children"; // lista di tutti i bambini che sono dentro al gruppo
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+    public void getFriendKids(){
+        RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
+
+
+        String id_group = Utilities.getPrefs(this).getString("group","");
+        Utilities.httpRequest(this,Request.Method.GET,"/groups/"+id_group+"/children",new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONArray tmp = new JSONArray(response);
                     for(int i=0; i<tmp.length();++i){
-                        RequestQueue groupkids = Volley.newRequestQueue(ListaBambiniAmici.this);
-                        String urlq = getString(R.string.url) + "/children?ids[]="+tmp.getString(i)+"&searchBy=ids"; //info un bambino
-                        StringRequest getBambinoInfo = new StringRequest(Request.Method.GET, urlq, new Response.Listener<String>() {
+                        Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+tmp.getString(i)+"&searchBy=ids",new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 try {
@@ -73,27 +156,21 @@ public class ListaBambiniAmici extends AppCompatActivity {
                                         l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }
                                     MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
-                                    grouplist.setLayoutManager(grouplistManager);
+                                    System.out.println(l);
+                                    System.out.println("*********************150");
+                                    grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
                                     grouplist.setAdapter(adapter);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
-                        }, new Response.ErrorListener() {
+                        },new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
                                 System.err.println(error.getMessage());
                             }
-                        }){
-                            @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                HashMap<String,String> headers = new HashMap<String,String>();
-                                headers.put("Authorization","Bearer "+getToken());
-                                return headers;
-                            }
-                        };
-                        groupkids.add(getBambinoInfo);
+                        }, new HashMap<>());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -105,22 +182,8 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
                 System.err.println(error.getMessage());
             }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+getToken());
-                return headers;
-            }
-        };
-        groupuser.add(stringRequest);
+        },new HashMap<>());
     }
-
-    protected String getToken(){
-        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return  prefs.getString("token","");
-    }
-
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Bambini> mData;
@@ -226,7 +289,20 @@ public class ListaBambiniAmici extends AppCompatActivity {
             this.surname = surname;
             this.image_path = image_path;
         }
+
+        @Override
+        public String toString() {
+            return "Bambini{" +
+                    "id='" + id + '\'' +
+                    ", name='" + name + '\'' +
+                    ", surname='" + surname + '\'' +
+                    ", image_path='" + image_path + '\'' +
+                    '}';
+        }
     }
+
+
+
     public void getHomepage(View v){
         Intent  homepage= new Intent(ListaBambiniAmici.this,Homepage.class);
         startActivity(homepage);

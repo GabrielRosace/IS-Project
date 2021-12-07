@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"/>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cardView2"
+                android:id="@+id/card_genitore"
                 android:layout_width="30dp"
                 android:layout_height="32dp"
                 android:layout_marginStart="31dp"
@@ -107,7 +107,7 @@
                 app:cardCornerRadius="50dp">
 
                 <ImageView
-                    android:id="@+id/imageView9"
+                    android:id="@+id/img_genitore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:srcCompat="@tools:sample/avatars" />

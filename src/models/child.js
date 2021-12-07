@@ -1,3 +1,5 @@
+// import * as label from './label'
+const label = require('./label')
 const mongoose = require('mongoose')
 
 const childSchema = new mongoose.Schema(
@@ -35,6 +37,10 @@ const childSchema = new mongoose.Schema(
       type: Boolean,
       required: true
     },
+    labels: {
+      type: [String],
+      required : false
+    },
     allergies: String,
     special_needs: String,
     other_info: String
@@ -46,6 +52,14 @@ childSchema.virtual('image', {
   ref: 'Image',
   localField: 'image_id',
   foreignField: 'image_id',
+  justOne: true
+})
+
+
+childSchema.virtual('parent',{
+  ref: 'Parent',
+  localField: 'child_id',
+  foreignField: 'child_id',
   justOne: true
 })
 
