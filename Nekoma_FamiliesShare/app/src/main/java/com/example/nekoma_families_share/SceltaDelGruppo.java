@@ -81,7 +81,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getSharedPreferences("myPrefs", Context.MODE_PRIVATE).edit().putString("group",id);
+                    getSharedPreferences("myPrefs", Context.MODE_PRIVATE).edit().putString("group",id).apply();
                     Intent homepageA = new Intent(SceltaDelGruppo.this,Homepage.class);
                     startActivity(homepageA);
                 }
