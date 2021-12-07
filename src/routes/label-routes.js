@@ -38,7 +38,7 @@ router.post('/', (req, res, next) => {
 	let groupId = req.body.group_id
 	if(!groupId)
 		return res.status(400).send('Bad Request')
-	console.log(userId);
+	// console.log(userId);
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
 		console.log(g);
 		if(g){
@@ -75,9 +75,30 @@ router.post('/', (req, res, next) => {
 	})
 })
 
-// TODO delete a label
+// delete a label
 router.delete('/', (req, res, next) => {
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+
+	let labelName = req.body.name.toString()
+	if(!labelName)
+		return res.status(400).send('Bad Request')
 	
+	let groupId = req.body.group_id
+	if(!groupId)
+		return res.status(400).send('Bad Request')
+
+	Group.find({group_id : groupId}).then((g) => {
+		if(g){
+			Label.deleteOne({name : labelName, group_id : g.groupId}).then(() => {
+				res.status(200).send('Label deleted')
+			})
+		}
+		else{
+			console.log("Permissione denied");
+			return res.status(400).send('Permissione Denied')
+		}
+	})
 })
 
 module.exports = router
