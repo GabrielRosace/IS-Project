@@ -19,6 +19,15 @@
             android:name=".VisualizzazioneEventi"
             android:exported="false" />
         <activity
+            android:name=".YourEvent"
+            android:exported="true" />
+        <activity
+            android:name=".Etichette"
+            android:exported="true" />
+        <activity
+            android:name=".NewChild"
+            android:exported="false" />
+        <activity
             android:name=".SceltaDelGruppo"
             android:exported="false" />
         <activity

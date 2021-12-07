@@ -313,4 +313,8 @@ public class ListaBambiniAmici extends AppCompatActivity {
         return prefs;
     }
 
+    public void getNewKid(View v){
+        Intent  kid= new Intent(ListaBambiniAmici.this,NewChild.class);
+        startActivity(kid);
+    }
 }

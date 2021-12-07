@@ -6,19 +6,18 @@ const labelSchema = new mongoose.Schema(
         type: String,
         required: true
     },
-    name : {
+    name: {
         type : String,
-        unique : true,
+        // unique : true,
         required : true
     },
     group_id: {
         type : String,
+        // unique: true,
         required : true
     }
 }
 )
-
-// export function getSchema() { return labelSchema }
 
 const model = mongoose.model('Label', labelSchema)
 

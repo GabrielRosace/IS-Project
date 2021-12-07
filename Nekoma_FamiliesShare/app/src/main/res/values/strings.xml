@@ -26,4 +26,8 @@
     <string name="attivitàricorrenti">Attività ricorrenti</string>
     <string name="servizipersona">Servizi alla persona</string>
     <string name="attivitàconsigliate">Attività consigliate</string>
+    <string-array name="etichette">
+        <item>aa</item>
+        <item>bb</item>
+    </string-array>
 </resources>
