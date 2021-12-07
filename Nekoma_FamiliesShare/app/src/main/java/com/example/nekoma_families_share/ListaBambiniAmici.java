@@ -227,6 +227,9 @@ public class ListaBambiniAmici extends AppCompatActivity {
             this.image_path = image_path;
         }
     }
+
+
+
     public void getHomepage(View v){
         Intent  homepage= new Intent(ListaBambiniAmici.this,Homepage.class);
         startActivity(homepage);

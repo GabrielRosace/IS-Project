@@ -55,11 +55,11 @@ public class Utilities {
     }
 
     /** With bearer token authentication and params */
-    public static void httpRequest(Context context, String endpoint , Response.Listener onSuccess, Response.ErrorListener onError, Map<String,String> params){
+    public static void httpRequest(Context context,int method, String endpoint , Response.Listener onSuccess, Response.ErrorListener onError, Map<String,String> params){
         RequestQueue queue = Volley.newRequestQueue(context);
         String url= context.getString(R.string.url) + endpoint;
 
-        StringRequest stringRequest1 = new StringRequest(Request.Method.GET, url, onSuccess, onError){
+        StringRequest stringRequest1 = new StringRequest(method, url, onSuccess, onError){
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String,String> headers = new HashMap<String,String>();

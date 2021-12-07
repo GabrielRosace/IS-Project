@@ -139,10 +139,10 @@ public class SceltaDelGruppo extends AppCompatActivity {
     }
 
 
-    protected String getToken(){
-        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return  prefs.getString("token","");
-    }
+//    protected String getToken(){
+//        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+//        return  prefs.getString("token","");
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,7 +153,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
         ArrayList<String> groupPhoto = new ArrayList<>();
 
         String user_id;
-        String userToken = getToken();
+        String userToken = Utilities.getToken(SceltaDelGruppo.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
         String body = new String(Base64.getDecoder().decode(base64Body));
@@ -161,14 +161,14 @@ public class SceltaDelGruppo extends AppCompatActivity {
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
 
-            Utilities.httpRequest(SceltaDelGruppo.this, "/users/" + user_id + "/groups", new Response.Listener<String>() {
+            Utilities.httpRequest(SceltaDelGruppo.this, Request.Method.GET,"/users/" + user_id + "/groups", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
                         JSONArray res = new JSONArray(response);
                         for (int i = 0; i < res.length(); i++) {
                             String group_id = new JSONObject(res.getString(i)).get("group_id").toString();
-                            Utilities.httpRequest(SceltaDelGruppo.this,"/groups/"+group_id,response1 -> {
+                            Utilities.httpRequest(SceltaDelGruppo.this,Request.Method.GET,"/groups/"+group_id,response1 -> {
                                 try {
                                     JSONObject object = new JSONObject((String) response1);
                                     groupName.add(object.getString("name"));
