@@ -2,8 +2,10 @@ const express = require('express')
 const router = new express.Router()
 
 const Label = require('../models/label')
+const Group = require('../models/group')
+const objectid = require('objectid')
 
-// Get all labels
+// Get all labels of the group 
 router.get('/', (req, res, next) => {
     if (!req.user_id) { return res.status(401).send('Not authenticated') }
 
@@ -16,28 +18,53 @@ router.get('/', (req, res, next) => {
 
 // Create a new label
 router.post('/', (req, res, next) => {
-    if (!req.user_id) { return res.status(401).send('Not authenticated') }
-    let labelName = req.body.label
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+    
+	let labelName = req.body.name.toString()
 	if(!labelName)
 		return res.status(400).send('Bad Request')
-	Label.findOne({labelName}).exec().then((l) => {
-		if(!l){
-			const newLabel = { name }
-            newLabel.name = labelName
+	
+	let groupId = req.body.group_id
+	if(!groupId)
+		return res.status(400).send('Bad Request')
+	console.log(userId);
+	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
+		console.log(g);
+		if(g){
+			Label.findOne({name : labelName}).exec().then((l) => {
+				if(!l){
+					const { 
+						name, group_id
+					} = req.body
+		
+					const newLabel = {
+						name, 
+						group_id
+					}
+					newLabel.label_id = objectid()
+					try{
+						Label.create(newLabel)
+						res.status(200).send('Label created')
+					}
+					catch (error) {
+						next(error)
+					}
+				}
+				else{
+					return res.status(400).send('Label already exists')
+				}
+			}).catch((error) => {
+				console.log(error)
+				return res.status(400).send('Impossible to retrieve label: ' + error)
+			})
 		}
 		else{
-			return res.status(400).send('Label already exists')
+			return res.status(400).send('Permissione Denied')
 		}
-		try{
-			Label.create(newLabel)
-			res.status(200).send('Label created')
-		}
-		catch (error) {
-    next(error)
-  	}
-	}).catch((error) => {
-		return res.status(400).send('Impossibile to retrieve label')
 	})
 })
 
 // TODO delete a label
+
+module.exports = router
