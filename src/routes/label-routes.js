@@ -29,7 +29,7 @@ router.post('/', (req, res, next) => {
 			return res.status(400).send('Label already exists')
 		}
 		try{
-			await Label.create(newLabel)
+			Label.create(newLabel)
 			res.status(200).send('Label created')
 		}
 		catch (error) {
