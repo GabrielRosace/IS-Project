@@ -30,7 +30,7 @@ router.get('/', (req, res, next) => {
 
   //? Si può fare meglio
   Child.find({ child_id: { $in: ids } })
-  .select('given_name family_name image_id child_id suspended')
+  .select('given_name family_name image_id child_id suspended birthdate')
   .lean()
   .populate('image')
   .populate('parent')

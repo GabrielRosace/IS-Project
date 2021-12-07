@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -54,7 +55,19 @@ public class Bambino_soloinfo extends AppCompatActivity {
                         JSONArray kid = new JSONArray(response);
                         for(int i=0;i<kid.length();++i){
                             if(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("_id").equals(user_id)){
-
+                                Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
+                                ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
+                                new ImageDownloader(img_bambino).execute(getString(R.string.urlnoapi)+bambino.image_path);
+                                TextView nome_bambino = (TextView) findViewById(R.id.nome_bambino);
+                                nome_bambino.setText(bambino.name+" "+bambino.surname);
+                                ImageView img_genitore = (ImageView) findViewById(R.id.img_genitore);
+                                CardView card_genitore = (CardView) findViewById(R.id.card_genitore);
+                                card_genitore.setVisibility(View.GONE);
+                                img_genitore.setVisibility(View.GONE);
+                                /*TextView nome = (TextView) findViewById(R.id.nome);
+                                nome.setText(new );*/
+                                TextView nome_genitore = (TextView) findViewById(R.id.nome_genitore);
+                                nome_genitore.setText(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("given_name")+" "+new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("family_name"));
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);

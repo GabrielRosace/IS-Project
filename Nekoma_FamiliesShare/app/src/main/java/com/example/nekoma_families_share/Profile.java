@@ -5,11 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -24,6 +28,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,96 +37,76 @@ import java.util.Map;
 public class Profile extends AppCompatActivity {
 
     private String user_id = "";
+    private EditText emailLabel;
+    private EditText nameLabel;
+    private EditText surnameLabel;
+    private EditText phoneLabel;
+    private EditText addressLabel;
+    private EditText numberLabel;
+    private EditText cityLabel;
+    private Switch editSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         // Ottengo il token
-        String userToken = getToken();
-        System.out.println("USER TOKEN: "+userToken);
+        String userToken = Utilities.getToken(this);
         // Faccio il parse del token in modo tale da prendermi l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
-        System.out.println("Body");
         String body = new String(Base64.getDecoder().decode(base64Body));
         try {
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
-            System.out.println(user_id);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        // Faccio richiesta al server in modo tale da potermi prendere le informazioni dell'utente
-        RequestQueue profile = Volley.newRequestQueue(this);
-        String url= getString(R.string.url) + "/users/"+user_id+"/profile";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject user_response = new JSONObject(response);
-                    // user_response.getJSONObject("address") viene usato per prendere tutti oggetti contenuti nell'oggetto JSON principale in modo tale da non dover fare chiamate aggiuntive
-                    JSONObject user_address = user_response.getJSONObject("address");
-                    JSONObject user_image = user_response.getJSONObject("image");
-                    //System.out.println("USER PROFILE DATA "+user_response);
-                    //System.out.println("USER ADDRESS "+user_address);
-                    //System.out.println("USER IMAGE "+user_image);
-                    // Informazioni personali utente
-                    EditText emailLabel = findViewById(R.id.profileEmail);
-                    EditText nameLabel = findViewById(R.id.profileName);
-                    EditText surnameLabel = findViewById(R.id.profileSurname);
-                    EditText phoneLabel = findViewById(R.id.profilePhone);
-                    EditText addressLabel = findViewById(R.id.profileStreet);
-                    EditText numberLabel = findViewById(R.id.profileNumber);
-                    EditText cityLabel = findViewById(R.id.profileCity);
-                    Switch edit = findViewById(R.id.EditSwitch);
-                    emailLabel.setEnabled(false);
-                    nameLabel.setEnabled(false);
-                    surnameLabel.setEnabled(false);
-                    phoneLabel.setEnabled(false);
-                    emailLabel.setText(user_response.getString("email"));
-                    nameLabel.setText(user_response.getString("given_name"));
-                    surnameLabel.setText(user_response.getString("family_name"));
-                    phoneLabel.setText((user_response.getString("phone")).length()==0?"Non specificato":user_response.getString("phone"));
-                    // Informazioni su indirizzo dell'utente
-                    addressLabel.setEnabled(false);
-                    numberLabel.setEnabled(false);
-                    cityLabel.setEnabled(false);
-                    addressLabel.setText((user_address.getString("street").length()==0?"Non specificato":user_address.getString("street")));
-                    numberLabel.setText((user_address.getString("number").length()==0?"":user_address.getString("number")));
-                    cityLabel.setText((user_address.getString("city")).length()==0?"Non specificato":user_response.getString("city"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+userToken);
-                return headers;
-            }
-        };
-        profile.add(stringRequest);
 
-        Switch editSwitch = (Switch)findViewById(R.id.EditSwitch);
+        Utilities.httpRequest(this,"/users/"+user_id+"/profile",response -> {
+            try {
+                JSONObject user_response = new JSONObject((String) response);
+                // user_response.getJSONObject("address") viene usato per prendere tutti oggetti contenuti nell'oggetto JSON principale in modo tale da non dover fare chiamate aggiuntive
+                JSONObject user_address = user_response.getJSONObject("address");
+                JSONObject user_image = user_response.getJSONObject("image");
+                System.out.println(user_image);
+                // Informazioni personali utente
+                emailLabel = findViewById(R.id.profileEmail);
+                emailLabel.setEnabled(false);
+                emailLabel.setText(user_response.getString("email"));
+                nameLabel = findViewById(R.id.profileName);
+                nameLabel.setEnabled(false);
+                nameLabel.setText(user_response.getString("given_name"));
+                surnameLabel = findViewById(R.id.profileSurname);
+                surnameLabel.setEnabled(false);
+                surnameLabel.setText(user_response.getString("family_name"));
+                phoneLabel = findViewById(R.id.profilePhone);
+                phoneLabel.setEnabled(false);
+                phoneLabel.setText((user_response.getString("phone")).length()==0?"Non specificato":user_response.getString("phone"));
+                // Informazioni su indirizzo dell'utente
+                addressLabel = findViewById(R.id.profileStreet);
+                addressLabel.setEnabled(false);
+                addressLabel.setText((user_address.getString("street").length()==0?"Non specificato":user_address.getString("street")));
+                numberLabel = findViewById(R.id.profileNumber);
+                numberLabel.setEnabled(false);
+                numberLabel.setText((user_address.getString("number").length()==0?"":user_address.getString("number")));
+                cityLabel = findViewById(R.id.profileCity);
+                cityLabel.setEnabled(false);
+                cityLabel.setText((user_address.getString("city")).length()==0?"Non specificato":user_response.getString("city"));
+                ImageDownloader image = new ImageDownloader(findViewById(R.id.profileImage));
+                image.execute(getString(R.string.urlnoapi)+user_image.getString("path"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
+            System.err.println(error.getMessage());
+        }, new HashMap<>());
+
+        editSwitch = (Switch)findViewById(R.id.EditSwitch);
         editSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                System.out.println("Check!");
-                EditText emailLabel = findViewById(R.id.profileEmail);
-                EditText nameLabel = findViewById(R.id.profileName);
-                EditText surnameLabel = findViewById(R.id.profileSurname);
-                EditText phoneLabel = findViewById(R.id.profilePhone);
-                EditText addressLabel = findViewById(R.id.profileStreet);
-                EditText numberLabel = findViewById(R.id.profileNumber);
-                EditText cityLabel = findViewById(R.id.profileCity);
                 Button saveChange = findViewById(R.id.profileSaveChanges);
                 emailLabel.setEnabled(isChecked);
                 nameLabel.setEnabled(isChecked);
@@ -132,11 +118,6 @@ public class Profile extends AppCompatActivity {
                 cityLabel.setEnabled(isChecked);
             }
         });
-    }
-
-    protected String getToken(){
-        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return  prefs.getString("token","");
     }
 
     public void DeleteUser(View v){
@@ -158,7 +139,7 @@ public class Profile extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+getToken());
+                headers.put("Authorization","Bearer "+Utilities.getToken(Profile.this));
                 return headers;
             }
         };
@@ -166,13 +147,6 @@ public class Profile extends AppCompatActivity {
     }
 
     public void EditUser(View v){
-        EditText emailLabel = findViewById(R.id.profileEmail);
-        EditText nameLabel = findViewById(R.id.profileName);
-        EditText surnameLabel = findViewById(R.id.profileSurname);
-        EditText phoneLabel = findViewById(R.id.profilePhone);
-        EditText addressLabel = findViewById(R.id.profileStreet);
-        EditText numberLabel = findViewById(R.id.profileNumber);
-        EditText cityLabel = findViewById(R.id.profileCity);
         RequestQueue profile = Volley.newRequestQueue(this);
         String url= getString(R.string.url) + "/users/"+user_id+"/profile";
         StringRequest stringRequest = new StringRequest(Request.Method.PATCH, url, new Response.Listener<String>() {
@@ -192,7 +166,7 @@ public class Profile extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+getToken());
+                headers.put("Authorization","Bearer "+Utilities.getToken(Profile.this));
                 return headers;
             }
 
@@ -221,10 +195,41 @@ public class Profile extends AppCompatActivity {
         profile.add(stringRequest);
     }
 
+    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+       ImageView holder;
+
+        public ImageDownloader(ImageView holder) {
+            this.holder = holder;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String urlOfImage = strings[0];
+            Bitmap logo = null;
+            try{
+                InputStream is = new URL(urlOfImage).openStream();
+                logo = BitmapFactory.decodeStream(is);
+            }catch(Exception e){ // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            holder.setImageBitmap(bitmap);
+        }
+    }
+
 
     public void getHomepage(View v){
         Intent  homepage= new Intent(Profile.this,Homepage.class);
         startActivity(homepage);
+    }
+
+    public void getNewChild(View v){
+        Intent  newChild= new Intent(Profile.this,NewChild.class);
+        startActivity(newChild);
     }
 
 }
