@@ -24,7 +24,7 @@
   </androidx.cardview.widget.CardView>
 
   <TextView
-      android:id="@+id/recycle_view_text"
+      android:id="@+id/info"
       android:layout_width="wrap_content"
       android:layout_height="27dp"
       android:layout_marginStart="23dp"

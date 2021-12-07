@@ -16,19 +16,21 @@ public class Homepage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
     }
+
     protected String getToken(){
         SharedPreferences prefs = getSharedPreferences("myPrefs",Context.MODE_PRIVATE);
         return  prefs.getString("token","");
     }
+
     public void getBambini(View v){
         Intent bambino = new Intent(Homepage.this,ListaBambiniAmici.class);
         startActivity(bambino);
     }
-    public void logout(View v){
-        Intent logout = new Intent(Homepage.this,MainActivity.class);
-        startActivity(logout);
-    }
 
+    public void getGroup(View v){
+        Intent group = new Intent(Homepage.this,SceltaDelGruppo.class);
+        startActivity(group);
+    }
 
     public void getProfile(View v){
         Intent profile = new Intent(Homepage.this,Profile.class);

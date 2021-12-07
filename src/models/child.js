@@ -54,6 +54,14 @@ childSchema.virtual('image', {
   justOne: true
 })
 
+
+childSchema.virtual('parent',{
+  ref: 'Parent',
+  localField: 'child_id',
+  foreignField: 'child_id',
+  justOne: true
+})
+
 childSchema.post('find', (profiles, next) => {
   for (let i = 0; i < profiles.length; i++) {
     if (profiles[i].suspended) {
