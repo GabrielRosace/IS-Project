@@ -52,21 +52,14 @@ public class ListaBambiniAmici extends AppCompatActivity {
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambini);
         LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
 
-        RequestQueue groupuser = Volley.newRequestQueue(this);
-        // sostituire 61acf9c4908415ca04000001 con l'id del gruppo
-
         String id_group = "61acf9c4908415ca04000001";
-        // String id_group = Utilities.getPrefs("group");
-        String url = getString(R.string.url) + "/groups/"+id_group+"/children"; // lista di tutti i bambini che sono dentro al gruppo
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+        Utilities.httpRequest(this,Request.Method.GET,"/groups/"+id_group+"/children",new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONArray tmp = new JSONArray(response);
                     for(int i=0; i<tmp.length();++i){
-                        RequestQueue groupkids = Volley.newRequestQueue(ListaBambiniAmici.this);
-                        String urlq = getString(R.string.url) + "/children?ids[]="+tmp.getString(i)+"&searchBy=ids"; //info un bambino
-                        StringRequest getBambinoInfo = new StringRequest(Request.Method.GET, urlq, new Response.Listener<String>() {
+                        Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+tmp.getString(i)+"&searchBy=ids",new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 try {
@@ -81,21 +74,13 @@ public class ListaBambiniAmici extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
                             }
-                        }, new Response.ErrorListener() {
+                        },new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
                                 System.err.println(error.getMessage());
                             }
-                        }){
-                            @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                HashMap<String,String> headers = new HashMap<String,String>();
-                                headers.put("Authorization","Bearer "+getToken());
-                                return headers;
-                            }
-                        };
-                        groupkids.add(getBambinoInfo);
+                        }, new HashMap<>());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -107,15 +92,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
                 System.err.println(error.getMessage());
             }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+getToken());
-                return headers;
-            }
-        };
-        groupuser.add(stringRequest);
+        },new HashMap<>());
     }
 
     protected String getToken(){

@@ -26,7 +26,7 @@ public class Homepage extends AppCompatActivity {
         Intent bambino = new Intent(Homepage.this,ListaBambiniAmici.class);
         startActivity(bambino);
     }
-    
+
     public void getGroup(View v){
         Intent group = new Intent(Homepage.this,SceltaDelGruppo.class);
         startActivity(group);
