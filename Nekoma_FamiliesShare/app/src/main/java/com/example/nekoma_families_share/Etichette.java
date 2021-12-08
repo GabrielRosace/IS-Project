@@ -122,16 +122,17 @@ public class Etichette extends AppCompatActivity {
                 public void onClick(View v) {
                     //todo fai la delete
                     RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
-                    String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
-                    Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+id_group+"/"+name.id, new Response.Listener<String>() {
+                    // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
+                    Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            Toast.makeText(Etichette.this, "FUNZIONA", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Etichette.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
                             String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                             Utilities.httpRequest(Etichette.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response1) {
                                     try{
+                                        etichette = new ArrayList<>();
                                         JSONArray tmp = new JSONArray(response1);
                                         System.out.println(tmp);
                                         for(int i=0;i<tmp.length();++i){

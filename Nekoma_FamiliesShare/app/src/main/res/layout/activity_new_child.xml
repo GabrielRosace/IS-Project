@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/abc_vector_test"
         app:subtitleTextColor="#FFFFFF"
-        app:title="Create new child"
+        app:title="Crea nuovo bambino"
         app:titleTextColor="#FFFFFF" />
 
     <EditText
@@ -64,7 +64,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="33dp"
-        android:text="Surname"
+        android:text="Cognome"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +76,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="72dp"
-        android:text="Name"
+        android:text="Nome"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -136,7 +136,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="34dp"
-        android:text="Other Info"
+        android:text="Altre info"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -148,7 +148,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="28dp"
-        android:text="Allergies"
+        android:text="Allergie"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -160,7 +160,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="29dp"
-        android:text="SpecialNeeds"
+        android:text="Necessità"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -173,7 +173,7 @@
         android:layout_marginStart="150dp"
         android:layout_marginTop="29dp"
         android:layout_marginEnd="151dp"
-        android:text="Add Label"
+        android:text="Preferenze"
         android:textAlignment="center"
         android:textSize="18dp"
         android:textStyle="bold"
@@ -187,33 +187,21 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="Gender"
+        android:text="Genere"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/birthdayLabel" />
 
-    <TextView
-        android:id="@+id/textView23"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="100dp"
-        android:text="Manca la selezione delle etichette"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/specialneedsLabel2" />
-
     <Button
         android:id="@+id/childConfirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="154dp"
-        android:layout_marginEnd="156dp"
+        android:layout_marginStart="155dp"
+        android:layout_marginEnd="155dp"
         android:layout_marginBottom="40dp"
         android:onClick="setNewChild"
-        android:text="Confirm"
+        android:text="conferma"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -230,6 +218,36 @@
         android:onClick="openDatePicker"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/childSurname"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Spinner
+        android:id="@+id/labelsSpinner"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.137"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/specialneedsLabel2"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/confirmlabel"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="69dp"
+        android:layout_marginEnd="7dp"
+        android:backgroundTint="#4CAF50"
+        android:onClick="newLabel"
+        android:textAlignment="center"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.452"
+        app:layout_constraintStart_toEndOf="@+id/labelsSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/childSpecialNeeds"
         tools:ignore="SpeakableTextPresentCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
