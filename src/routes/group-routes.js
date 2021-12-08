@@ -102,6 +102,7 @@ const Child = require('../models/child')
 const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
+const Servizio = require('../models/servizio')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1120,6 +1121,7 @@ router.post('/:id/activities', async (req, res, next) => {
   }
   const user_id = req.user_id
   const group_id = req.params.id
+
   try {
     const { activity, events } = req.body
     const member = await Member.findOne({
@@ -1134,11 +1136,22 @@ router.post('/:id/activities', async (req, res, next) => {
     if (!(events && activity)) {
       return res.status(400).send('Bad Request')
     }
+
     const activity_id = objectid()
+    const image_id = objectid()
+    const image = {
+      image_id,
+      owner_type: 'user',
+      owner_id: user_id,
+      url: 'https://avatars.dicebear.com/api/adventurer/dinosauro.svg',
+      path: '/images/profiles/user_default_photo.png',
+      thumbnail_path: '/images/profiles/user_default_photo.png'
+    }
     activity.status = member.admin ? 'accepted' : 'pending'
     activity.activity_id = activity_id
     const group = await Group.findOne({ group_id })
     activity.group_name = group.name
+    activity.image_id = image_id
     events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
     await Promise.all(
       events.map(event =>
@@ -1148,6 +1161,7 @@ router.post('/:id/activities', async (req, res, next) => {
         })
       )
     )
+    await Image.create(image)
     await Activity.create(activity)
     if (member.admin) {
       await nh.newActivityNotification(group_id, user_id)
@@ -1893,5 +1907,217 @@ router.delete(
     }
   }
 )
+
+router.post('/:id/servizio', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const user_id = req.user_id
+  const group_id = req.params.id
+  console.log(JSON.stringify(req.body))
+  try {
+    // eslint-disable-next-line no-unused-vars
+    const { servizio, events } = req.body
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (!(servizio)) {
+      return res.status(400).send('Bad Request')
+    }
+
+    const servizio_id = objectid()
+    const image_id = objectid()
+    const image = {
+      image_id,
+      owner_type: 'user',
+      owner_id: user_id,
+      url: 'https://avatars.dicebear.com/api/adventurer/dinosauro.svg',
+      path: '/images/profiles/user_default_photo.png',
+      thumbnail_path: '/images/profiles/user_default_photo.png'
+    }
+    servizio.status = member.admin ? 'accepted' : 'pending'
+    servizio.servizio_id = servizio_id
+    const group = await Group.findOne({ group_id })
+    servizio.group_name = group.name
+    servizio.image_id = image_id
+    /*
+    UNCOMMENT WHEN USE FRONT-END
+    events.forEach(event => { event.extendedProperties.shared.servizio_id = servizio_id })
+    await Promise.all(
+      events.map(event =>
+        calendar.events.insert({
+          calendarId: group.calendar_id,
+          resource: event
+        })
+      )
+    ) */
+    await Image.create(image)
+    await Servizio.create(servizio)
+    if (member.admin) {
+      await nh.newActivityNotification(group_id, user_id)
+    }
+    res.json({ status: servizio.status })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/:groupId/servizio/:servizioId', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  try {
+    const group_id = req.params.groupId
+    const user_id = req.user_id
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (!member.admin) {
+      return res.status(401).send('Unauthorized')
+    }
+    // eslint-disable-next-line no-unused-vars
+    const group = await Group.findOne({ group_id })
+    const servizio_id = req.params.servizioId
+    /*
+    UNCOMMENT WHEN USE FRONT-END
+    const resp = await calendar.events.list({
+      calendarId: group.calendar_id,
+      sharedExtendedProperty: `servizioId=${servizio_id}`
+    })
+    const activityTimeslots = resp.data.items
+    await activityTimeslots.reduce(async (previous, event) => {
+      await previous
+      return calendar.events.delete({
+        eventId: event.id,
+        calendarId: group.calendar_id
+      })
+    }, Promise.resolve())
+    */
+    const servizio = await Servizio.findOneAndDelete({ servizio_id })
+    /*
+    TO UNDERSTAND
+    await nh.deleteActivityNotification(user_id, activity.name, activityTimeslots)
+    */
+    console.log(servizio)
+    res.status(200).send('Servizio deleted')
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/:id/servizio', (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const group_id = req.params.id
+  const user_id = req.user_id
+  Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+    .then(member => {
+      if (!member) {
+        return res.status(401).send('Unauthorized')
+      }
+      return Servizio.find({ group_id })
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec()
+        .then(servizi => {
+          if (servizi.length === 0) {
+            return res.status(404).send('Group has no servizi')
+          }
+          res.json(servizi)
+        })
+    })
+    .catch(next)
+})
+router.get('/:id/servizio/:servizioId', (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const group_id = req.params.id
+  const user_id = req.user_id
+  const servizio_id = req.params.servizioId
+  Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+    .then(member => {
+      if (!member) {
+        return res.status(401).send('Unauthorized')
+      }
+      return Servizio.find({ group_id: group_id, servizio_id: servizio_id })
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec()
+        .then(servizi => {
+          if (servizi.length === 0) {
+            return res.status(404).send('Group has no servizi')
+          }
+          res.json(servizi)
+        })
+    })
+    .catch(next)
+})
+
+router.patch('/:id/servizio/:servizioId', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const group_id = req.params.id
+  const user_id = req.user_id
+  try {
+    const servizio_id = req.params.servizioId
+    const servizioPatch = req.body
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    const servizio = await Servizio.findOne({
+      servizio_id: req.params.servizioId
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (!(member.admin || servizio.creator_id === user_id)) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (
+      !(
+        servizioPatch.name ||
+        servizioPatch.description ||
+        servizioPatch.status
+      )
+    ) {
+      return res.status(400).send('Bad Request')
+    }
+    await Servizio.updateOne({ servizio_id }, servizioPatch)
+    if (servizioPatch.status === 'accepted') {
+      await nh.newActivityNotification(group_id, servizio.creator_id)
+    }
+    res.status(200).send('Servizio was updated')
+  } catch (error) {
+    next(error)
+  }
+})
 
 module.exports = router

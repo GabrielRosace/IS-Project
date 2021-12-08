@@ -10,6 +10,7 @@ const imageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  url: String,
   thumbnail_path: {
     type: String
   },

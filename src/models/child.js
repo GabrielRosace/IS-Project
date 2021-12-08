@@ -38,7 +38,7 @@ const childSchema = new mongoose.Schema(
     },
     labels: {
       type: [label.getSchema()],
-      required : false
+      required: false
     },
     allergies: String,
     special_needs: String,
@@ -54,8 +54,7 @@ childSchema.virtual('image', {
   justOne: true
 })
 
-
-childSchema.virtual('parent',{
+childSchema.virtual('parent', {
   ref: 'Parent',
   localField: 'child_id',
   foreignField: 'child_id',
