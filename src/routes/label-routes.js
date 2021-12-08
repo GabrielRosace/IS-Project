@@ -75,21 +75,21 @@ router.post('/', (req, res, next) => {
 })
 
 // delete a label
-router.delete('/', (req, res, next) => {
+router.delete('/:group_id/:name', (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
 
-	let labelName = req.body.name.toString()
-	if(!labelName)
+	let lable_id = req.params.name
+	if(!lable_id)
 		return res.status(400).send('Bad Request')
 	
-	let groupId = req.body.group_id
+	let groupId = req.params.group_id
 	if(!groupId)
 		return res.status(400).send('Bad Request')
 
 	Group.find({group_id : groupId}).then((g) => {
 		if(g){
-			Label.deleteOne({name : labelName, group_id : g.groupId}).then(() => {
+			Label.deleteOne({lable_id : lable_id, group_id : g.groupId}).then(() => { // ho modificato il lable_id altrimenti non trovava perchè non esiste in lable il lablename
 				res.status(200).send('Label deleted')
 			})
 		}
