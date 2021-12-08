@@ -27,9 +27,9 @@
         android:id="@+id/info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="102dp"
+        android:layout_marginStart="90dp"
         android:layout_marginTop="5dp"
-        android:text="Add new service, event or activity"
+        android:text="Aggiungi un nuovo evento o servizio."
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/floatingActionButton2" />
 
@@ -40,7 +40,7 @@
         android:layout_marginStart="60dp"
         android:layout_marginTop="16dp"
         android:onClick="getEvent"
-        android:text="FIND"
+        android:text="CERCA"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
@@ -51,7 +51,7 @@
         android:layout_marginStart="144dp"
         android:layout_marginTop="18dp"
         android:onClick="getActivities"
-        android:text="FIND"
+        android:text="CERCA"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView6" />
 
@@ -62,7 +62,7 @@
         android:layout_marginTop="21dp"
         android:layout_marginEnd="60dp"
         android:onClick="getService"
-        android:text="FIND"
+        android:text="CERCA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView4" />
 
@@ -70,9 +70,9 @@
         android:id="@+id/enddate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="1dp"
-        android:text="Find activities, events or services: created, attending, closed."
+        android:text="Trova servizi ed eventi: creati, a cui partecipi, chiusi."
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/find_service" />
 
@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="80dp"
         android:layout_marginTop="14dp"
-        android:text="Find group activities events and services."
+        android:text="Trova tutti gli eventi e servizi e gruppi."
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/find_all" />
 
@@ -110,10 +110,12 @@
         android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="163dp"
+        android:layout_marginStart="153dp"
         android:layout_marginTop="7dp"
-        android:text="Welcome!"
+        android:layout_marginEnd="148dp"
+        android:text="Benvenuto!"
         android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 

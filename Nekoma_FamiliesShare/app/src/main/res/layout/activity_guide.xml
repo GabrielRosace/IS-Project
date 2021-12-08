@@ -26,7 +26,7 @@
             android:theme="?attr/actionBarTheme"
             app:logo="@android:drawable/ic_menu_info_details"
             app:navigationIcon="@drawable/abc_vector_test"
-            app:title="Guide"
+            app:title="Guida"
             app:titleTextColor="#FFFFFF" />
 
         <ScrollView
