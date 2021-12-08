@@ -7,12 +7,10 @@ const Member = require('../models/member')
 const objectid = require('objectid')
 
 // Get all labels of the group 
-router.get('/', (req, res, next) => {
+router.get('/:group_id', (req, res, next) => {
     if (!req.user_id) { return res.status(401).send('Not authenticated') }
-	// let userId = req.user_id
-	let groupId = req.body.group_id
+	let groupId = req.params.group_id
 	Member.find({group_id : groupId}).then((m) => {
-		// console.log(m.group_id)
 		if(m){
 			Label.find({group_id : groupId}).exec().then((l) => {
 				res.status(200).send(l)
@@ -40,7 +38,7 @@ router.post('/', (req, res, next) => {
 		return res.status(400).send('Bad Request')
 	// console.log(userId);
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
-		console.log(g);
+		// console.log(g);
 		if(g){
 			Label.findOne({name : labelName}).exec().then((l) => {
 				if(!l){
