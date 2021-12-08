@@ -79,6 +79,8 @@ public class NewChild extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         childGender.setAdapter(adapter);
+
+        System.out.println("Gruppo : "+Utilities.getPrefs(this).getString("group",""));
     }
 
     private void initDatePicker() {
@@ -133,7 +135,7 @@ public class NewChild extends AppCompatActivity {
                 params.put("other_info",childOtherInfos.getText().toString());
                 params.put("special_needs",childSpecialNeeds.getText().toString());
                 params.put("background","#00838F");
-                params.put("image","\"\\/images\\/profiles\\/child_default_photo.png\"");
+                params.put("image","/images/profiles/child_default_photo.png");
                 return new JSONObject(params).toString().getBytes();
             }
 
