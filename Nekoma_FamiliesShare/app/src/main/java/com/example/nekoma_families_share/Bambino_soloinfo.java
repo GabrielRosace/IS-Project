@@ -1,8 +1,11 @@
 package com.example.nekoma_families_share;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +14,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -35,13 +43,20 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class Bambino_soloinfo extends AppCompatActivity {
+public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private List<String> labels;
+    private List<String> childLabels = new ArrayList<>();
+    private ArrayAdapter dataSpinner;
+    private List<myEtichette> etichette = new ArrayList<>();
+    private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +107,52 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 //aggoungi etichette al bambino
                                 LinearLayout layout = (LinearLayout) findViewById(R.id.aggiunta_etichette);
                                 layout.setVisibility(View.VISIBLE);
+
+                                // spinner
                                 Spinner etichette = (Spinner) findViewById(R.id.spinner_etichette);
                                 Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
+
+                                String user_id;
+                                String userToken = Utilities.getToken(Bambino_soloinfo.this);
+                                System.out.println(userToken);
+                                // Faccio il parse del token in modo tale da prendermi l'id dell'utente
+                                String[] split_token = userToken.split("\\.");
+                                String base64Body = split_token[1];
+                                String body = new String(Base64.getDecoder().decode(base64Body));
+                                try {
+                                    JSONObject res = new JSONObject(body);
+                                    user_id = res.getString("user_id");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+
+                                labels = new ArrayList<>();
+                                Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
+                                    try {
+                                        JSONArray user_response = new JSONArray((String) response2);
+                                        for (int j = 0; j < user_response.length(); j++) {
+                                            System.out.println(user_response.get(j));
+                                            JSONObject obj = user_response.getJSONObject(j);
+                                            labels.add(obj.getString("name"));
+                                        }
+                                        etichette.setOnItemSelectedListener(Bambino_soloinfo.this);
+                                        dataSpinner = new ArrayAdapter(Bambino_soloinfo.this, R.layout.support_simple_spinner_dropdown_item);
+                                        dataSpinner.addAll(labels);
+                                        dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                                        etichette.setAdapter(dataSpinner);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }, error -> {
+                                    Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
+                                    System.err.println(error.getMessage());
+                                }, new HashMap<>());
+                                // fine spinner
+
+                                //todo mettere la recicle view
+
+                                System.out.println("sono kid di i"+ kid.getString(i));
 
                                 TextView text_gender = (TextView) findViewById(R.id.genere_);
                                 if(!new JSONObject(kid.getString(i)).getString("gender").equals("unspecified")){
@@ -161,6 +220,17 @@ public class Bambino_soloinfo extends AppCompatActivity {
         }
 
     }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
     private static class Bambini{
         public final String id;
         public final String name;
@@ -209,5 +279,140 @@ public class Bambino_soloinfo extends AppCompatActivity {
     public String getKid(){
         SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         return  prefs.getString("id_child","");
+    }
+    private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
+
+        private List<myEtichette> mData;
+
+        private LayoutInflater mInflater;
+
+        // data is passed into the constructor
+        MyRecyclerViewAdapter(Context context, List<myEtichette> data) {
+            this.mInflater = LayoutInflater.from(context);
+            this.mData = data;
+        }
+
+
+        // inflates the row layout from xml when needed
+        @NonNull
+        @Override
+        public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = mInflater.inflate(R.layout.recycler_view_item_1, parent, false);
+            return new MyRecyclerViewAdapter.ViewHolder(view);
+        }
+
+        // binds the data to the TextView in each row
+        @Override
+        public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
+            myEtichette name = mData.get(position);
+            holder.myTextView.setText(name.name);
+            holder.btn.setVisibility(View.VISIBLE);
+            holder.btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //todo fai la delete
+                    RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
+                    // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
+                    Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Toast.makeText(Bambino_soloinfo.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
+                            String id_group = Utilities.getPrefs(Bambino_soloinfo.this).getString("group", "");
+                            Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response1) {
+                                    try{
+                                        etichette = new ArrayList<>();
+                                        JSONArray tmp = new JSONArray(response1);
+                                        System.out.println(tmp);
+                                        for(int i=0;i<tmp.length();++i){
+                                            myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
+                                            etichette.add(nuovo);
+                                        }
+                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Bambino_soloinfo.this, etichette);
+
+                                        grouplist.setLayoutManager(grouplistManager);
+                                        grouplist.setAdapter(adapter);
+                                    }catch(JSONException e){
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
+                                    System.err.println(error.getMessage());
+                                }
+                            }, new HashMap<>());
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
+                            System.err.println(error.getMessage());
+                        }
+                    },new HashMap<>());
+                }
+            });
+        }
+
+        // total number of rows
+        @Override
+        public int getItemCount() {
+            return mData.size();
+        }
+
+        private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+            MyRecyclerViewAdapter.ViewHolder holder;
+
+            public ImageDownloader(MyRecyclerViewAdapter.ViewHolder holder) {
+                this.holder = holder;
+            }
+
+            @Override
+            protected Bitmap doInBackground(String... strings) {
+                String urlOfImage = strings[0];
+                Bitmap logo = null;
+                try{
+                    InputStream is = new URL(urlOfImage).openStream();
+                    logo = BitmapFactory.decodeStream(is);
+                }catch(Exception e){ // Catch the download exception
+                    e.printStackTrace();
+                }
+                return logo;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+            }
+        }
+
+
+        // stores and recycles views as they are scrolled off screen
+        public class ViewHolder extends RecyclerView.ViewHolder{
+            TextView myTextView;
+            ImageButton btn;
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                myTextView = itemView.findViewById(R.id.etichette_id);
+                btn = itemView.findViewById(R.id.delete_etichette);
+            }
+        }
+
+        // convenience method for getting data at click position
+        myEtichette getItem(int id) {
+            return mData.get(id);
+        }
+
+    }
+    private class myEtichette {
+        public final String name;
+        public final String id;
+        myEtichette(String name, String id){
+            this.name=name;
+            this.id=id;
+        }
     }
 }
