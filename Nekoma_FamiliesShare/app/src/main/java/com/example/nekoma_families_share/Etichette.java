@@ -50,7 +50,7 @@ public class Etichette extends AppCompatActivity {
 
         // non funziona
 
-        /*HashMap<String,String> id_group = new HashMap<>();
+        HashMap<String,String> id_group = new HashMap<>();
         System.out.println(Utilities.getPrefs(this).getString("group", ""));
         id_group.put("group_id", Utilities.getPrefs(this).getString("group", ""));
         Utilities.httpRequest(this, Request.Method.GET, "/label", new Response.Listener<String>() {
@@ -72,7 +72,7 @@ public class Etichette extends AppCompatActivity {
                 Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
                 System.err.println(error.getMessage());
             }
-        }, id_group);*/
+        }, id_group);
 
         // non funziona
 

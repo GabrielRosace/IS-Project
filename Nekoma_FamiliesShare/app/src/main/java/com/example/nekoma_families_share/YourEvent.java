@@ -19,6 +19,7 @@ public class YourEvent extends AppCompatActivity {
         TabItem tabYourEvent = (TabItem) findViewById(R.id.your_events);
         TabItem tabActiveEvent = (TabItem) findViewById(R.id.active_events);
         TabItem tabClosedEvent = (TabItem) findViewById(R.id.closed_events);
+
     }
     public void getHomePage(View v){
         Intent homepage = new Intent(YourEvent.this,Homepage.class);

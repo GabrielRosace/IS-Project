@@ -139,50 +139,63 @@ public class ListaBambiniAmici extends AppCompatActivity {
     public void getFriendKids(){
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
 
+        String user_id;
+        String userToken = Utilities.getToken(ListaBambiniAmici.this);
+        String[] split_token = userToken.split("\\.");
+        String base64Body = split_token[1];
+        String body = new String(Base64.getDecoder().decode(base64Body));
+        try {
+            JSONObject res = new JSONObject(body);
+            user_id = res.getString("user_id");
+            String id_group = Utilities.getPrefs(this).getString("group", "");
+            Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/children", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONArray tmp = new JSONArray(response);
+                        for (int i = 0; i < tmp.length(); ++i) {
+                            Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, "/children?ids[]=" + tmp.getString(i) + "&searchBy=ids", new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    try {
+                                        JSONArray kid = new JSONArray(response);
 
-        String id_group = Utilities.getPrefs(this).getString("group","");
-        Utilities.httpRequest(this,Request.Method.GET,"/groups/"+id_group+"/children",new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONArray tmp = new JSONArray(response);
-                    for(int i=0; i<tmp.length();++i){
-                        Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+tmp.getString(i)+"&searchBy=ids",new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                try {
-                                    JSONArray kid = new JSONArray(response);
-                                    for(int i=0;i<kid.length();++i){
-                                        l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
+                                        for (int i = 0; i < kid.length(); ++i) {
+                                            if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
+                                                l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
+                                            }
+                                        }
+                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
+                                        System.out.println(l);
+                                        System.out.println("*********************150");
+                                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
+                                        grouplist.setAdapter(adapter);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
                                     }
-                                    MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
-                                    System.out.println(l);
-                                    System.out.println("*********************150");
-                                    grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                                    grouplist.setAdapter(adapter);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
                                 }
-                            }
-                        },new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
-                                System.err.println(error.getMessage());
-                            }
-                        }, new HashMap<>());
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
+                                    System.err.println(error.getMessage());
+                                }
+                            }, new HashMap<>());
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
-            }
-        },new HashMap<>());
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
+                    System.err.println(error.getMessage());
+                }
+            }, new HashMap<>());
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
     }
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 

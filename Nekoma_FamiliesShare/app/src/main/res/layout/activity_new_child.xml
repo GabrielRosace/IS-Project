@@ -12,11 +12,12 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
+        android:onClick="getChildrenList"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/actionModeCloseDrawable"
+        app:navigationIcon="@drawable/abc_vector_test"
         app:subtitleTextColor="#FFFFFF"
         app:title="Create new child"
         app:titleTextColor="#FFFFFF" />
