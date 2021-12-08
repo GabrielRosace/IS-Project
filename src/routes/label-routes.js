@@ -4,6 +4,7 @@ const router = new express.Router()
 const Label = require('../models/label')
 const Group = require('../models/group')
 const Member = require('../models/member')
+const Child = require('../models/child')
 const objectid = require('objectid')
 
 // Get all labels of the group 
@@ -98,5 +99,56 @@ router.delete('/', (req, res, next) => {
 		}
 	})
 })
+
+// Add a label to a child
+router.post('/child', (req, res, next) => {
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+
+	let childId = req.body.child_id
+	if(!childId) { return res.status(400).send('Bad Request') }
+
+	let labelId = req.body.label_id
+	if(!labelId) { return res.status(400).send('Bad Request') }
+
+	// let labelName = req.body.label_name
+	// if(!labelName) { return res.status(400).send('Bad Request') }
+
+	// let labelGroup = req.body.label_group
+	// if(!labelGroup) { return res.status(400).send('Bad Request') }
+
+	// Label.findOne({name : labelName, group_id : labelGroup}).then((l) => {
+	Label.findOne({label_id : labelId}).then((l) => {
+		if(l){
+			Child.findOne({child_id : childId}).then((c) => {
+				if(c){
+					c.labels.push(l.label_id)
+					c.save().then(() => {
+						return res.status(200).send('Label inserted')
+					}).catch((error) => {
+						console.log('Save error: ' + error);
+					})
+				}
+				else{
+					return res.status(400).send('Child does not exist')
+				}
+			})
+		}else{
+			// ! Non esiste l'etichetta
+			return res.status(400).send('Label does not exists')
+		}
+	})
+})
+
+// Get all labels of a child
+// router.get('/child/:child_id', (req, res, next) => {
+// 	let userId = req.user_id
+//     if (!userId) { return res.status(401).send('Not authenticated') }
+
+// 	let childId = req.body.child_id
+// 	if(!childId) { return res.status(400).send('Bad Request') }
+
+// 	Child.findOne({child_id : childId})
+// })
 
 module.exports = router
