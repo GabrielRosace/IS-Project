@@ -104,8 +104,11 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 ImageView img_genitore = (ImageView) findViewById(R.id.img_genitore);
                                 new ImageDownloader(img_genitore).execute(getString(R.string.urlnoapi)+new JSONObject(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("image")).getString("path"));
                                 TextView text_gender = (TextView) findViewById(R.id.allergie_);
-                                /*if()
-                                text_gender.setText(new JSONObject(kid.getString(i)).getString("gender"));*/
+                                if(new JSONObject(kid.getString(i)).getString("gender").equals("")){
+                                    text_gender.setText(new JSONObject(kid.getString(i)).getString("gender"));
+                                }
+
+
                             }
                         }
 
