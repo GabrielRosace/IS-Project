@@ -1,4 +1,5 @@
-import * as label from './label'
+// import * as label from './label'
+const label = require('./label')
 const mongoose = require('mongoose')
 
 const childSchema = new mongoose.Schema(
@@ -37,8 +38,8 @@ const childSchema = new mongoose.Schema(
       required: true
     },
     labels: {
-      type: [label.getSchema()],
-      required: false
+      type: [String],
+      required : false
     },
     allergies: String,
     special_needs: String,

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".YourEvent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@color/purple_500"
+            android:minHeight="?attr/actionBarSize"
+            android:onClick="getHomePage"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/abc_vector_test"
+            app:title="Archived user's servicies"
+            app:titleTextAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:titleTextColor="#FFFFFF" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/your_events"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your Events" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/active_events"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active Events" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/closed_events"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Closed Events" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

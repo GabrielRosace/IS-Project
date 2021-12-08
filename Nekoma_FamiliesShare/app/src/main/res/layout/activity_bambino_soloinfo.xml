@@ -54,8 +54,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout3"
-        android:layout_width="414dp"
-        android:layout_height="555dp"
+        android:layout_width="412dp"
+        android:layout_height="531dp"
         android:layout_marginEnd="2dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -94,10 +94,10 @@
 
             <Space
                 android:layout_width="155dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cardView2"
+                android:id="@+id/card_genitore"
                 android:layout_width="30dp"
                 android:layout_height="32dp"
                 android:layout_marginStart="31dp"
@@ -107,7 +107,7 @@
                 app:cardCornerRadius="50dp">
 
                 <ImageView
-                    android:id="@+id/imageView9"
+                    android:id="@+id/img_genitore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:srcCompat="@tools:sample/avatars" />
@@ -145,22 +145,71 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/preferenze"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="163dp"
-            android:layout_marginTop="22dp"
-            android:layout_marginEnd="164dp"
-            android:text="Preferenze:"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
 
-        <ListView
-            android:id="@+id/listaprefernze"
-            android:layout_width="414dp"
-            android:layout_height="379dp"
-            android:layout_marginStart="1dp" />
+            <TextView
+                android:id="@+id/preferenze"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="163dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="164dp"
+                android:text="Preferenze:"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="279dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/recycler_view_item_1" />
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/aggiunta_etichette"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <Space
+                android:layout_width="26dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Spinner
+                android:id="@+id/spinner_etichette"
+                android:layout_width="301dp"
+                android:layout_height="49dp"
+                android:entries="@array/etichette" />
+
+            <Button
+                android:id="@+id/add_etichetta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#4CAF50"
+                android:text="Add" />
+
+            <Space
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
 
     </LinearLayout>
 

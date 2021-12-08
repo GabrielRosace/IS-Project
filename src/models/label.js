@@ -1,16 +1,23 @@
 const mongoose = require('mongoose')
 
 const labelSchema = new mongoose.Schema(
-  {
+{
+    label_id: {
+        type: String,
+        required: true
+    },
     name: {
-      type: String,
-      unique: true,
-      required: true
+        type : String,
+        // unique : true,
+        required : true
+    },
+    group_id: {
+        type : String,
+        // unique: true,
+        required : true
     }
   }
 )
-
-export function getSchema () { return labelSchema }
 
 const model = mongoose.model('Label', labelSchema)
 

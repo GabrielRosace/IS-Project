@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:padding="8dp"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+  <TextView
+      android:id="@+id/etichette_id"
+      android:layout_width="294dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:padding="5dp"
+      android:textSize="16sp"
+      tools:text="@tools:sample/lorem" />
+
+  <ImageButton
+      android:id="@+id/delete_etichette"
+      android:layout_width="9dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:backgroundTint="#C50A0A"
+      android:visibility="invisible"
+      app:srcCompat="@android:drawable/ic_menu_delete" />
+
+</LinearLayout>
