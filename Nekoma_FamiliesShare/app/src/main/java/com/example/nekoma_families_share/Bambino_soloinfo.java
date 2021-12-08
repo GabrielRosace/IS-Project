@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 
 import android.content.Context;
@@ -46,6 +47,13 @@ public class Bambino_soloinfo extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bambino_soloinfo);
+        Toolbar t = (Toolbar) findViewById(R.id.bambinotoolbar);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         String id_child = getKid();
         String user_id;
         String userToken = Utilities.getToken(Bambino_soloinfo.this);
@@ -71,7 +79,7 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 nome_bambino.setText(bambino.name+" "+bambino.surname);
                                 TextView nome = (TextView) findViewById(R.id.nome);
                                 nome.setText("Nato il:");
-                                CardView card_genitore = (CardView) findViewById(R.id.card_genitore);
+                                LinearLayout card_genitore = (LinearLayout) findViewById(R.id.foto_genitore);
                                 card_genitore.setVisibility(View.GONE);
                                 TextView nome_genitore = (TextView) findViewById(R.id.nome_genitore);
                                 String date =new JSONObject(kid.getString(i)).getString("birthdate");
@@ -84,7 +92,7 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 // aggiungi_etichetta.setVisibility(View.VISIBLE);
                                 // Spinner etichette = (Spinner) findViewById(R.id.spinner_etichette);
                                 LinearLayout layout = (LinearLayout) findViewById(R.id.aggiunta_etichette);
-                                layout.setVisibility(View.VISIBLE);
+                                // layout.setVisibility(View.VISIBLE);
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
@@ -95,6 +103,12 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 nome_genitore.setText(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("given_name")+" "+new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("family_name"));
                                 ImageView img_genitore = (ImageView) findViewById(R.id.img_genitore);
                                 new ImageDownloader(img_genitore).execute(getString(R.string.urlnoapi)+new JSONObject(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("image")).getString("path"));
+                                TextView text_gender = (TextView) findViewById(R.id.allergie_);
+                                if(new JSONObject(kid.getString(i)).getString("gender").equals("")){
+                                    text_gender.setText(new JSONObject(kid.getString(i)).getString("gender"));
+                                }
+
+
                             }
                         }
 
