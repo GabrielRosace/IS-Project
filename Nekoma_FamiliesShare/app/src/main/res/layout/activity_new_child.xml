@@ -193,18 +193,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/birthdayLabel" />
 
-    <TextView
-        android:id="@+id/textView23"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="100dp"
-        android:text="Manca la selezione delle etichette"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/specialneedsLabel2" />
-
     <Button
         android:id="@+id/childConfirm"
         android:layout_width="wrap_content"
@@ -230,6 +218,36 @@
         android:onClick="openDatePicker"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/childSurname"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Spinner
+        android:id="@+id/labelsSpinner"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.137"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/specialneedsLabel2"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/confirmlabel"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="69dp"
+        android:layout_marginEnd="7dp"
+        android:backgroundTint="#4CAF50"
+        android:onClick="newLabel"
+        android:textAlignment="center"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.452"
+        app:layout_constraintStart_toEndOf="@+id/labelsSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/childSpecialNeeds"
         tools:ignore="SpeakableTextPresentCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

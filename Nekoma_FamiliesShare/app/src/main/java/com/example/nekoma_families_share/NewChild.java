@@ -1,10 +1,12 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +25,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,25 +34,33 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class NewChild extends AppCompatActivity {
+public class NewChild extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private String user_id = "";
     private DatePickerDialog datePicker;
     private EditText childName;
     private EditText childSurname;
     private Spinner childGender;
+    private Spinner labelsSpinner;
     private Button dateButton;
     private EditText childAllergies;
     private EditText childOtherInfos;
     private EditText childSpecialNeeds;
     private Button confirmButton;
 
+    private List<String> labels;
+    private List<String> childLabels = new ArrayList<>();
+    private ArrayAdapter dataSpinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_child);
+
+        System.out.println(Utilities.getToken(this));
 
         childName = findViewById(R.id.childName);
         childSurname = findViewById(R.id.childSurname);
@@ -57,6 +68,7 @@ public class NewChild extends AppCompatActivity {
         childAllergies = findViewById(R.id.childAllergies);
         childOtherInfos = findViewById(R.id.childOtherInfo);
         childSpecialNeeds = findViewById(R.id.childSpecialNeeds);
+        labelsSpinner = (Spinner) findViewById(R.id.labelsSpinner);
 
         String userToken = Utilities.getToken(this);
         System.out.println(userToken);
@@ -71,16 +83,46 @@ public class NewChild extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        labels = new ArrayList<>();
+        Utilities.httpRequest(this,Request.Method.GET,"/label/"+Utilities.getPrefs(this).getString("group",""),response -> {
+            try {
+                JSONArray user_response = new JSONArray((String) response);
+                for (int i = 0; i < user_response.length(); i++) {
+                    System.out.println(user_response.get(i));
+                    JSONObject obj = user_response.getJSONObject(i);
+                    labels.add(obj.getString("name"));
+                }
+                labelsSpinner.setOnItemSelectedListener(this);
+                dataSpinner = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item);
+                dataSpinner.addAll(labels);
+                dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                labelsSpinner.setAdapter(dataSpinner);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            Toast.makeText(NewChild.this, error.toString(), Toast.LENGTH_LONG).show();
+            System.err.println(error.getMessage());
+        }, new HashMap<>());
+
         initDatePicker();
         dateButton = findViewById(R.id.dateButton);
         dateButton.setText("Select a date");
 
         childGender = (Spinner) findViewById(R.id.childGender);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         childGender.setAdapter(adapter);
+    }
 
-        System.out.println("Gruppo : "+Utilities.getPrefs(this).getString("group",""));
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     private void initDatePicker() {
@@ -135,7 +177,9 @@ public class NewChild extends AppCompatActivity {
                 params.put("other_info",childOtherInfos.getText().toString());
                 params.put("special_needs",childSpecialNeeds.getText().toString());
                 params.put("background","#00838F");
+                params.put("labels", childLabels.toString());
                 params.put("image","/images/profiles/child_default_photo.png");
+                System.out.println("Ecco cosa passo: "+params);
                 return new JSONObject(params).toString().getBytes();
             }
 
@@ -145,6 +189,13 @@ public class NewChild extends AppCompatActivity {
             }
         };
         newChild.add(stringRequest);
+    }
+
+    public void newLabel(View v){
+        childLabels.add(labelsSpinner.getSelectedItem().toString());
+        System.out.println(childLabels.toString());
+        dataSpinner.remove(labelsSpinner.getSelectedItem());
+
     }
 
     public void openDatePicker(View v){
