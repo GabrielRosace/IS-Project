@@ -89,9 +89,9 @@ router.delete('/:group_id/:name', (req, res, next) => {
 
 	Group.find({group_id : groupId}).then((g) => {
 		if(g){
-			Label.deleteOne({lable_id : lable_id, group_id : g.groupId}).then(() => { // ho modificato il lable_id altrimenti non trovava perchè non esiste in lable il lablename
+			Label.deleteOne({lable_id : lable_id, group_id : groupId}).then(() => { // ho modificato il lable_id altrimenti non trovava perchè non esiste in lable il lablename
 				res.status(200).send('Label deleted')
-			})
+			});
 		}
 		else{
 			console.log("Permissione denied");

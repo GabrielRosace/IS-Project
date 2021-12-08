@@ -20,7 +20,7 @@
             android:onClick="getHomePage"
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
-            app:title="Archived user's servicies"
+            app:title="Archivio Eventi"
             app:titleTextAppearance="@style/TextAppearance.AppCompat.Body2"
             app:titleTextColor="#FFFFFF" />
 
@@ -33,19 +33,19 @@
                 android:id="@+id/your_events"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Events" />
+                android:text="Tuoi eventi" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/active_events"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Active Events" />
+                android:text="Partecipo" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/closed_events"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Closed Events" />
+                android:text="chiusi" />
 
         </com.google.android.material.tabs.TabLayout>
 
