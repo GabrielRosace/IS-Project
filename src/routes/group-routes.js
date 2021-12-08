@@ -447,7 +447,13 @@ router.get('/:id/children', async (req, res, next) => {
   if (children.length === 0) {
     return res.status(404).send('Group has no children')
   }
-  return res.json([...new Set(children)])
+
+  let childrenList = [...new Set(children)]
+  for (let i = 0; i < childrenList.length; i++){
+    childrenList[i] = await Child.findOne({child_id: childrenList[i]})
+  }
+  
+  return res.json(childrenList)
 })
 
 router.patch('/:id/members', async (req, res, next) => {
