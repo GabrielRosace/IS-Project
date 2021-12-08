@@ -38,7 +38,7 @@ router.post('/', (req, res, next) => {
 		return res.status(400).send('Bad Request')
 	// console.log(userId);
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
-		console.log(g);
+		// console.log(g);
 		if(g){
 			Label.findOne({name : labelName}).exec().then((l) => {
 				if(!l){
