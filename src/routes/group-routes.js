@@ -1310,17 +1310,18 @@ router.get('/:groupId/activities/:activityId', async (req, res, next) => {
     return res.status(401).send('Not authenticated')
   }
   const { activityId } = req.params
-  
+
   const member = await Member.findOne({ group_id: req.params.groupId, user_id: req.user_id, group_accepted: true, user_accepted: true })
   if (!member) return res.status(401).send("Unauthorized")
   let activity = await Activity.findOne({ activity_id: activityId }).lean().exec()
   if (!activity) {
     return res.status(404).send("Activity not found")
   }
-
-  for (let i = 0; i < activity.labels.length;i++) {
-    let e = activity.labels[i]
-    activity.labels[i] = await Label.findOne({label_id: e})
+  if (activity.labels) {
+    for (let i = 0; i < activity.labels.length;i++) {
+      let e = activity.labels[i]
+      activity.labels[i] = await Label.findOne({label_id: e})
+    }
   }
 
   res.json(activity)

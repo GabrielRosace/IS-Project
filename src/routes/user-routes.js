@@ -902,6 +902,10 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
   const {
     birthdate, given_name, family_name, gender, allergies, other_info, special_needs, background, image: imagePath, labels
   } = req.body
+
+
+  let labelsSplit = labels?labels.split(','):undefined
+
   const { file } = req
   if (!(birthdate && given_name && family_name && gender && background)) {
     return res.status(400).send('Bad Request')
@@ -916,7 +920,7 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
     other_info,
     special_needs,
     background,
-    labels,
+    labelsSplit,
     suspended: false
   }
   const image_id = objectid()
