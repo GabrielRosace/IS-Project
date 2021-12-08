@@ -141,14 +141,31 @@ router.post('/child', (req, res, next) => {
 })
 
 // Get all labels of a child
-// router.get('/child/:child_id', (req, res, next) => {
-// 	let userId = req.user_id
-//     if (!userId) { return res.status(401).send('Not authenticated') }
+router.get('/child/:child_id', (req, res, next) => {
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
 
-// 	let childId = req.body.child_id
-// 	if(!childId) { return res.status(400).send('Bad Request') }
+	let childId = req.params.child_id
+	if(!childId) { return res.status(400).send('Bad Request') }
 
-// 	Child.findOne({child_id : childId})
-// })
+	Child.findOne({child_id : childId}).then((c) => {
+		if(c){
+			let childLabels = []
+			c.labels.forEach((label) => {
+				console.log(label);
+				Label.findOne({label_id : label}).then((l) => {
+					console.log(l);
+					childLabels.push(l)
+				})
+				
+			})
+			console.log('Labels:' + childLabels);
+			return res.status(200).send(childLabels)
+		}
+		else{
+			return res.status(400).send('Child does not exist')
+		}
+	})
+})
 
 module.exports = router
