@@ -87,12 +87,34 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 Date data = new SimpleDateFormat("yyyy-MM-dd").parse(parts[0]);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(data);
-                                nome_genitore.setText(calendar.get(Calendar.DAY_OF_MONTH)+":"+calendar.get(Calendar.MONTH)+":"+calendar.get(Calendar.YEAR));
-                                // Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
-                                // aggiungi_etichetta.setVisibility(View.VISIBLE);
-                                // Spinner etichette = (Spinner) findViewById(R.id.spinner_etichette);
+                                nome_genitore.setText(calendar.get(Calendar.DAY_OF_MONTH)+":"+calendar.get(Calendar.MONTH)+1+":"+calendar.get(Calendar.YEAR));
+
+                                //aggoungi etichette al bambino
                                 LinearLayout layout = (LinearLayout) findViewById(R.id.aggiunta_etichette);
-                                // layout.setVisibility(View.VISIBLE);
+                                layout.setVisibility(View.VISIBLE);
+                                Spinner etichette = (Spinner) findViewById(R.id.spinner_etichette);
+                                Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
+
+                                TextView text_gender = (TextView) findViewById(R.id.genere_);
+                                if(!new JSONObject(kid.getString(i)).getString("gender").equals("unspecified")){
+                                    if(new JSONObject(kid.getString(i)).getString("gender").equals("Male") || new JSONObject(kid.getString(i)).getString("gender").equals("male")){
+                                        text_gender.setText("Maschio");
+                                    }else{
+                                        text_gender.setText("Femmina");
+                                    }
+                                }
+                                TextView text_allergie = (TextView) findViewById(R.id.allergie_);
+                                if(!new JSONObject(kid.getString(i)).getString("allergies").equals("")){
+                                    text_allergie.setText(new JSONObject(kid.getString(i)).getString("allergies"));
+                                }
+                                TextView text_altreinfo = (TextView) findViewById(R.id.altre_info);
+                                if(!new JSONObject(kid.getString(i)).getString("other_info").equals("")){
+                                    text_altreinfo.setText(new JSONObject(kid.getString(i)).getString("other_info"));
+                                }
+                                TextView text_bisgoni = (TextView) findViewById(R.id.bisogni_);
+                                if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
+                                    text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
+                                }
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
@@ -103,9 +125,22 @@ public class Bambino_soloinfo extends AppCompatActivity {
                                 nome_genitore.setText(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("given_name")+" "+new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("family_name"));
                                 ImageView img_genitore = (ImageView) findViewById(R.id.img_genitore);
                                 new ImageDownloader(img_genitore).execute(getString(R.string.urlnoapi)+new JSONObject(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("image")).getString("path"));
-                                TextView text_gender = (TextView) findViewById(R.id.allergie_);
-                                /*if()
-                                text_gender.setText(new JSONObject(kid.getString(i)).getString("gender"));*/
+                                TextView text_gender = (TextView) findViewById(R.id.genere_);
+                                if(!new JSONObject(kid.getString(i)).getString("gender").equals("unspecified")){
+                                    text_gender.setText(new JSONObject(kid.getString(i)).getString("gender"));
+                                }
+                                TextView text_allergie = (TextView) findViewById(R.id.allergie_);
+                                if(!new JSONObject(kid.getString(i)).getString("allergies").equals("")){
+                                    text_allergie.setText(new JSONObject(kid.getString(i)).getString("allergies"));
+                                }
+                                TextView text_altreinfo = (TextView) findViewById(R.id.altre_info);
+                                if(!new JSONObject(kid.getString(i)).getString("other_info").equals("")){
+                                    text_altreinfo.setText(new JSONObject(kid.getString(i)).getString("other_info"));
+                                }
+                                TextView text_bisgoni = (TextView) findViewById(R.id.bisogni_);
+                                if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
+                                    text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
+                                }
                             }
                         }
 

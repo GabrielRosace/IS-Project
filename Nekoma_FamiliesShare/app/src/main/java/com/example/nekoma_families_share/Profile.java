@@ -227,9 +227,4 @@ public class Profile extends AppCompatActivity {
         startActivity(homepage);
     }
 
-    public void getNewChild(View v){
-        Intent  newChild= new Intent(Profile.this,NewChild.class);
-        startActivity(newChild);
-    }
-
 }
