@@ -40,6 +40,10 @@ const activitySchema = new mongoose.Schema({
     type: Boolean,
     required: true
   },
+  etichette: {
+    type: [String],
+    require: true
+  },
   status: {
     type: String,
     required: true
