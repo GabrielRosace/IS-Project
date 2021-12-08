@@ -906,7 +906,6 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
 
   let labelsSplit = labels?labels.split(','):undefined
 
-
   const { file } = req
   if (!(birthdate && given_name && family_name && gender && background)) {
     return res.status(400).send('Bad Request')
