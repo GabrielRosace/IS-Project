@@ -5,6 +5,7 @@ const Label = require('../models/label')
 const Group = require('../models/group')
 const Member = require('../models/member')
 const Child = require('../models/child')
+const Parent = require('../models/parent')
 const objectid = require('objectid')
 
 // Get all labels of the group 
@@ -75,29 +76,48 @@ router.post('/', (req, res, next) => {
 })
 
 // delete a label
-router.delete('/:group_id/:name', (req, res, next) => {
+router.delete('/:label_id', async (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
 
-	let lable_id = req.params.name
-	if(!lable_id)
-		return res.status(400).send('Bad Request')
-	
-	let groupId = req.params.group_id
-	if(!groupId)
-		return res.status(400).send('Bad Request')
+	let label_id = req.params.label_id
+	if(!label_id) return res.status(400).send('Bad Request')
 
-	Group.find({group_id : groupId}).then((g) => {
-		if(g){
-			Label.deleteOne({lable_id : lable_id, group_id : groupId}).then(() => { // ho modificato il lable_id altrimenti non trovava perchè non esiste in lable il lablename
-				res.status(200).send('Label deleted')
-			});
-		}
-		else{
-			console.log("Permissione denied");
-			return res.status(400).send('Permissione Denied')
-		}
+	Label.findOne({label_id : label_id}).then((l) => {
+		Group.findOne({group_id : l.group_id}).then((g) => {
+			if(g.owner_id != userId)
+				return res.status(400).send('Unauthorized')
+		})
 	})
+
+	Label.findOne({label_id : label_id}).then((l) => {
+		Group.findOne({group_id : l.group_id}).then((g) => {
+			Member.find({group_id : g.group_id}).then((m) => {
+				for(let i = 0; i < m.length; i++){
+					let parents = await Parent.find({parent_id : m[i].user_id})
+					if(parents){
+						for(let j = 0; j < parent.length; j++){
+							let children = await Children.find({child_id : parents[j]})
+							if(children.labels){
+								for(let k = 0; k < children.labels.length; k++){
+									if(l.label_id == children.labels[k]){
+										delete children.labels[k]
+									}
+								}
+							}
+							children.save().then().catch((error) => {
+								console.log(error);
+							})
+						}
+					}
+				}
+			})
+		})
+	})
+
+
+	await Label.deleteOne({label_id : label_id})
+	return res.status(200).send('Label deleted')
 })
 
 // Add a label to a child

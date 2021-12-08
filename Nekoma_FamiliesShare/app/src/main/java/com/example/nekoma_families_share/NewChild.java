@@ -1,12 +1,9 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,7 +29,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +47,8 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
     private EditText childSpecialNeeds;
     private Button confirmButton;
 
-    private List<String> labels;
+    private List<String> labelsName;
+    private List<String> labelsId;
     private List<String> childLabels = new ArrayList<>();
     private ArrayAdapter dataSpinner;
 
@@ -83,20 +80,27 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
             e.printStackTrace();
         }
 
-        labels = new ArrayList<>();
+        labelsName = new ArrayList<>();
+        labelsId = new ArrayList<>();
         Utilities.httpRequest(this,Request.Method.GET,"/label/"+Utilities.getPrefs(this).getString("group",""),response -> {
             try {
                 JSONArray user_response = new JSONArray((String) response);
                 for (int i = 0; i < user_response.length(); i++) {
-                    System.out.println(user_response.get(i));
                     JSONObject obj = user_response.getJSONObject(i);
-                    labels.add(obj.getString("name"));
+                    labelsName.add(obj.getString("name"));
+                    labelsId.add(obj.getString("label_id"));
                 }
                 labelsSpinner.setOnItemSelectedListener(this);
                 dataSpinner = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item);
-                dataSpinner.addAll(labels);
+                dataSpinner.addAll(labelsName);
                 dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                 labelsSpinner.setAdapter(dataSpinner);
+                for (int i = 0; i < labelsId.size(); i++) {
+                    System.out.println("ID :"+labelsId.get(i));
+                }
+                for (int i = 0; i < labelsName.size(); i++) {
+                    System.out.println("NAME :"+labelsName.get(i));
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -192,10 +196,9 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
     }
 
     public void newLabel(View v){
-        childLabels.add(labelsSpinner.getSelectedItem().toString());
-        System.out.println(childLabels.toString());
+        childLabels.add(labelsId.get(labelsSpinner.getSelectedItemPosition()));
         dataSpinner.remove(labelsSpinner.getSelectedItem());
-
+        labelsId.remove(labelsSpinner.getSelectedItemPosition());
     }
 
     public void openDatePicker(View v){
