@@ -16,7 +16,7 @@ const labelSchema = new mongoose.Schema(
         // unique: true,
         required : true
     }
-}
+  }
 )
 
 const model = mongoose.model('Label', labelSchema)

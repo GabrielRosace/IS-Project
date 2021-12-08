@@ -55,8 +55,7 @@ childSchema.virtual('image', {
   justOne: true
 })
 
-
-childSchema.virtual('parent',{
+childSchema.virtual('parent', {
   ref: 'Parent',
   localField: 'child_id',
   foreignField: 'child_id',
