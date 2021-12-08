@@ -40,7 +40,7 @@ const activitySchema = new mongoose.Schema({
     type: Boolean,
     required: true
   },
-  etichette: {
+  labels: {
     type: [String],
     require: true
   },
