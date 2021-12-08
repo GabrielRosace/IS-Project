@@ -102,6 +102,7 @@ const Child = require('../models/child')
 const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
+const Label = require('../models/label')
 const Servizio = require('../models/servizio')
 
 router.get('/', (req, res, next) => {
@@ -446,7 +447,13 @@ router.get('/:id/children', async (req, res, next) => {
   if (children.length === 0) {
     return res.status(404).send('Group has no children')
   }
-  return res.json([...new Set(children)])
+
+  let childrenList = [...new Set(children)]
+  for (let i = 0; i < childrenList.length; i++){
+    childrenList[i].child = await Child.findOne({child_id: childrenList[i]})
+  }
+  
+  return res.json(childrenList)
 })
 
 router.patch('/:id/members', async (req, res, next) => {
@@ -1172,34 +1179,51 @@ router.post('/:id/activities', async (req, res, next) => {
   }
 })
 
-router.get('/:id/activities', (req, res, next) => {
+router.get('/:id/activities', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
   const group_id = req.params.id
   const user_id = req.user_id
-  Member.findOne({
-    group_id,
-    user_id,
-    group_accepted: true,
-    user_accepted: true
-  })
-    .then(member => {
-      if (!member) {
-        return res.status(401).send('Unauthorized')
+
+  // Member.findOne({
+  //   group_id,
+  //   user_id,
+  //   group_accepted: true,
+  //   user_accepted: true
+  // })
+  //   .then(member => {
+  //     if (!member) {
+  //       return res.status(401).send('Unauthorized')
+  //     }
+  //     return Activity.find({ group_id })
+  //       .sort({ createdAt: -1 })
+  //       .lean()
+  //       .exec()
+  //       .then(activities => {
+  //         if (activities.length === 0) {
+  //           return res.status(404).send('Group has no activities')
+  //         }
+  //         res.json(activities)
+  //       })
+  //   })
+  //   .catch(next)
+
+  const member = await Member.findOne({ group_id, user_id, group_accepted: true, user_accepted: true })
+  if (!member) return res.status(401).send("Unauthorized")
+  let activities = await Activity.find({ group_id }).sort().lean().exec()
+  if (activities.length === 0) return res.status(404).send("Group has no activities")
+  for (const element of activities) {
+    if (element.labels) {
+      for (let i = 0; i < element.labels.length; i++){
+        let e = element.labels[i]
+        element.labels[i] = await Label.findOne({label_id: e})
       }
-      return Activity.find({ group_id })
-        .sort({ createdAt: -1 })
-        .lean()
-        .exec()
-        .then(activities => {
-          if (activities.length === 0) {
-            return res.status(404).send('Group has no activities')
-          }
-          res.json(activities)
-        })
-    })
-    .catch(next)
+    }
+  }
+
+  return res.json(activities)
+
 })
 
 router.patch('/:id/activities/:activityId', async (req, res, next) => {
@@ -1287,32 +1311,48 @@ router.delete('/:groupId/activities/:activityId', async (req, res, next) => {
   }
 })
 
-router.get('/:groupId/activities/:activityId', (req, res, next) => {
+router.get('/:groupId/activities/:activityId', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
   const { activityId } = req.params
-  Member.findOne({
-    group_id: req.params.groupId,
-    user_id: req.user_id,
-    group_accepted: true,
-    user_accepted: true
-  })
-    .then(member => {
-      if (!member) {
-        return res.status(401).send('Unauthorized')
-      }
-      return Activity.findOne({ activity_id: activityId })
-        .lean()
-        .exec()
-        .then(activity => {
-          if (!activity) {
-            return res.status(404).send('Activity not found')
-          }
-          res.json(activity)
-        })
-    })
-    .catch(next)
+
+  const member = await Member.findOne({ group_id: req.params.groupId, user_id: req.user_id, group_accepted: true, user_accepted: true })
+  if (!member) return res.status(401).send("Unauthorized")
+  let activity = await Activity.findOne({ activity_id: activityId }).lean().exec()
+  if (!activity) {
+    return res.status(404).send("Activity not found")
+  }
+  if (activity.labels) {
+    for (let i = 0; i < activity.labels.length;i++) {
+      let e = activity.labels[i]
+      activity.labels[i] = await Label.findOne({label_id: e})
+    }
+  }
+
+  res.json(activity)
+
+  // Member.findOne({
+  //   group_id: req.params.groupId,
+  //   user_id: req.user_id,
+  //   group_accepted: true,
+  //   user_accepted: true
+  // })
+  //   .then(member => {
+  //     if (!member) {
+  //       return res.status(401).send('Unauthorized')
+  //     }
+  //     return Activity.findOne({ activity_id: activityId })
+  //       .lean()
+  //       .exec()
+  //       .then(activity => {
+  //         if (!activity) {
+  //           return res.status(404).send('Activity not found')
+  //         }
+  //         res.json(activity)
+  //       })
+  //   })
+  //   .catch(next)
 })
 
 router.post(

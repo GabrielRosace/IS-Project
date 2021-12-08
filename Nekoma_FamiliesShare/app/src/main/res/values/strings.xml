@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Nekoma_FamiliesShare</string>
-    <string name="login_string">Fill in the form to use the modded app by Nekoma</string>
+    <string name="login_string">Compila il form per utilizzare l\'app modificata da Nekoma</string>
     <string name="email">Email:</string>
     <string name="password">Password:</string>
     <string name="login">Login</string>
@@ -11,17 +11,17 @@
     <string name="servizi">I servizi possono essere comodamente creati attraverso l\'apposita sezione. Vengono proposti anche dei template, come per il servizio di car sharing, sono riservati al gruppo con cui si decide di condividere il servizio.</string>
     <string name="bambini">La nuova estensione ti permette di definire alcune preferenze del tuo bambino in modo da permettere agli utenti amichevoli di sapere a priori cosa piace al bambino specificatamente inserito nella sezione.</string>
     <string name="nome">Genitore:</string>
-    <string name="profilepictureLabel">Profile Picture</string>
+    <string name="profilepictureLabel">Foto profilo</string>
     <string name="emailLabel">Email</string>
     <string name="nameLabel">Name</string>
-    <string name="surnameLabel">Surname</string>
-    <string name="phonenumberLabel">Phone Number</string>
-    <string name="addressLabel">Address</string>
-    <string name="cityLabel">City</string>
-    <string name="enableEdit">Enable Edit</string>
-    <string name="disableEdit">Disable Edit</string>
-    <string name="savechanges">Save Changes</string>
-    <string name="deleteProfile">Delete Profile</string>
+    <string name="surnameLabel">Cognome</string>
+    <string name="phonenumberLabel">Numero telefono</string>
+    <string name="addressLabel">Indirizzo</string>
+    <string name="cityLabel">Città</string>
+    <string name="enableEdit">Abilita Modifiche</string>
+    <string name="disableEdit">Disabilita Modifiche</string>
+    <string name="savechanges">Salva Modifiche</string>
+    <string name="deleteProfile">Elimina Profilo</string>
     <string name="urlnoapi">http://10.0.2.2:8080</string>
     <string name="attivitàricorrenti">Attività ricorrenti</string>
     <string name="servizipersona">Servizi alla persona</string>
