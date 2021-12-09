@@ -65,6 +65,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         childAllergies = findViewById(R.id.childAllergies);
         childOtherInfos = findViewById(R.id.childOtherInfo);
         childSpecialNeeds = findViewById(R.id.childSpecialNeeds);
+        confirmButton = findViewById(R.id.confirmlabel);
         labelsSpinner = (Spinner) findViewById(R.id.labelsSpinner);
 
         String userToken = Utilities.getToken(this);
@@ -199,6 +200,9 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         childLabels.add(labelsId.get(labelsSpinner.getSelectedItemPosition()));
         dataSpinner.remove(labelsSpinner.getSelectedItem());
         labelsId.remove(labelsSpinner.getSelectedItemPosition());
+        if(labelsId.size()==0){
+            confirmButton.setEnabled(false);
+        }
     }
 
     public void openDatePicker(View v){
