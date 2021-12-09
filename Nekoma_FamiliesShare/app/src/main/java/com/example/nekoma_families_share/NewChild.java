@@ -105,12 +105,6 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
                 dataSpinner.addAll(labelsName);
                 dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                 labelsSpinner.setAdapter(dataSpinner);
-                for (int i = 0; i < labelsId.size(); i++) {
-                    System.out.println("ID :"+labelsId.get(i));
-                }
-                for (int i = 0; i < labelsName.size(); i++) {
-                    System.out.println("NAME :"+labelsName.get(i));
-                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -121,7 +115,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
 
         initDatePicker();
         dateButton = findViewById(R.id.dateButton);
-        dateButton.setText("Select a date");
+        dateButton.setText("Seleziona una data");
 
         childGender = (Spinner) findViewById(R.id.childGender);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
@@ -166,11 +160,11 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         params.put("image","/images/profiles/child_default_photo.png");
 
         Utilities.httpRequest(this,Request.Method.POST,"/users/"+user_id+"/children",response -> {
-            Toast.makeText(NewChild.this, "New child added succesfully!", Toast.LENGTH_LONG).show();
+            Toast.makeText(NewChild.this, "Nuovo figlio aggiunto correttamente!", Toast.LENGTH_LONG).show();
             Intent homepage = new Intent(NewChild.this,Homepage.class);
             startActivity(homepage);
         },error -> {
-            Toast.makeText(NewChild.this, "You have to specify: name, surname, birthdate, gender", Toast.LENGTH_LONG).show();
+            Toast.makeText(NewChild.this, "Devi specificare: nome,cognome,data di nascita e genere!", Toast.LENGTH_LONG).show();
             System.err.println(error.getMessage());
         },params);
     }
@@ -181,9 +175,6 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         labelsId.remove(labelsSpinner.getSelectedItemPosition());
         if(labelsId.size()==0){
             confirmButton.setEnabled(false);
-        }
-        for (int i = 0; i < childLabels.size(); i++) {
-            System.out.println(childLabels.get(i));
         }
     }
 

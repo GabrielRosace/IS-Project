@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Le credenziali non sono corrette, riprova.", Toast.LENGTH_LONG).show();
                 System.err.println(error.getMessage());
             }
         }){

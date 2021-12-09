@@ -130,7 +130,7 @@ public class Etichette extends AppCompatActivity {
                     Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            Toast.makeText(Etichette.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Etichette.this, "Etichetta eliminata correttamente!", Toast.LENGTH_SHORT).show();
                             String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                             Utilities.httpRequest(Etichette.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
                                 @Override
@@ -246,8 +246,7 @@ public class Etichette extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.POST, "/label", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-
-                Toast.makeText(Etichette.this, response, Toast.LENGTH_SHORT).show();
+                Toast.makeText(Etichette.this, "Etichetta creata correttamente!", Toast.LENGTH_SHORT).show();
                 String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                 Utilities.httpRequest(Etichette.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
                     @Override
