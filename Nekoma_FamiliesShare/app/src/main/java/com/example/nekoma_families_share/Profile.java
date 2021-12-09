@@ -145,6 +145,11 @@ public class Profile extends AppCompatActivity {
                 saveChange.setEnabled(isChecked);
                 numberLabel.setEnabled(isChecked);
                 cityLabel.setEnabled(isChecked);
+                if ((isChecked)) {
+                    editSwitch.setText(R.string.disableEdit);
+                } else {
+                    editSwitch.setText(R.string.enableEdit);
+                }
             }
         });
     }
