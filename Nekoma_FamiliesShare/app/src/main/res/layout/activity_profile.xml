@@ -228,7 +228,7 @@
         android:layout_width="193dp"
         android:layout_height="48dp"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="14dp"
         android:backgroundTint="#AE4848"
         android:onClick="DeleteUser"
         android:text="@string/deleteProfile"

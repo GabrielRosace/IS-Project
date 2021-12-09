@@ -3,6 +3,6 @@
     <string-array name="gendervalues">
         <item>Male</item>
         <item>Female</item>
-        <item>Not specified</item>
+        <item>Unspecified</item>
     </string-array>
 </resources>
