@@ -899,14 +899,21 @@ router.get('/:id/children', (req, res, next) => {
   }).catch(next)
 })
 
+
+
 router.post('/:id/children', childProfileUpload.single('photo'), async (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const {
     birthdate, given_name, family_name, gender, allergies, other_info, special_needs, background, image: imagePath, labels
   } = req.body
 
+  let labelFormatted
+  if (labelFormatted) {
+    labelFormatted = labels.substring(1,labels.length-1)
+  }
 
-  let labelsSplit = labels ? labels.split(',') : undefined
+
+  let labelsSplit = labels ? labelFormatted.split(',') : undefined
 
   const { file } = req
   if (!(birthdate && given_name && family_name && gender && background)) {
