@@ -2,6 +2,7 @@ package com.example.nekoma_families_share;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +41,15 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         userid = Utilities.getUserID(this);
         groupid = Utilities.getPrefs(this).getString("group","");
 
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar6);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
 
         ChipGroup chipGroup = (ChipGroup)findViewById(R.id.chipgroup);
 
@@ -66,7 +76,20 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 JSONArray array = new JSONArray((String) reason);
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject e = new JSONObject(array.get(i).toString());
-                    activities.add(new Evento(e.getString("name"), "manca", e.getString("activity_id"), 10, e.getString("description")));
+
+                    String labels = "";
+
+                    if(e.has("labels")){
+                        JSONArray a = new JSONArray(e.getString("labels"));
+//                        System.out.println("Sono qui:"+ a.toString());
+                        for (int j = 0; j < a.length(); j++) {
+                            labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                        }
+//                        System.out.println(labels);
+                    }
+
+
+                    activities.add(new Evento(e.getString("name"), "TODO", e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels));
                 }
                 addRecyclerView(activities);
             } catch (JSONException e) {
@@ -181,18 +204,22 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         public final String img;
         public final int nPart;
         public final String descrizione;
+        public final String enddate;
+        public final String labels;
 
-        public Evento(String nome, String img, String event_id, int nPart, String descrizione) {
+        public Evento(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels) {
             this.nome = nome;
             this.img = img;
             this.event_id = event_id;
             this.nPart = nPart;
             this.descrizione = descrizione;
+            this.enddate = enddate;
+            this.labels = labels;
         }
 
         @Override
         public String toString() {
-            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione;
+            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels;
         }
     }
 

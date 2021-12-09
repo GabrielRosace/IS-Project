@@ -4,7 +4,8 @@ const labelSchema = new mongoose.Schema(
 {
     label_id: {
         type: String,
-        required: true
+        required: true,
+        unique : true
     },
     name: {
         type : String,
