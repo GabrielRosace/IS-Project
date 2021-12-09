@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ListaBambiniAmici extends AppCompatActivity {
-    private List<String> save = new ArrayList<>();
     private List<Bambini> b_amici = null;
     private List<Bambini> b_miei = null;
     private String id_group;

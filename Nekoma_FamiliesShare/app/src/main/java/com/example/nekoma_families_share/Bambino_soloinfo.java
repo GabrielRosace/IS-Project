@@ -55,7 +55,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     private List<String> labels;
     private List<String> childLabels = new ArrayList<>();
     private ArrayAdapter dataSpinner;
-    private List<myEtichette> etichette = new ArrayList<>();
+    private List<myEtichette> etichette_figlio = new ArrayList<>();
+    private List<myEtichette> my_etichette = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private Boolean isChild = false;
 
@@ -104,7 +105,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 Date data = new SimpleDateFormat("yyyy-MM-dd").parse(parts[0]);
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(data);
-                                nome_genitore.setText(calendar.get(Calendar.DAY_OF_MONTH)+":"+calendar.get(Calendar.MONTH)+1+":"+calendar.get(Calendar.YEAR));
+                                nome_genitore.setText(calendar.get(Calendar.DAY_OF_MONTH)+":"+(calendar.get(Calendar.MONTH)+1)+":"+calendar.get(Calendar.YEAR));
 
                                 //aggoungi etichette al bambino
                                 LinearLayout layout = (LinearLayout) findViewById(R.id.aggiunta_etichette);
@@ -202,6 +203,14 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
+                                if(new JSONObject(kid.getString(i)).has("labels")){
+                                    JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
+                                    for(int y =0;y<my_tmp.length();++i){
+                                        myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),false);
+                                        my_etichette.add(et);
+                                    }
+                                }
+                                addRecyclerView(my_etichette);
                             }
                         }
 
@@ -270,6 +279,13 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             image.setImageBitmap(bitmap);
         }
     }
+    private void addRecyclerView(List<myEtichette> list){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.label_info);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(adapter);
+    }
     public void getLista(View v) {
         Intent homepage = new Intent(Bambino_soloinfo.this, ListaBambiniAmici.class);
         startActivity(homepage);
@@ -308,12 +324,13 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEtichette name = mData.get(position);
             holder.myTextView.setText(name.name);
-            holder.btn.setVisibility(View.VISIBLE);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //todo fai la delete
-                    RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
+            if(name.parent == true){
+                holder.btn.setVisibility(View.VISIBLE);
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //todo fai la delete
+                    /*RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
                     // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                     Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
@@ -324,14 +341,14 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 @Override
                                 public void onResponse(String response1) {
                                     try{
-                                        etichette = new ArrayList<>();
+                                        etichette_figlio = new ArrayList<>();
                                         JSONArray tmp = new JSONArray(response1);
                                         System.out.println(tmp);
                                         for(int i=0;i<tmp.length();++i){
-                                            myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
-                                            etichette.add(nuovo);
+                                            myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"),true);
+                                            etichette_figlio.add(nuovo);
                                         }
-                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Bambino_soloinfo.this, etichette);
+                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Bambino_soloinfo.this, etichette_figlio);
 
                                         grouplist.setLayoutManager(grouplistManager);
                                         grouplist.setAdapter(adapter);
@@ -354,9 +371,11 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                             Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
                             System.err.println(error.getMessage());
                         }
-                    },new HashMap<>());
-                }
-            });
+                    },new HashMap<>());*/
+                    }
+                });
+            }
+
         }
 
         // total number of rows
@@ -412,9 +431,11 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     private class myEtichette {
         public final String name;
         public final String id;
-        myEtichette(String name, String id){
+        public final Boolean parent;
+        myEtichette(String name, String id, Boolean parent){
             this.name=name;
             this.id=id;
+            this.parent= parent;
         }
     }
 }
