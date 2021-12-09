@@ -57,6 +57,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     private ArrayAdapter dataSpinner;
     private List<myEtichette> etichette = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
+    private Boolean isChild = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                         for(int i=0;i<kid.length();++i){
                             System.out.println("sono kid(i):" + kid.getString(i));
                             if(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
+                                isChild = true;
                                 System.out.println("sono qui dentro il caso in cui sia mio figlio");
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
