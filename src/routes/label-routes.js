@@ -194,4 +194,29 @@ router.get('/child/:child_id', async (req, res, next) => {
 	})
 })
 
+// Delete a label of a child
+router.delete('/child/:label_id/:child_id', (req, res, next) => {
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+
+	let label_id = req.params.label_id
+	if(!label_id) return res.status(400).send('Bad Request')
+
+	let child_id = req.params.child_id
+	if(!child_id) return res.status(400).send('Bad Request')
+
+	Label.findOne({label_id : label_id}).then((l) => {
+		if(!l) return res.status(400).send('Label does not exists')
+
+		Parent.findOne({parent_id : userId, child_id : child_id}).then((p) => {
+			if(!p) return res.status(400).send('Child does not belong to the user')
+		})
+
+		Child.updateOne({child_id : child_id}, {$pull : {labels : {$in : [l.label_id]}}}).then((data) => {
+			console.log('Label deleted');
+		})
+		return res.status(200).send('Label deleted')
+	})
+})
+
 module.exports = router
