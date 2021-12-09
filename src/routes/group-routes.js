@@ -449,7 +449,7 @@ router.get('/:id/children', async (req, res, next) => {
   }
 
   let childrenList = [...new Set(children)]
-  
+
   return res.json(childrenList)
 })
 
@@ -1244,11 +1244,13 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
         parents: []
       })
     }
+    const parenti = JSON.parse(events[0].extendedProperties.shared.parents)
+    console.log(parenti.length)
     const myresponse = {
       start: events[0].start.dateTime,
       end: events[0].end.dateTime,
-      children: events[0].extendedProperties.shared.children,
-      parents: events[0].extendedProperties.shared.parents
+      children: JSON.parse(events[0].extendedProperties.shared.children),
+      parents: JSON.parse(events[0].extendedProperties.shared.parents)
     }
     console.log(myresponse)
     res.json(myresponse)
@@ -1331,51 +1333,171 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
       return res.status(404).send('Not existing activity')
     }
     const group = await Group.findOne({ group_id })
-    await Promise.all(
-      comingevent.map(event => {
-        const timeslot = {
-          location: event.location,
-          summary: event.name,
-          start: {
-            dateTime: event.start,
-            date: null
-          },
-          end: {
-            dateTime: event.end,
-            date: null
-          },
-          extendedProperties: {
-            shared: {
-              requiredParents: event.requiredParents,
-              requiredChildren: event.requiredChildren,
-              cost: event.cost,
-              parents: event.parents,
-              children: event.children,
-              externals: [],
-              status: 'ongoing',
-              link: event.link,
-              activityColor: event.color,
-              category: event.category,
-              groupId: event.group_id,
-              repetition: event.repetitionType,
-              start: event.startHour,
-              end: event.endHour
-            }
-          }
+    const tmp = { description: comingevent.description,
+      location: comingevent.location,
+      summary: comingevent.summary,
+      start: { dateTime: comingevent.start, date: null },
+      end: { dateTime: comingevent.end, date: null },
+      extendedProperties:
+     { shared:
+        { requiredParents: comingevent.requiredParents,
+          requiredChildren: comingevent.requiredParents,
+          cost: comingevent.cost,
+          parents: JSON.stringify(comingevent.parents),
+          children: JSON.stringify(comingevent.children),
+          externals: '[]',
+          status: 'ongoing',
+          link: comingevent.link,
+          activityColor: comingevent.activityColor,
+          category: comingevent.category,
+          groupId: group_id,
+          repetition: comingevent.repetition,
+          start: comingevent.startHour,
+          end: comingevent.endHour,
+          activityId: activity_id
         }
-        console.log(timeslot)
-        calendar.events.insert({
-          calendarId: group.calendar_id,
-          resource: timeslot
-        })
-      }
-      )
-    )
+     }
+    }
+    await calendar.events.insert({
+      calendarId: group.calendar_id,
+      resource: tmp
+    })
+
     return res.status(200).send('Date added')
   } catch (error) {
     next(error)
   }
 })
+
+router.patch(
+  '/:groupId/nekomaActivities/:activityId/timeslots/:timeslotId',
+  async (req, res, next) => {
+    if (!req.user_id) {
+      return res.status(401).send('Not authenticated')
+    }
+    const { groupId: group_id, activityId: activity_id, timeslotId: timeslot_id } = req.params
+    const user_id = req.user_id
+    try {
+      const member = await Member.findOne({
+        group_id,
+        user_id,
+        group_accepted: true,
+        user_accepted: true
+      })
+      if (!member) {
+        return res.status(401).send('Unauthorized')
+      }
+      const comingevent = req.body
+      const tmp = {
+        description: comingevent.description,
+        location: comingevent.location,
+        summary: comingevent.summary,
+        start: { dateTime: comingevent.start, date: null },
+        end: { dateTime: comingevent.end, date: null },
+        extendedProperties:
+         { shared:
+            { requiredParents: comingevent.requiredParents,
+              requiredChildren: comingevent.requiredParents,
+              cost: comingevent.cost,
+              parents: JSON.stringify(comingevent.parents),
+              children: JSON.stringify(comingevent.children),
+              externals: '[]',
+              status: 'ongoing',
+              link: comingevent.link,
+              activityColor: comingevent.activityColor,
+              category: comingevent.category,
+              groupId: group_id,
+              repetition: comingevent.repetition,
+              start: comingevent.startHour,
+              end: comingevent.endHour,
+              activityId: activity_id
+            }
+         }
+      }
+      const notifyUsers = JSON.parse(comingevent.notifyUsers)
+      const adminChanges = comingevent.adminChanges
+      if (
+        !(
+          tmp.summary ||
+          tmp.description ||
+          tmp.location ||
+          tmp.start ||
+          tmp.end ||
+          tmp.extendedProperties
+        )
+      ) {
+        return res.status(400).send('Bad Request')
+      }
+      const group = await Group.findOne({ group_id })
+      const myChildren = await Parent.distinct('child_id', { parent_id: req.user_id })
+      const event = await calendar.events.get({
+        calendarId: group.calendar_id,
+        eventId: req.params.timeslotId
+      })
+      const oldParents = JSON.parse(event.data.extendedProperties.shared.parents)
+      const oldChildren = JSON.parse(event.data.extendedProperties.shared.children)
+      console.log(JSON.parse(tmp.extendedProperties.shared.parents))
+      const parents = JSON.parse(tmp.extendedProperties.shared.parents)
+      const children = JSON.parse(tmp.extendedProperties.shared.children)
+      if (!member.admin) {
+        if (parents.includes(req.user_id)) {
+          tmp.extendedProperties.shared.parents = JSON.stringify([...new Set([...oldParents, req.user_id])])
+        } else {
+          tmp.extendedProperties.shared.parents = JSON.stringify(oldParents.filter(u => u !== req.user_id))
+        }
+        myChildren.forEach(c => {
+          if (children.includes(c) && !oldChildren.includes(c)) {
+            oldChildren.push(c)
+          } else if (!children.includes(c) && oldChildren.includes(c)) {
+            oldChildren.splice(oldChildren.indexOf(c), 1)
+          }
+        })
+        tmp.extendedProperties.shared.children = JSON.stringify(oldChildren)
+      } else {
+        if (adminChanges) {
+          if (Object.keys(adminChanges).length > 0) {
+            Object.keys(adminChanges).forEach(id => {
+              if (adminChanges[id] > 0) {
+                adminChanges[id] = 'add'
+              } else if (adminChanges[id] < 0) {
+                adminChanges[id] = 'remove'
+              } else {
+                delete adminChanges[id]
+              }
+            })
+            nh.timeslotAdminChangesNotification(tmp.summary, adminChanges, req.user_id, group_id, activity_id, timeslot_id)
+          }
+        }
+      }
+      const externals = JSON.parse(tmp.extendedProperties.shared.externals || '[]')
+      const volunteersReq =
+        (parents.length + externals.length) >= tmp.extendedProperties.shared.requiredParents
+      const childrenReq =
+        children.length >= tmp.extendedProperties.shared.requiredChildren
+      if (event.data.extendedProperties.shared.status !== tmp.extendedProperties.shared.status) {
+        nh.timeslotStatusChangeNotification(tmp.summary, tmp.extendedProperties.shared.status, oldParents, group_id, activity_id, timeslot_id)
+      }
+      if (notifyUsers) {
+        tmp.extendedProperties.shared.parents = JSON.stringify([])
+        tmp.extendedProperties.shared.children = JSON.stringify([])
+        tmp.extendedProperties.shared.externals = JSON.stringify([])
+        await nh.timeslotMajorChangeNotification(tmp.summary, oldParents, group_id, activity_id, timeslot_id)
+      } else if (volunteersReq && childrenReq) {
+        await nh.timeslotRequirementsNotification(tmp.summary, parents, group_id, activity_id, timeslot_id)
+      }
+      await calendar.events.patch({
+        calendarId: group.calendar_id,
+        eventId: req.params.timeslotId,
+        resource: tmp
+      })
+      console.log(adminChanges)
+      console.log(notifyUsers)
+      res.status(200).send('Timeslot was updated')
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 router.post('/:id/activities', async (req, res, next) => {
   if (!req.user_id) {
@@ -1416,11 +1538,13 @@ router.post('/:id/activities', async (req, res, next) => {
     activity.image_id = image_id
     events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
     await Promise.all(
-      events.map(event =>
+      events.map(event => {
+        console.log(event)
         calendar.events.insert({
           calendarId: group.calendar_id,
           resource: event
         })
+      }
       )
     )
     await Image.create(image)
@@ -1969,6 +2093,7 @@ router.delete(
       if (!(member.admin || user_id === activity.creator_id)) {
         return res.status(401).send('Unauthorized')
       }
+
       if (!(summary && parents)) {
         return res.status(400).send('Bad Request')
       }
@@ -1977,6 +2102,8 @@ router.delete(
         calendarId: group.calendar_id,
         eventId: req.params.timeslotId
       })
+      console.log(summary)
+      console.log(parents)
       nh.deleteTimeslotNotification(user_id, { summary, parents: JSON.parse(parents) })
       res.status(200).send('Timeslot was deleted')
     } catch (error) {
