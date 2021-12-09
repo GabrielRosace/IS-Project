@@ -35,9 +35,10 @@ public class DettagliEvento extends AppCompatActivity {
         Intent i = getIntent();
 
         String extraData = i.getStringExtra("evento");
-
+        System.out.println("siamo su dettagli evento: "+ extraData);
 
         String[] parsed = extraData.split("/");
+        System.out.println(parsed.length);
 
 
         ImageView img = (ImageView) findViewById(R.id.eventImage);

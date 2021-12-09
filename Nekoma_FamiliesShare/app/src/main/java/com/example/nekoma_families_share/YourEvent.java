@@ -42,9 +42,9 @@ import java.util.List;
 import java.util.Locale;
 
 public class YourEvent extends AppCompatActivity {
-    private List<myEventi> tuoi_eventi = null;
-    private List<myEventi> partecipi_eventi = null;
-    private List<myEventi> scaduti_eventi = null;
+    private List<myEventi> tuoi_eventi = new ArrayList<>();
+    private List<myEventi> partecipi_eventi = new ArrayList<>();
+    private List<myEventi> scaduti_eventi = new ArrayList<>();
     private String id_group;
     private String user_id;
 
@@ -107,7 +107,7 @@ public class YourEvent extends AppCompatActivity {
         this.getEvents();
     }
 
-    public void getEvents(){ //todo controllare che funzioni con has (quindi se ha)
+    public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -121,12 +121,10 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onResponse(String response1) {
                                 try {
-                                    tuoi_eventi = new ArrayList<>();
-                                    partecipi_eventi = new ArrayList<>();
-                                    scaduti_eventi = new ArrayList<>();
                                     System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
                                     JSONObject tmp = new JSONObject(response1);
                                     // caso in cui sono il creatore
+
                                     if(new JSONObject(tmp_activity).getString("creator_id").equals(user_id)){
                                         //se io sono il creatore posso avere tre casi :
                                         //      - sono un repetition==true?  -> tuoi eventi (fatto)
@@ -143,11 +141,20 @@ public class YourEvent extends AppCompatActivity {
                                             String id_img = new JSONObject(tmp_activity).getString("image_id");
                                             int nPart = new JSONArray(tmp.getString("parents")).length();
                                             String descrizione = new JSONObject(tmp_activity).getString("description");
-                                            String end = ""; //todo finire di implemetare in 1.1
+                                            String end = "TODO"; //todo finire di implemetare in 1.1
                                             String labels = "";
-                                            JSONArray a= new JSONArray(tmp.getString("labels"));
-                                            for (int j = 0; j < a.length(); j++) {
-                                                labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                            JSONObject tmp_ = new JSONObject(tmp_activity);
+                                            if(tmp_.has("labels")){
+                                                JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                if(a.length()>0){
+                                                    for (int j = 0; j < a.length(); j++) {
+                                                        labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                    }
+                                                }else{
+                                                    labels =",";
+                                                }
+                                            }else{
+                                                labels=",";
                                             }
                                             myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                             tuoi_eventi.add(eve);
@@ -159,11 +166,20 @@ public class YourEvent extends AppCompatActivity {
                                                 String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = ""; //todo finire di implemetare in 1.1
+                                                String end = "todo"; //todo finire di implemetare in 1.1
                                                 String labels = "";
-                                                JSONArray a= new JSONArray(tmp.getString("labels"));
-                                                for (int j = 0; j < a.length(); j++) {
-                                                    labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                if(tmp_.has("labels")){
+                                                    JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                    if(a.length()>0){
+                                                        for (int j = 0; j < a.length(); j++) {
+                                                            labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                        }
+                                                    }else{
+                                                        labels =",";
+                                                    }
+                                                }else{
+                                                    labels=",";
                                                 }
                                                 myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                 tuoi_eventi.add(eve);
@@ -178,11 +194,21 @@ public class YourEvent extends AppCompatActivity {
                                                     String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "";
+                                                    String end = "todo";
+
                                                     String labels = "";
-                                                    JSONArray a= new JSONArray(tmp.getString("labels")); //todo questo è tmp_activity
-                                                    for (int j = 0; j < a.length(); j++) {
-                                                        labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                    JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                    if(tmp_.has("labels")){
+                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                        if(a.length()>0){
+                                                            for (int j = 0; j < a.length(); j++) {
+                                                                labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                            }
+                                                        }else{
+                                                            labels =",";
+                                                        }
+                                                    }else{
+                                                        labels=",";
                                                     }
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                     tuoi_eventi.add(eve);
@@ -192,11 +218,20 @@ public class YourEvent extends AppCompatActivity {
                                                     String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "";
+                                                    String end = "todo";
                                                     String labels = "";
-                                                    JSONArray a= new JSONArray(tmp.getString("labels"));
-                                                    for (int j = 0; j < a.length(); j++) {
-                                                        labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                    JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                    if(tmp_.has("labels")){
+                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                        if(a.length()>0){
+                                                            for (int j = 0; j < a.length(); j++) {
+                                                                labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                            }
+                                                        }else{
+                                                            labels =",";
+                                                        }
+                                                    }else{
+                                                        labels=",";
                                                     }
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                     scaduti_eventi.add(eve);
@@ -208,7 +243,7 @@ public class YourEvent extends AppCompatActivity {
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
-                                            if(new JSONObject(Part.getString(i)).toString().equals(user_id)){
+                                            if(Part.getString(i).equals(user_id)){
                                                 find = true;
                                             }
                                         }
@@ -219,11 +254,20 @@ public class YourEvent extends AppCompatActivity {
                                                 String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = ""; //todo finire di implemetare in 1.1
+                                                String end = "todo"; //todo finire di implemetare in 1.1
                                                 String labels = "";
-                                                JSONArray a= new JSONArray(tmp.getString("labels"));
-                                                for (int j = 0; j < a.length(); j++) {
-                                                    labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                if(tmp_.has("labels")){
+                                                    JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                    if(a.length()>0){
+                                                        for (int j = 0; j < a.length(); j++) {
+                                                            labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                        }
+                                                    }else{
+                                                        labels =",";
+                                                    }
+                                                }else{
+                                                    labels=",";
                                                 }
                                                 myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                 tuoi_eventi.add(eve);
@@ -238,11 +282,20 @@ public class YourEvent extends AppCompatActivity {
                                                     String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "";
+                                                    String end = "todo";
                                                     String labels = "";
-                                                    JSONArray a= new JSONArray(tmp.getString("labels"));
-                                                    for (int j = 0; j < a.length(); j++) {
-                                                        labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                    JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                    if(tmp_.has("labels")){
+                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                        if(a.length()>0){
+                                                            for (int j = 0; j < a.length(); j++) {
+                                                                labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                            }
+                                                        }else{
+                                                            labels =",";
+                                                        }
+                                                    }else{
+                                                        labels=",";
                                                     }
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                     partecipi_eventi.add(eve);
@@ -252,11 +305,20 @@ public class YourEvent extends AppCompatActivity {
                                                     String id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "";
+                                                    String end = "todo";
                                                     String labels = "";
-                                                    JSONArray a= new JSONArray(tmp.getString("labels"));
-                                                    for (int j = 0; j < a.length(); j++) {
-                                                        labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                    JSONObject tmp_ = new JSONObject(tmp_activity);
+                                                    if(tmp_.has("labels")){
+                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
+                                                        if(a.length()>0){
+                                                            for (int j = 0; j < a.length(); j++) {
+                                                                labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                                                            }
+                                                        }else{
+                                                            labels =",";
+                                                        }
+                                                    }else{
+                                                        labels=",";
                                                     }
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
                                                     scaduti_eventi.add(eve);
@@ -264,7 +326,9 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }
-                                    addRecyclerView(tuoi_eventi); //todo da vedere dove
+                                    if(tuoi_eventi.size()>0){
+                                        addRecyclerView(tuoi_eventi); //error
+                                    }
                                 } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
                                 }
@@ -298,6 +362,9 @@ public class YourEvent extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+
+
+
     // recicle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
@@ -322,6 +389,7 @@ public class YourEvent extends AppCompatActivity {
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEventi event = mData.get(position);
+            System.out.println(" ************************* questo è event: "+event.toString());
             holder.btn.setText(event.nome);
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -350,7 +418,7 @@ public class YourEvent extends AppCompatActivity {
             ViewHolder(View itemView) {
                 super(itemView);
                 myTextView = itemView.findViewById(R.id.info);
-                btn = itemView.findViewById(R.id.recycle_view_btn);
+                btn = itemView.findViewById(R.id.name_event);
             }
         }
 
