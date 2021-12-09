@@ -68,7 +68,29 @@ const fetchAllGroupEvents = async (groupId, calendarId) => {
   return events
 }
 
+const fetchAGroupEventActivity = async (groupId, calendarId, activityId) => {
+  const pendingActivities = await Activity.find({ group_id: groupId, status: 'pending' }).distinct('activity_id')
+  let events = []
+  let nextPageToken = null
+
+  do {
+    let resp
+    if (nextPageToken) {
+      resp = await calendar.events.list({ calendarId, maxResults: 250, pageToken: nextPageToken })
+    } else {
+      resp = await calendar.events.list({ calendarId, maxResults: 250 })
+    }
+    const pageEvents = resp.data.items
+    const pageAcceptedEvents = pageEvents.filter(event => pendingActivities.indexOf(event.extendedProperties.shared.activityId) === -1)
+    const eventfromActivityId = pageAcceptedEvents.filter(event => event.extendedProperties.shared.activityId === activityId)
+    events = events.concat(eventfromActivityId)
+    nextPageToken = resp.data.nextPageToken
+  } while (nextPageToken)
+  return events
+}
+
 module.exports = {
   checkCompletedTimeslots,
-  fetchAllGroupEvents
+  fetchAllGroupEvents,
+  fetchAGroupEventActivity
 }

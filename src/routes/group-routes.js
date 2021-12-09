@@ -103,7 +103,7 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
-const Servizio = require('../models/servizio')
+const Servizio = require('../models/service')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1119,13 +1119,236 @@ router.post('/:groupId/plans/:planId/activities', async (req, res, next) => {
   }
 })
 
+// Create a new label in activity
+router.post('/:id/activities/:activityId/label', async (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+  let label_id = req.body.label_id
+  if (!label_id) { return res.status(400).send('Bad Request') }
+  let groupId = req.params.id
+  let activityId = req.params.activityId
+  if (!groupId || !activityId) { return res.status(400).send('Bad Request') }
+  // console.log(userId);
+  const group = await Group.findOne({ group_id: groupId }).exec()
+  console.log(group)
+  if (group) {
+    const flabel = await Label.findOne({ label_id: label_id, group_id: groupId }).exec()
+    if (!flabel) {
+      return res.status(400).send('Label dont exist, ask to the group admin')
+    }
+    const activity = await Activity.findOne({ activity_id: activityId })
+    if (!activity) {
+      return res.status(400).send('Activity dont exist')
+    }
+    activity.labels.forEach((label) => {
+      if (label_id === label) {
+        return res.status(400).send('Label already added in activity')
+      }
+    })
+    activity.labels.push(label_id)
+    const nlabels = activity.labels
+    try {
+      await Activity.updateOne({ activity_id: activityId }, { $set: { 'labels': nlabels } })
+      const nact = await Activity.findOne({ activity_id: activityId })
+      console.log(nact)
+      res.status(200).send('Label added to activity')
+    } catch (error) {
+      next(error)
+    }
+  } else {
+    return res.status(400).send('Group dont exist')
+  }
+})
+// Delete a new label in activity
+router.delete('/:id/activities/:activityId/label/:labelId', async (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+  let label_id = req.params.labelId
+  if (!label_id) { return res.status(400).send('Bad Request') }
+  let groupId = req.params.id
+  let activityId = req.params.activityId
+  if (!groupId || !activityId) { return res.status(400).send('Bad Request') }
+  // console.log(userId);
+  const group = await Group.findOne({ group_id: groupId }).exec()
+  // console.log(group)
+  if (group) {
+    const flabel = await Label.findOne({ label_id: label_id, group_id: groupId }).exec()
+    if (!flabel) {
+      return res.status(400).send('Label dont exist, ask to the group admin')
+    }
+    const activity = await Activity.findOne({ activity_id: activityId })
+    if (!activity) {
+      return res.status(400).send('Activity dont exist')
+    }
+    const nlabels = []
+    activity.labels.forEach((label) => {
+      if (label_id !== label) {
+        nlabels.push(label)
+      }
+    })
+    try {
+      await Activity.updateOne({ activity_id: activityId }, { $set: { 'labels': nlabels } })
+      /*
+      ONLY FOR VIEW THAT ACTIVITY IS UPDATED
+      const nact = await Activity.findOne({ activity_id: activityId })
+      console.log(nact)
+      */
+      res.status(200).send('Label removed from activity')
+    } catch (error) {
+      next(error)
+    }
+  } else {
+    return res.status(400).send('Group dont exist')
+  }
+})
+
+/*
+
+TO DO
+- Lista partecipanti
+- Data evento
+- Aggiunta/rimozione etichette
+- Modifica activity nuovo post/patch senza events
+*/
+router.get('/:id/nekomaActivities/:activityId/information', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const group_id = req.params.id
+  const user_id = req.user_id
+  const activity_id = req.params.activityId
+  try {
+    const group = await Group.findOne({ group_id })
+    if (!group) {
+      return res.status(404).send('Non existing group')
+    }
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    const activity = Activity.findOne({ activity_id })
+    if (!activity) {
+      return res.status(404).send('Not existing activity')
+    }
+    const events = await ah.fetchAGroupEventActivity(group.group_id, group.calendar_id, activity_id)
+    if (events.length === 0) {
+      return res.status(404).send('Activity has no date')
+    }
+    const myresponse = {
+      start: events[0].start.dateTime,
+      end: events[0].end.dateTime,
+      children: events[0].extendedProperties.shared.children,
+      parents: events[0].extendedProperties.shared.parents
+    }
+    console.log(myresponse)
+    res.json(myresponse)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/nekomaActivities', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const user_id = req.user_id
+  const group_id = req.params.id
+  // add image from url
+  try {
+    const activity = req.body
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (!(activity)) {
+      return res.status(400).send('Bad Request')
+    }
+
+    const activity_id = objectid()
+    const image_id = objectid()
+    const image = {
+      image_id,
+      owner_type: 'user',
+      owner_id: user_id,
+      url: (!activity.imgUrl || activity.imgUrl === '') ? 'https://avatars.dicebear.com/api/adventurer/dinosauro.svg' : activity.imgUrl,
+      path: '/images/profiles/user_default_photo.png',
+      thumbnail_path: '/images/profiles/user_default_photo.png'
+    }
+    activity.status = member.admin ? 'accepted' : 'pending'
+    activity.activity_id = activity_id
+    const group = await Group.findOne({ group_id })
+    activity.group_name = group.name
+    activity.image_id = image_id
+    await Image.create(image)
+    await Activity.create(activity)
+    if (member.admin) {
+      await nh.newActivityNotification(group_id, user_id)
+    }
+    res.json({ status: activity.status })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => {
+  if (!req.user_id) {
+    return res.status(401).send('Not authenticated')
+  }
+  const user_id = req.user_id
+  const group_id = req.params.id
+  const activity_id = req.params.activityId
+  try {
+    const events = req.body
+    const member = await Member.findOne({
+      group_id,
+      user_id,
+      group_accepted: true,
+      user_accepted: true
+    })
+    if (!member) {
+      return res.status(401).send('Unauthorized')
+    }
+    if (!events) {
+      return res.status(400).send('Bad Request')
+    }
+    const activity = Activity.findOne({ activity_id })
+    if (!activity) {
+      return res.status(404).send('Not existing activity')
+    }
+    const group = await Group.findOne({ group_id })
+
+    events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
+    await Promise.all(
+      events.map(event =>
+        calendar.events.insert({
+          calendarId: group.calendar_id,
+          resource: event
+        })
+      )
+    )
+    return res.status(200).send('Date added')
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.post('/:id/activities', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
   const user_id = req.user_id
   const group_id = req.params.id
-
+  // add image from url
   try {
     const { activity, events } = req.body
     const member = await Member.findOne({
@@ -1207,20 +1430,19 @@ router.get('/:id/activities', async (req, res, next) => {
   //   .catch(next)
 
   const member = await Member.findOne({ group_id, user_id, group_accepted: true, user_accepted: true })
-  if (!member) return res.status(401).send("Unauthorized")
+  if (!member) return res.status(401).send('Unauthorized')
   let activities = await Activity.find({ group_id }).sort().lean().exec()
-  if (activities.length === 0) return res.status(404).send("Group has no activities")
+  if (activities.length === 0) return res.status(404).send('Group has no activities')
   for (const element of activities) {
     if (element.labels) {
-      for (let i = 0; i < element.labels.length; i++){
+      for (let i = 0; i < element.labels.length; i++) {
         let e = element.labels[i]
-        element.labels[i] = await Label.findOne({label_id: e})
+        element.labels[i] = await Label.findOne({ label_id: e })
       }
     }
   }
 
   return res.json(activities)
-
 })
 
 router.patch('/:id/activities/:activityId', async (req, res, next) => {
@@ -1315,15 +1537,15 @@ router.get('/:groupId/activities/:activityId', async (req, res, next) => {
   const { activityId } = req.params
 
   const member = await Member.findOne({ group_id: req.params.groupId, user_id: req.user_id, group_accepted: true, user_accepted: true })
-  if (!member) return res.status(401).send("Unauthorized")
+  if (!member) return res.status(401).send('Unauthorized')
   let activity = await Activity.findOne({ activity_id: activityId }).lean().exec()
   if (!activity) {
-    return res.status(404).send("Activity not found")
+    return res.status(404).send('Activity not found')
   }
   if (activity.labels) {
-    for (let i = 0; i < activity.labels.length;i++) {
+    for (let i = 0; i < activity.labels.length; i++) {
       let e = activity.labels[i]
-      activity.labels[i] = await Label.findOne({label_id: e})
+      activity.labels[i] = await Label.findOne({ label_id: e })
     }
   }
 
@@ -1945,7 +2167,7 @@ router.delete(
   }
 )
 
-router.post('/:id/servizio', async (req, res, next) => {
+router.post('/:id/service', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
@@ -2005,7 +2227,7 @@ router.post('/:id/servizio', async (req, res, next) => {
   }
 })
 
-router.delete('/:groupId/servizio/:servizioId', async (req, res, next) => {
+router.delete('/:groupId/service/:servizioId', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
@@ -2054,7 +2276,7 @@ router.delete('/:groupId/servizio/:servizioId', async (req, res, next) => {
   }
 })
 
-router.get('/:id/servizio', (req, res, next) => {
+router.get('/:id/service', (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
@@ -2083,7 +2305,7 @@ router.get('/:id/servizio', (req, res, next) => {
     })
     .catch(next)
 })
-router.get('/:id/servizio/:servizioId', (req, res, next) => {
+router.get('/:id/service/:servizioId', (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
@@ -2114,7 +2336,7 @@ router.get('/:id/servizio/:servizioId', (req, res, next) => {
     .catch(next)
 })
 
-router.patch('/:id/servizio/:servizioId', async (req, res, next) => {
+router.patch('/:id/service/:servizioId', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
   }
