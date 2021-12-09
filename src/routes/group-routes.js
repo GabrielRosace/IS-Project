@@ -449,10 +449,10 @@ router.get('/:id/children', async (req, res, next) => {
   }
 
   let childrenList = [...new Set(children)]
-  for (let i = 0; i < childrenList.length; i++){
-    childrenList[i].child = await Child.findOne({child_id: childrenList[i]})
+  for (let i = 0; i < childrenList.length; i++) {
+    childrenList[i].child = await Child.findOne({ child_id: childrenList[i] })
   }
-  
+
   return res.json(childrenList)
 })
 
@@ -1240,7 +1240,12 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
     }
     const events = await ah.fetchAGroupEventActivity(group.group_id, group.calendar_id, activity_id)
     if (events.length === 0) {
-      return res.status(404).send('Activity has no date')
+      return res.status(200).send({
+        start: '',
+        end: '',
+        children: '',
+        parents: ''
+      })
     }
     const myresponse = {
       start: events[0].start.dateTime,
@@ -1311,7 +1316,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
   const group_id = req.params.id
   const activity_id = req.params.activityId
   try {
-    const events = req.body
+    const comingevent = req.body
     const member = await Member.findOne({
       group_id,
       user_id,
@@ -1321,7 +1326,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
     if (!member) {
       return res.status(401).send('Unauthorized')
     }
-    if (!events) {
+    if (!comingevent) {
       return res.status(400).send('Bad Request')
     }
     const activity = Activity.findOne({ activity_id })
@@ -1329,14 +1334,44 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
       return res.status(404).send('Not existing activity')
     }
     const group = await Group.findOne({ group_id })
-
-    events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
     await Promise.all(
-      events.map(event =>
+      comingevent.map(event => {
+        const timeslot = {
+          location: event.location,
+          summary: event.name,
+          start: {
+            dateTime: event.start,
+            date: null
+          },
+          end: {
+            dateTime: event.end,
+            date: null
+          },
+          extendedProperties: {
+            shared: {
+              requiredParents: event.requiredParents,
+              requiredChildren: event.requiredChildren,
+              cost: event.cost,
+              parents: event.parents,
+              children: event.children,
+              externals: [],
+              status: 'ongoing',
+              link: event.link,
+              activityColor: event.color,
+              category: event.category,
+              groupId: event.group_id,
+              repetition: event.repetitionType,
+              start: event.startHour,
+              end: event.endHour
+            }
+          }
+        }
+        console.log(timeslot)
         calendar.events.insert({
           calendarId: group.calendar_id,
-          resource: event
+          resource: timeslot
         })
+      }
       )
     )
     return res.status(200).send('Date added')
