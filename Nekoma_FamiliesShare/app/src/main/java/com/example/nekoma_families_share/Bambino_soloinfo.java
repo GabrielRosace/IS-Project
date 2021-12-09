@@ -203,14 +203,15 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
-                                if(new JSONObject(kid.getString(i)).has("labels")){
+                                /*if(new JSONObject(kid.getString(i)).has("labels")){
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
                                     for(int y =0;y<my_tmp.length();++i){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),false);
                                         my_etichette.add(et);
                                     }
-                                }
-                                addRecyclerView(my_etichette);
+                                    addRecyclerView(my_etichette);
+                                }*/
+
                             }
                         }
 
@@ -326,11 +327,11 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             holder.myTextView.setText(name.name);
             if(name.parent == true){
                 holder.btn.setVisibility(View.VISIBLE);
-                holder.btn.setOnClickListener(new View.OnClickListener() {
+                /*holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //todo fai la delete
-                    /*RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
+                    *//*RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
                     // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                     Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
@@ -371,9 +372,9 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                             Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
                             System.err.println(error.getMessage());
                         }
-                    },new HashMap<>());*/
+                    },new HashMap<>());*//*
                     }
-                });
+                });*/
             }
 
         }
