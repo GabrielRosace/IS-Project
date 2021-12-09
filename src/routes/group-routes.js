@@ -1240,8 +1240,8 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
       return res.status(200).send({
         start: '',
         end: '',
-        children: '',
-        parents: ''
+        children: [],
+        parents: []
       })
     }
     const myresponse = {
