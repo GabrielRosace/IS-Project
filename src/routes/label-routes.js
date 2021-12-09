@@ -90,35 +90,24 @@ router.delete('/:label_id', async (req, res, next) => {
 		})
 	})
 
+	console.log(label_id);
 	Label.findOne({label_id : label_id}).then((l) => {
-		if(!l) console.log("Label does not exist");
+		if(!l) return res.status(400).send('Label does not exist')
 		Group.findOne({group_id : l.group_id}).then((g) => {
-			if(!g) console.log("Group does not exists");
+			if(!g) return res.status(400).send('Group does not exist')
 			Member.find({group_id : g.group_id}).then( async (m) => {
-				if(!m) console.log("Member does not exist");
+				if(!m) return res.status(400).send('Empty group')
 				for(let i = 0; i < m.length; i++){
 					let parents = await Parent.find({parent_id : m[i].user_id})
 					if(parents){
 						for(let j = 0; j < parents.length; j++){
-							Child.find({child_id : parents[j].child_id}).then((children) => {
-								if(children){
-									for(let k = 0; k < children.length; k++){
-										for(let t = 0; t < children[k].labels.length; t++){
-											if(l.label_id == children[k].labels[t]){
-												let childLabels = children[k].labels
-												// delete children[k].labels[t]
-												delete childLabels[t]
-												children[k].labels = childLabels
-												console.log("Deleted");
-											}
-										}
-										children[k].save().then().catch((error) => {
-											console.log(error);
-										})
-									}
-								}
+							Child.updateOne({child_id : parents[j].child_id}, {$pull : { labels : { $in : [l.label_id]}}}).then((data) => {
+								console.log("Label deleted");
 							})
 						}
+					}
+					else{
+						return res.status(400).send('No child')
 					}
 				}
 			})
