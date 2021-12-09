@@ -39,6 +39,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
     private List<String> save = new ArrayList<>();
     private List<Bambini> l = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +93,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 public void onResponse(String response) {
                     try{
                         JSONArray tmp = new JSONArray(response);
-                        for(int i=0;i<tmp.length();++i){
+                        /*for(int i=0;i<tmp.length();++i){
                             Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+new JSONObject(tmp.getString(i)).getString("child_id")+"&searchBy=ids",new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response1) {
@@ -101,11 +102,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                                         for(int i=0;i<kid.length();++i){
                                             l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                         }
-                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
-                                        System.out.println(l);
-                                        System.out.println("*********************150");
-                                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                                        grouplist.setAdapter(adapter);
+
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -117,7 +114,12 @@ public class ListaBambiniAmici extends AppCompatActivity {
                                     System.err.println(error.getMessage());
                                 }
                             }, new HashMap<>());
-                        }
+                        }*/
+                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
+                        System.out.println(l);
+                        System.out.println("*********************150");
+                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
+                        grouplist.setAdapter(adapter);
                     }catch(JSONException e){
                         e.printStackTrace();
                     }
@@ -136,6 +138,8 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }
     }
 
+
+    // vedi meglio
     public void getFriendKids(){
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
 
@@ -153,23 +157,18 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 public void onResponse(String response) {
                     try {
                         JSONArray tmp = new JSONArray(response);
-                        for (int i = 0; i < tmp.length(); ++i) {
+                        /*for (int i = 0; i < tmp.length(); ++i) {
                             Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, "/children?ids[]=" + tmp.getString(i) + "&searchBy=ids", new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
                                     try {
                                         JSONArray kid = new JSONArray(response);
-
-                                        for (int i = 0; i < kid.length(); ++i) {
+                                        for (int i = 0; i < kid.length(); ++i) { 
                                             if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                                 l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                             }
                                         }
-                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
-                                        System.out.println(l);
-                                        System.out.println("*********************150");
-                                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                                        grouplist.setAdapter(adapter);
+
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -181,10 +180,17 @@ public class ListaBambiniAmici extends AppCompatActivity {
                                     System.err.println(error.getMessage());
                                 }
                             }, new HashMap<>());
-                        }
+
+                        }*/
+                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
+                        System.out.println(l);
+                        System.out.println("*********************150");
+                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
+                        grouplist.setAdapter(adapter);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -196,6 +202,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }catch(JSONException e){
             e.printStackTrace();
         }
+    System.out.println("********************ESEGUO");
     }
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
