@@ -38,7 +38,17 @@ router.post('/', (req, res, next) => {
 	let groupId = req.body.group_id
 	if(!groupId)
 		return res.status(400).send('Bad Request')
-	// console.log(userId);
+	
+	Group.findOne({group_id : groupId}).then((g) => {
+		if(g){
+			if(g.owner_id != userId)
+			return res.status(400).send('Unauthorized')
+		}
+		else{
+			return res.status(400).send('Group does not exist')
+		}
+	})
+
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
 		// console.log(g);
 		if(g){
@@ -90,7 +100,7 @@ router.delete('/:label_id', async (req, res, next) => {
 		})
 	})
 
-	console.log(label_id);
+	// console.log(label_id);
 	Label.findOne({label_id : label_id}).then((l) => {
 		if(!l) return res.status(400).send('Label does not exist')
 		Group.findOne({group_id : l.group_id}).then((g) => {
