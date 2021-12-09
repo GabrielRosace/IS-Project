@@ -129,7 +129,6 @@ router.delete('/:label_id', async (req, res, next) => {
 	return res.status(200).send('Label deleted')
 })
 
-// TODO controllare se è bambino
 // Add a label to a child
 router.post('/child', (req, res, next) => {
 	let userId = req.user_id
@@ -141,17 +140,13 @@ router.post('/child', (req, res, next) => {
 	let labelId = req.body.label_id
 	if(!labelId) { return res.status(400).send('Bad Request') }
 
-	// let labelName = req.body.label_name
-	// if(!labelName) { return res.status(400).send('Bad Request') }
-
-	// let labelGroup = req.body.label_group
-	// if(!labelGroup) { return res.status(400).send('Bad Request') }
-
-	// Label.findOne({name : labelName, group_id : labelGroup}).then((l) => {
 	Label.findOne({label_id : labelId}).then((l) => {
 		if(l){
 			Child.findOne({child_id : childId}).then((c) => {
 				if(c){
+					Parent.findOne({parent_id : userId, child_id : c.child_id}).then((p) => {
+						if(!p) return res.status(400).send('Child does not belong to the user')
+					})
 					c.labels.push(l.label_id)
 					c.save().then(() => {
 						return res.status(200).send('Label inserted')
