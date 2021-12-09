@@ -11,6 +11,7 @@
     <string name="servizi">I servizi possono essere comodamente creati attraverso l\'apposita sezione. Vengono proposti anche dei template, come per il servizio di car sharing, sono riservati al gruppo con cui si decide di condividere il servizio.</string>
     <string name="bambini">La nuova estensione ti permette di definire alcune preferenze del tuo bambino in modo da permettere agli utenti amichevoli di sapere a priori cosa piace al bambino specificatamente inserito nella sezione.</string>
     <string name="nome">Genitore:</string>
+    <!-- Stringhe usate nel layout del profilo -->
     <string name="profilepictureLabel">Foto profilo</string>
     <string name="emailLabel">Email</string>
     <string name="nameLabel">Name</string>
@@ -30,4 +31,19 @@
         <item>aa</item>
         <item>bb</item>
     </string-array>
+    <string-array name="eventName">
+        <item>Evento semplice</item>
+        <item>Carsharing</item>
+        <item>Prestito</item>
+        <item>Commissionare attività</item>
+    </string-array>
+    <string name="title_activity_creazione_evento1">creazione_evento1</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>
