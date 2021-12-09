@@ -104,6 +104,7 @@ const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
 const Servizio = require('../models/service')
+const { json } = require('body-parser')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1333,40 +1334,34 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
     const group = await Group.findOne({ group_id })
     await Promise.all(
       comingevent.map(event => {
-        const timeslot = {
+        const tmp = { description: '',
           location: event.location,
-          summary: event.name,
-          start: {
-            dateTime: event.start,
-            date: null
-          },
-          end: {
-            dateTime: event.end,
-            date: null
-          },
-          extendedProperties: {
-            shared: {
-              requiredParents: event.requiredParents,
-              requiredChildren: event.requiredChildren,
+          summary: event.summary,
+          start: { dateTime: event.start, date: null },
+          end: { dateTime: event.end, date: null },
+          extendedProperties:
+         { shared:
+            { requiredParents: event.requiredParents,
+              requiredChildren: event.requiredParents,
               cost: event.cost,
-              parents: event.parents,
-              children: event.children,
-              externals: [],
+              parents: JSON.stringify(event.parents),
+              children: JSON.stringify(event.children),
+              externals: '[]',
               status: 'ongoing',
               link: event.link,
-              activityColor: event.color,
+              activityColor: event.activityColor,
               category: event.category,
-              groupId: event.group_id,
-              repetition: event.repetitionType,
+              groupId: group_id,
+              repetition: event.repetition,
               start: event.startHour,
-              end: event.endHour
+              end: event.endHour,
+              activityId: activity_id
             }
-          }
+         }
         }
-        console.log(timeslot)
         calendar.events.insert({
           calendarId: group.calendar_id,
-          resource: timeslot
+          resource: tmp
         })
       }
       )
@@ -1416,11 +1411,13 @@ router.post('/:id/activities', async (req, res, next) => {
     activity.image_id = image_id
     events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
     await Promise.all(
-      events.map(event =>
+      events.map(event => {
+        console.log(event)
         calendar.events.insert({
           calendarId: group.calendar_id,
           resource: event
         })
+      }
       )
     )
     await Image.create(image)
@@ -1879,6 +1876,7 @@ router.patch(
         eventId: req.params.timeslotId,
         resource: timeslotPatch
       })
+      console.log(timeslotPatch)
       res.status(200).send('Timeslot was updated')
     } catch (error) {
       next(error)
@@ -1954,7 +1952,7 @@ router.delete(
     }
     const { groupId: group_id, activityId: activity_id } = req.params
     const user_id = req.user_id
-    const { summary, parents } = req.query
+    //const { summary, parents } = req.query
     try {
       const member = await Member.findOne({
         group_id,
@@ -1969,15 +1967,17 @@ router.delete(
       if (!(member.admin || user_id === activity.creator_id)) {
         return res.status(401).send('Unauthorized')
       }
+      /*
       if (!(summary && parents)) {
         return res.status(400).send('Bad Request')
       }
+      */
       const group = await Group.findOne({ group_id })
       await calendar.events.delete({
         calendarId: group.calendar_id,
         eventId: req.params.timeslotId
       })
-      nh.deleteTimeslotNotification(user_id, { summary, parents: JSON.parse(parents) })
+      //nh.deleteTimeslotNotification(user_id, { summary, parents: JSON.parse(parents) })
       res.status(200).send('Timeslot was deleted')
     } catch (error) {
       next(error)
