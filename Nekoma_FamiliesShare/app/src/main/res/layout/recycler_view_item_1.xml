@@ -18,8 +18,8 @@
 
   <ImageButton
       android:id="@+id/delete_etichette"
-      android:layout_width="9dp"
-      android:layout_height="wrap_content"
+      android:layout_width="97dp"
+      android:layout_height="41dp"
       android:layout_weight="1"
       android:backgroundTint="#C50A0A"
       android:visibility="invisible"

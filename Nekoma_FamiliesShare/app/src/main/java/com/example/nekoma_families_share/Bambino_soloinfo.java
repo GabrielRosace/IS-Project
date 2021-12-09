@@ -50,20 +50,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private List<String> labels;
+    private List<String> id_labels_spinner;
     private List<String> childLabels = new ArrayList<>();
     private ArrayAdapter dataSpinner;
-    private List<myEtichette> etichette_figlio = new ArrayList<>();
     private List<myEtichette> my_etichette = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private Boolean isChild = false;
+    private Spinner etichette ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bambino_soloinfo);
+        etichette =  (Spinner) findViewById(R.id.spinner_etichette);
         Toolbar t = (Toolbar) findViewById(R.id.bambinotoolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,8 +115,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 layout.setVisibility(View.VISIBLE);
 
                                 // spinner
-                                Spinner etichette = (Spinner) findViewById(R.id.spinner_etichette);
-                                Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
+
+
 
                                 String user_id;
                                 String userToken = Utilities.getToken(Bambino_soloinfo.this);
@@ -129,15 +132,29 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                     e.printStackTrace();
                                 }
 
-
+                                if(new JSONObject(kid.getString(i)).has("labels")){
+                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
+                                    JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
+                                    System.out.println("questo è my tmp : "+my_tmp.toString());
+                                    for(int y =0;y<my_tmp.length();++y){
+                                        myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
+                                        my_etichette.add(et);
+                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
+                                    }
+                                }
                                 labels = new ArrayList<>();
+                                id_labels_spinner = new ArrayList<>();
                                 Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
                                     try {
                                         JSONArray user_response = new JSONArray((String) response2);
                                         for (int j = 0; j < user_response.length(); j++) {
-                                            System.out.println(user_response.get(j));
                                             JSONObject obj = user_response.getJSONObject(j);
-                                            labels.add(obj.getString("name"));
+                                            System.out.println("sono obj :"+obj);
+                                            if(!my_etichette.contains(new myEtichette(obj.getString("name"),"",true))){
+                                                System.out.println(user_response.get(j));
+                                                labels.add(obj.getString("name"));
+                                                id_labels_spinner.add(obj.getString("label_id"));
+                                            }
                                         }
                                         etichette.setOnItemSelectedListener(Bambino_soloinfo.this);
                                         dataSpinner = new ArrayAdapter(Bambino_soloinfo.this, R.layout.support_simple_spinner_dropdown_item);
@@ -177,6 +194,17 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
+                                if(new JSONObject(kid.getString(i)).has("labels")){
+                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
+                                    JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
+                                    System.out.println("questo è my tmp : "+my_tmp.toString());
+                                    for(int y =0;y<my_tmp.length();++y){
+                                        myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
+                                        my_etichette.add(et);
+                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
+                                    }
+                                }
+                                addRecyclerView(my_etichette);
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
@@ -203,15 +231,17 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
-                                /*if(new JSONObject(kid.getString(i)).has("labels")){
+                                if(new JSONObject(kid.getString(i)).has("labels")){
+                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    for(int y =0;y<my_tmp.length();++i){
+                                    System.out.println("questo è my tmp : "+my_tmp.toString());
+                                    for(int y =0;y<my_tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),false);
                                         my_etichette.add(et);
+                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
-                                    addRecyclerView(my_etichette);
-                                }*/
-
+                                }
+                                addRecyclerView(my_etichette);
                             }
                         }
 
@@ -286,6 +316,20 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
+    }
+    public void addLabel(){
+        Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
+        aggiungi_etichetta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    childLabels.add(id_labels_spinner.get(etichette.getSelectedItemPosition()));
+                    dataSpinner.remove(etichette.getSelectedItem());
+                    id_labels_spinner.remove(etichette.getSelectedItemPosition());
+                    if(id_labels_spinner.size()==0){
+                        aggiungi_etichetta.setEnabled(false);
+                    }
+            }
+        });
     }
     public void getLista(View v) {
         Intent homepage = new Intent(Bambino_soloinfo.this, ListaBambiniAmici.class);
@@ -437,6 +481,19 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             this.name=name;
             this.id=id;
             this.parent= parent;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            myEtichette that = (myEtichette) o;
+            return Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
     }
 }

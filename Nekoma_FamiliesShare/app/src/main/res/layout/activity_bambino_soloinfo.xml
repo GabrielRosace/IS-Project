@@ -316,8 +316,7 @@
                 <Spinner
                     android:id="@+id/spinner_etichette"
                     android:layout_width="301dp"
-                    android:layout_height="49dp"
-                    android:entries="@array/etichette" />
+                    android:layout_height="49dp" />
 
                 <Button
                     android:id="@+id/add_etichetta"
