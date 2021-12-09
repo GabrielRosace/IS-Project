@@ -6,6 +6,7 @@ const Group = require('../models/group')
 const Member = require('../models/member')
 const Child = require('../models/child')
 const Parent = require('../models/parent')
+const Activity = require('../models/activity')
 const objectid = require('objectid')
 
 // Get all labels of the group 
@@ -38,7 +39,17 @@ router.post('/', (req, res, next) => {
 	let groupId = req.body.group_id
 	if(!groupId)
 		return res.status(400).send('Bad Request')
-	// console.log(userId);
+	
+	Group.findOne({group_id : groupId}).then((g) => {
+		if(g){
+			if(g.owner_id != userId)
+			return res.status(400).send('Unauthorized')
+		}
+		else{
+			return res.status(400).send('Group does not exist')
+		}
+	})
+
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
 		// console.log(g);
 		if(g){
@@ -90,7 +101,6 @@ router.delete('/:label_id', async (req, res, next) => {
 		})
 	})
 
-	console.log(label_id);
 	Label.findOne({label_id : label_id}).then((l) => {
 		if(!l) return res.status(400).send('Label does not exist')
 		Group.findOne({group_id : l.group_id}).then((g) => {
@@ -111,6 +121,9 @@ router.delete('/:label_id', async (req, res, next) => {
 					}
 				}
 			})
+			Activity.updateMany({group_id : g.group_id}, { $pull : {labels : { $in : [l.label_id]}}}).then((data) => {
+				console.log('Label deleted from activities');
+			})
 		})
 	})
 
@@ -119,7 +132,6 @@ router.delete('/:label_id', async (req, res, next) => {
 	return res.status(200).send('Label deleted')
 })
 
-// TODO controllare se è bambino
 // Add a label to a child
 router.post('/child', (req, res, next) => {
 	let userId = req.user_id
@@ -131,17 +143,13 @@ router.post('/child', (req, res, next) => {
 	let labelId = req.body.label_id
 	if(!labelId) { return res.status(400).send('Bad Request') }
 
-	// let labelName = req.body.label_name
-	// if(!labelName) { return res.status(400).send('Bad Request') }
-
-	// let labelGroup = req.body.label_group
-	// if(!labelGroup) { return res.status(400).send('Bad Request') }
-
-	// Label.findOne({name : labelName, group_id : labelGroup}).then((l) => {
 	Label.findOne({label_id : labelId}).then((l) => {
 		if(l){
 			Child.findOne({child_id : childId}).then((c) => {
 				if(c){
+					Parent.findOne({parent_id : userId, child_id : c.child_id}).then((p) => {
+						if(!p) return res.status(400).send('Child does not belong to the user')
+					})
 					c.labels.push(l.label_id)
 					c.save().then(() => {
 						return res.status(200).send('Label inserted')
@@ -161,30 +169,56 @@ router.post('/child', (req, res, next) => {
 })
 
 // Get all labels of a child
-router.get('/child/:child_id', (req, res, next) => {
+router.get('/child/:child_id', async (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
 
 	let childId = req.params.child_id
 	if(!childId) { return res.status(400).send('Bad Request') }
 
-	Child.findOne({child_id : childId}).then((c) => {
+	Child.findOne({child_id : childId}).then( async (c) => {
+
+		Parent.findOne({parent_id : userId, child_id : c.child_id}).then((p) => {
+			if(!p) return res.status(400).send('Child does not belong to the user')
+		})
+
 		if(c){
 			let childLabels = []
-			c.labels.forEach((label) => {
-				console.log(label);
-				Label.findOne({label_id : label}).then((l) => {
-					console.log(l);
-					childLabels.push(l)
-				})
-				
-			})
-			console.log('Labels:' + childLabels);
+			for(let i = 0 ; i < c.labels.length ; i++){
+				let label = await Label.findOne({label_id : c.labels[i]})
+				childLabels.push(label)
+			}
 			return res.status(200).send(childLabels)
 		}
 		else{
+			// ! Child does not exist
 			return res.status(400).send('Child does not exist')
 		}
+	})
+})
+
+// Delete a label of a child
+router.delete('/child/:label_id/:child_id', (req, res, next) => {
+	let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+
+	let label_id = req.params.label_id
+	if(!label_id) return res.status(400).send('Bad Request')
+
+	let child_id = req.params.child_id
+	if(!child_id) return res.status(400).send('Bad Request')
+
+	Label.findOne({label_id : label_id}).then((l) => {
+		if(!l) return res.status(400).send('Label does not exists')
+
+		Parent.findOne({parent_id : userId, child_id : child_id}).then((p) => {
+			if(!p) return res.status(400).send('Child does not belong to the user')
+		})
+
+		Child.updateOne({child_id : child_id}, {$pull : {labels : {$in : [l.label_id]}}}).then((data) => {
+			console.log('Label deleted');
+		})
+		return res.status(200).send('Label deleted')
 	})
 })
 
