@@ -53,7 +53,7 @@ router.get('/', async (req, res, next) => {
   //   })
   // }).catch(next)
 
-
+  //? Ottimizzare un pò, magari sfruttando i join
   const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
   
   if (profiles.length === 0) {
