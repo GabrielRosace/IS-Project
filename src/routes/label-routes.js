@@ -6,6 +6,7 @@ const Group = require('../models/group')
 const Member = require('../models/member')
 const Child = require('../models/child')
 const Parent = require('../models/parent')
+const Activity = require('../models/activity')
 const objectid = require('objectid')
 
 // Get all labels of the group 
@@ -100,7 +101,6 @@ router.delete('/:label_id', async (req, res, next) => {
 		})
 	})
 
-	// console.log(label_id);
 	Label.findOne({label_id : label_id}).then((l) => {
 		if(!l) return res.status(400).send('Label does not exist')
 		Group.findOne({group_id : l.group_id}).then((g) => {
@@ -120,6 +120,9 @@ router.delete('/:label_id', async (req, res, next) => {
 						return res.status(400).send('No child')
 					}
 				}
+			})
+			Activity.updateMany({group_id : g.group_id}, { $pull : {labels : { $in : [l.label_id]}}}).then((data) => {
+				console.log('Label deleted from activities');
 			})
 		})
 	})
