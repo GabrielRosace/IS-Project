@@ -908,7 +908,7 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
   } = req.body
 
   let labelFormatted
-  if (labelFormatted) {
+  if (labels) {
     labelFormatted = labels.substring(1,labels.length-1)
   }
 
