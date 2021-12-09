@@ -904,7 +904,7 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
   } = req.body
 
 
-  let labelsSplit = labels?labels.split(','):undefined
+  let labelsSplit = labels ? labels.split(',') : undefined
 
   const { file } = req
   if (!(birthdate && given_name && family_name && gender && background)) {
@@ -920,7 +920,7 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
     other_info,
     special_needs,
     background,
-    labelsSplit,
+    labels,
     suspended: false
   }
   const image_id = objectid()
@@ -950,6 +950,7 @@ router.post('/:id/children', childProfileUpload.single('photo'), async (req, res
     parent_id,
     child_id
   }
+  child.labels = labelsSplit
   try {
     await Image.create(image)
     await Child.create(child)
