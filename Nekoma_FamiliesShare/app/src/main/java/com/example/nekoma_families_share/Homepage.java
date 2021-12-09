@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,9 @@ public class Homepage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
+
+
+
         String id_group = Utilities.getPrefs(this).getString("group","");
         String user_id;
         String userToken = Utilities.getToken(Homepage.this);

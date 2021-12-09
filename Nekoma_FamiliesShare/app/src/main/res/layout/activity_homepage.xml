@@ -7,7 +7,7 @@
     tools:context=".Homepage">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_archivio"
         android:layout_width="0dp"
         android:layout_height="54dp"
         android:layout_marginBottom="7dp"
@@ -117,7 +117,7 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_archivio" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar2"
@@ -150,7 +150,7 @@
         android:onClick="getGroup"
         android:tint="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/toolbar"
+        app:layout_constraintTop_toTopOf="@+id/toolbar_archivio"
         app:srcCompat="?android:attr/actionModeFindDrawable" />
 
     <ImageView
@@ -159,7 +159,7 @@
         android:layout_height="55dp"
         android:layout_marginEnd="58dp"
         android:onClick="getBambini"
-        app:layout_constraintEnd_toEndOf="@+id/toolbar"
+        app:layout_constraintEnd_toEndOf="@+id/toolbar_archivio"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/child_icon_white" />
 

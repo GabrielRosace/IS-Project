@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.content.Intent;
@@ -50,6 +51,16 @@ public class Profile extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_profilo);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
         // Ottengo il token
         String userToken = Utilities.getToken(this);
         // Faccio il parse del token in modo tale da prendermi l'id dell'utente

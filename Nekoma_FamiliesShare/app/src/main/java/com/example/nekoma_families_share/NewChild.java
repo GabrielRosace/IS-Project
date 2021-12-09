@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -58,6 +59,14 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         setContentView(R.layout.activity_new_child);
 
         System.out.println(Utilities.getToken(this));
+
+        Toolbar t = (Toolbar) findViewById(R.id.newchild_toolbar);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         childName = findViewById(R.id.childName);
         childSurname = findViewById(R.id.childSurname);
