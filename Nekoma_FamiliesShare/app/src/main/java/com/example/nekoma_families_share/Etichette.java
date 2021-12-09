@@ -2,6 +2,7 @@ package com.example.nekoma_families_share;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
@@ -53,6 +54,14 @@ public class Etichette extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_etichette);
 
+        Toolbar t = (Toolbar) findViewById(R.id.etichette_toolbar);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
         String id_group = Utilities.getPrefs(this).getString("group", "");
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
@@ -83,11 +92,6 @@ public class Etichette extends AppCompatActivity {
                 System.err.println(error.getMessage());
             }
         }, new HashMap<>());
-    }
-
-    public void homepage(View v){
-        Intent homepage = new Intent(Etichette.this,Homepage.class);
-        startActivity(homepage);
     }
 
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
@@ -126,7 +130,7 @@ public class Etichette extends AppCompatActivity {
                     Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            Toast.makeText(Etichette.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Etichette.this, "Etichetta eliminata correttamente!", Toast.LENGTH_SHORT).show();
                             String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                             Utilities.httpRequest(Etichette.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
                                 @Override
@@ -242,8 +246,7 @@ public class Etichette extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.POST, "/label", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-
-                Toast.makeText(Etichette.this, response, Toast.LENGTH_SHORT).show();
+                Toast.makeText(Etichette.this, "Etichetta creata correttamente!", Toast.LENGTH_SHORT).show();
                 String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                 Utilities.httpRequest(Etichette.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
                     @Override

@@ -13,7 +13,7 @@ const ruleSchema = new mongoose.Schema({
   }
 })
 
-const servizioSchema = new mongoose.Schema({
+const serviceSchema = new mongoose.Schema({
   servizio_id: {
     type: String,
     unique: true,
@@ -66,9 +66,9 @@ const servizioSchema = new mongoose.Schema({
   }
 }, { timestamps: true, toJSON: { virtuals: true } })
 
-servizioSchema.index({ group_id: 1, createdAt: -1 })
+serviceSchema.index({ group_id: 1, createdAt: -1 })
 
 mongoose.pluralize(null)
-const model = mongoose.model('Servizio', servizioSchema)
+const model = mongoose.model('Service', serviceSchema)
 
 module.exports = model
