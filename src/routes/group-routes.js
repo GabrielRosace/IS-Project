@@ -449,10 +449,7 @@ router.get('/:id/children', async (req, res, next) => {
   }
 
   let childrenList = [...new Set(children)]
-  for (let i = 0; i < childrenList.length; i++) {
-    childrenList[i].child = await Child.findOne({ child_id: childrenList[i] })
-  }
-
+  
   return res.json(childrenList)
 })
 
