@@ -166,28 +166,29 @@ router.post('/child', (req, res, next) => {
 })
 
 // Get all labels of a child
-router.get('/child/:child_id', (req, res, next) => {
+router.get('/child/:child_id', async (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
 
 	let childId = req.params.child_id
 	if(!childId) { return res.status(400).send('Bad Request') }
 
-	Child.findOne({child_id : childId}).then((c) => {
+	Child.findOne({child_id : childId}).then( async (c) => {
+
+		Parent.findOne({parent_id : userId, child_id : c.child_id}).then((p) => {
+			if(!p) return res.status(400).send('Child does not belong to the user')
+		})
+
 		if(c){
 			let childLabels = []
-			c.labels.forEach((label) => {
-				console.log(label);
-				Label.findOne({label_id : label}).then((l) => {
-					console.log(l);
-					childLabels.push(l)
-				})
-				
-			})
-			console.log('Labels:' + childLabels);
+			for(let i = 0 ; i < c.labels.length ; i++){
+				let label = await Label.findOne({label_id : c.labels[i]})
+				childLabels.push(label)
+			}
 			return res.status(200).send(childLabels)
 		}
 		else{
+			// ! Child does not exist
 			return res.status(400).send('Child does not exist')
 		}
 	})
