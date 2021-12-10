@@ -33,6 +33,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
     private String userid;
     private String groupid;
+    private List<Evento> activities = null;
+    private List<String> child_pref = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,27 +52,52 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         });
 
 
-
         ChipGroup chipGroup = (ChipGroup)findViewById(R.id.chipgroup);
 
-        //ChipGroup.OnCheckedChangeListener()
         chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(ChipGroup group, int checkedId) {
                 if(checkedId == R.id.attività){
-                    getActivities();
+                    addRecyclerView(activities);
                 }else if(checkedId == R.id.servPersona){
                     getServPerson();
                 }else{
-                    getRecommendedActivities();
+                    addRecyclerView(getRecommendedActivities());
                 }
             }
         });
-        getActivities();
+        getActivities(()->{
+            addRecyclerView(activities);
+        });
+        getMyChildPref();
     }
 
-    private void getActivities(){
-        List<Evento> activities = new ArrayList<>();
+    private void getMyChildPref(){
+        String my_id = Utilities.getUserID(this);
+        child_pref = new ArrayList<>();
+        Utilities.httpRequest(this,Request.Method.GET, "/users/"+my_id+"/children", response -> {
+            try {
+                JSONArray arr = new JSONArray(response.toString());
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject child = new JSONObject(arr.getString(i)).getJSONObject("child");
+                    if(child.has("labels")){ // Parsing child label
+                        JSONArray labs = child.getJSONArray("labels");
+                        for (int j = 0; j < labs.length(); j++) {
+                            if(labs.get(j) != null){
+                                child_pref.add(labs.getString(j));
+                            }
+                        }
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {}, new HashMap<>());
+    }
+
+    private void getActivities(Runnable r){
+        activities = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/groups/"+groupid+"/activities", reason -> {
             try {
                 JSONArray array = new JSONArray((String) reason);
@@ -78,25 +105,26 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     JSONObject e = new JSONObject(array.get(i).toString());
 
                     String labels = "";
+                    String labels_ids = "";
 
                     if(e.has("labels")){
                         JSONArray a = new JSONArray(e.getString("labels"));
-//                        System.out.println("Sono qui:"+ a.toString());
                         for (int j = 0; j < a.length(); j++) {
                             labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
+                            labels_ids += new JSONObject(a.get(j).toString()).getString("label_id") + ",";
                         }
-//                        System.out.println(labels);
                     }
+//                    System.out.println(e.getString("creator_id"));
 
-
-                    activities.add(new Evento(e.getString("name"), "TODO", e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels));
+                    activities.add(new Evento(e.getString("name"), "TODO", e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels,labels_ids,e.getString("creator_id")));
                 }
-                addRecyclerView(activities);
+
+                r.run();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }, error -> {
-            Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
         }, new HashMap<>());
     }
 
@@ -116,12 +144,31 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }, error -> {
             Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show();
         }, new HashMap<>());*/
+        Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         addRecyclerView(activities);
     }
 
 
-    private void getRecommendedActivities(){ // TODO not implemented yet
-        addRecyclerView(new ArrayList<>());
+    private List<Evento> getRecommendedActivities(){
+        List<Evento> recommendedActivities = new ArrayList<>();
+        if(child_pref != null){
+            for (Evento a:activities) {
+                String[] lab = a.labels_ids.split(",");
+                for (String l:lab) {
+                    if(l!=""){
+                        if(child_pref.contains(l)){
+                            recommendedActivities.add(a);
+                        }
+                    }
+                }
+            }
+        }else{
+            recommendedActivities = new ArrayList<>(activities);
+        }
+        if(recommendedActivities.isEmpty()){
+            Toast.makeText(this, "Non ci sono eventi consigliati...", Toast.LENGTH_SHORT).show();
+        }
+        return recommendedActivities;
     }
 
 
@@ -163,13 +210,14 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Evento eve = eventoList.get(position);
+            System.out.println(" ************************* questo è event: "+eve.toString());
             holder.tv.setText(eve.nome);
             holder.btn.setText("Info");
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEvento.class);
-                    System.out.println("intent: "+eve.toString());
+//                    System.out.println("intent: "+eve.toString());
                     evento.putExtra("evento", eve.toString());
                     startActivity(evento);
                 }
@@ -198,16 +246,18 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    public class Evento{
+    public static class Evento{
         public final String nome;
         public final String event_id;
         public final String img;
         public final int nPart;
         public final String descrizione;
         public final String enddate;
-        public final String labels;
+        public String labels;
+        public final String labels_ids;
+        public final String owner_id;
 
-        public Evento(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels) {
+        public Evento(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String labels_ids,String owner_id) {
             this.nome = nome;
             this.img = img;
             this.event_id = event_id;
@@ -215,11 +265,34 @@ public class VisualizzazioneEventi extends AppCompatActivity {
             this.descrizione = descrizione;
             this.enddate = enddate;
             this.labels = labels;
+            this.labels_ids = labels_ids;
+            this.owner_id = owner_id;
+        }
+
+        public Evento(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels,String owner_id){
+//            this.nome = nome;
+//            this.img = img;
+//            this.event_id = event_id;
+//            this.nPart = nPart;
+//            this.descrizione = descrizione;
+//            this.enddate = enddate;
+//            this.labels = labels;
+//            this.labels_ids = null;
+            this(nome,img,event_id,nPart,descrizione,enddate,labels,null, owner_id);
+        }
+
+        public static Evento getEventoFromString(String toParse){
+            String[] parsed = toParse.split("/");
+//            System.out.println(parsed.length);
+            if(parsed.length<=6){ //? Forse 7?
+                return new Evento(parsed[0],parsed[2],parsed[1],Integer.parseInt(parsed[3]),parsed[4],parsed[5],"",parsed[6]);
+            }
+            return new Evento(parsed[0],parsed[2],parsed[1],Integer.parseInt(parsed[3]),parsed[4],parsed[5],parsed[6],parsed[7]);
         }
 
         @Override
         public String toString() {
-            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels;
+            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
         }
     }
 

@@ -29,8 +29,6 @@ public class Homepage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
 
-
-
         String id_group = Utilities.getPrefs(this).getString("group","");
         String user_id;
         String userToken = Utilities.getToken(Homepage.this);
@@ -65,7 +63,7 @@ public class Homepage extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Homepage.this, error.toString(), Toast.LENGTH_LONG).show();
-                    System.err.println(error.getMessage());
+                    // System.err.println(error.getMessage());
                 }
             },new HashMap<>());
         }catch(JSONException e){

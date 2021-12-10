@@ -17,7 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -36,10 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ListaBambiniAmici extends AppCompatActivity {
-    private List<String> save = new ArrayList<>();
     private List<Bambini> b_amici = null;
     private List<Bambini> b_miei = null;
-    private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private String id_group;
     private String user_id;
 
@@ -73,16 +73,12 @@ public class ListaBambiniAmici extends AppCompatActivity {
         t.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                System.out.println(tab.getPosition());
-                 // l = new ArrayList<>();
+                // System.out.println(tab.getPosition());
                 if(tab.getPosition()==1){
-                    System.out.println("sono qui dentro prima della getMyKids");
-                    // ListaBambiniAmici.this.getMyKids();
+                    // System.out.println("sono qui dentro prima della getMyKids");
+                    addRecyclerView(b_miei);
                 }else{
-                    RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
-                    MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, b_amici);
-                    grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                    grouplist.setAdapter(adapter);
+                    addRecyclerView(b_amici);
                 }
 
             }
@@ -97,123 +93,77 @@ public class ListaBambiniAmici extends AppCompatActivity {
 
             }
         });
-        // this.getFriendKids();
-        this.friendKids();
+        this.Kids();
 
     }
 
-    public void friendKids(){
-        RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
+    public void Kids(){
+        b_miei = new ArrayList<>();
         b_amici = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/children", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println(response);
+                // System.out.println(response);
                 try{
                     JSONArray tmp = new JSONArray(response);
                     String url = "/children?searchBy=ids";
-                    for(int i=0;i<tmp.length()/3;++i){
+                    for(int i=0;i<tmp.length();++i){
                         //todo costruire l'url
                         url += "&ids="+tmp.getString(i);
                     }
-                    System.out.println(url);
+                    // System.out.println(url);
                     Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, url, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            System.out.println(response);
+                            // System.out.println(response);
                             try {
                                 JSONArray kid = new JSONArray(response);
                                 for (int i = 0; i < kid.length(); ++i) {
                                     if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                         b_amici.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
+                                    }else{
+                                        // System.out.println("sono dentro ai miei bambini");
+                                        b_miei.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }
                                 }
-                                MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, b_amici);
-                                grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                                grouplist.setAdapter(adapter);
+                                RelativeLayout b = (RelativeLayout) findViewById(R.id.caricamento);
+                                b.setVisibility(View.GONE);
+                                addRecyclerView(b_amici);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+
                         }
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            System.err.println(error.toString());
+                            // System.err.println(error.toString());
+                            Toast.makeText(ListaBambiniAmici.this, "Richiesta non andata a buon fine", Toast.LENGTH_SHORT).show();
                         }
                     }, new HashMap<>());
 
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
+
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.err.println(error.toString());
+                Toast.makeText(ListaBambiniAmici.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
-/*    public void getMyKids(){
-        RecyclerView grouplist = (RecyclerView) findViewById(R.id.listabambiniamici);
-        String user_id;
-        String userToken = Utilities.getToken(ListaBambiniAmici.this);
-        String[] split_token = userToken.split("\\.");
-        String base64Body = split_token[1];
-        String body = new String(Base64.getDecoder().decode(base64Body));
-        try {
-            JSONObject res = new JSONObject(body);
-            user_id = res.getString("user_id");
-            Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, "/users/" + user_id + "/children", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try{
 
-                        JSONArray tmp = new JSONArray(response);
-                        System.out.println(tmp);
-                        *//*for(int i=0;i<tmp.length();++i){
-                            Utilities.httpRequest(ListaBambiniAmici.this,Request.Method.GET,"/children?ids[]="+new JSONObject(tmp.getString(i)).getString("child_id")+"&searchBy=ids",new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response1) {
-                                    try {
-                                        JSONArray kid = new JSONArray(response1);
-                                        for(int i=0;i<kid.length();++i){
-                                            l.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
-                                        }
+    private void addRecyclerView(List<Bambini> list){
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.listabambiniamici);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(adapter);
+    }
 
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            },new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
-                                    System.err.println(error.getMessage());
-                                }
-                            }, new HashMap<>());
-                        }*//*
-                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(ListaBambiniAmici.this, l);
-                        System.out.println(l);
-                        System.out.println("*********************150");
-                        grouplist.setLayoutManager(ListaBambiniAmici.this.grouplistManager);
-                        grouplist.setAdapter(adapter);
-                    }catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            },new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(ListaBambiniAmici.this, error.toString(), Toast.LENGTH_LONG).show();
-                    System.err.println(error.getMessage());
-                }
-            }, new HashMap<>());
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }*/
 
 
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {

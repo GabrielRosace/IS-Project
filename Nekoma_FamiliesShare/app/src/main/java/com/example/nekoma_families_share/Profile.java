@@ -43,6 +43,7 @@ public class Profile extends AppCompatActivity {
     private EditText surnameLabel;
     private EditText phoneLabel;
     private EditText addressLabel;
+    private String address_id;
     private EditText numberLabel;
     private EditText cityLabel;
     private Switch editSwitch;
@@ -63,7 +64,7 @@ public class Profile extends AppCompatActivity {
 
         // Ottengo il token
         String userToken = Utilities.getToken(this);
-        System.out.println(userToken);
+        // System.out.println(userToken);
         // Faccio il parse del token in modo tale da prendermi l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -99,6 +100,7 @@ public class Profile extends AppCompatActivity {
                     phoneLabel.setHint("Non specificato");
                 }
                 // Informazioni su indirizzo dell'utente
+                address_id = user_address.getString("address_id");
                 addressLabel = findViewById(R.id.profileStreet);
                 addressLabel.setEnabled(false);
                 if (((user_address.getString("street")).length()!= 0)) {
@@ -126,8 +128,8 @@ public class Profile extends AppCompatActivity {
                 e.printStackTrace();
             }
         }, error -> {
-            Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            Toast.makeText(Profile.this, "Impossibile caricare informazioni del profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
+            // System.err.println(error.getMessage());
         }, new HashMap<>());
 
         editSwitch = (Switch)findViewById(R.id.EditSwitch);
@@ -143,34 +145,23 @@ public class Profile extends AppCompatActivity {
                 saveChange.setEnabled(isChecked);
                 numberLabel.setEnabled(isChecked);
                 cityLabel.setEnabled(isChecked);
+                if ((isChecked)) {
+                    editSwitch.setText(R.string.disableEdit);
+                } else {
+                    editSwitch.setText(R.string.enableEdit);
+                }
             }
         });
     }
 
     public void DeleteUser(View v){
-        RequestQueue profile = Volley.newRequestQueue(this);
-        String url= getString(R.string.url) + "/users/"+user_id;
-        StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Intent login = new Intent(Profile.this,MainActivity.class);
-                startActivity(login);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+Utilities.getToken(Profile.this));
-                return headers;
-            }
-        };
-        profile.add(stringRequest);
+        Utilities.httpRequest(this,Request.Method.DELETE,"/users/"+user_id,response -> {
+            Intent login = new Intent(Profile.this,MainActivity.class);
+            startActivity(login);
+        },error -> {
+            Toast.makeText(Profile.this, "Non è possibile eliminare il profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
+            // System.err.println(error.getMessage());
+        },new HashMap<>());
     }
 
     public void EditUser(View v){
@@ -181,6 +172,7 @@ public class Profile extends AppCompatActivity {
         params.put("phone",phoneLabel.getText().toString());
         params.put("phone_type","unspecified");
         params.put("visible","true");
+        params.put("address_id",address_id);
         params.put("street",addressLabel.getText().toString());
         params.put("number",numberLabel.getText().toString());
         params.put("city",cityLabel.getText().toString());
@@ -188,12 +180,12 @@ public class Profile extends AppCompatActivity {
         params.put("contact_option","email");
 
         Utilities.httpRequest(this,Request.Method.PATCH,"/users/"+user_id+"/profile",response -> {
-            Toast.makeText(Profile.this, "Profile edited succesfully!", Toast.LENGTH_LONG).show();
+            Toast.makeText(Profile.this, "Profilo modificato correttamente!", Toast.LENGTH_LONG).show();
             Intent homepage = new Intent(Profile.this,Homepage.class);
             startActivity(homepage);
         },error -> {
             Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         },params);
     }
 
@@ -222,11 +214,4 @@ public class Profile extends AppCompatActivity {
             holder.setImageBitmap(bitmap);
         }
     }
-
-
-    public void getHomepage(View v){
-        Intent  homepage= new Intent(Profile.this,Homepage.class);
-        startActivity(homepage);
-    }
-
 }

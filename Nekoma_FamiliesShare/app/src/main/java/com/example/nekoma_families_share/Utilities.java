@@ -11,10 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -30,6 +34,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Utilities {
+    private static final int MY_SOCKET_TIMEOUT_MS = 1000000000;
+
     public static SharedPreferences setSharedPreferences(Context context){
         SharedPreferences prefs;
         prefs=context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
@@ -78,6 +84,10 @@ public class Utilities {
                 return "application/json";
             }
         };
+        stringRequest1.setRetryPolicy(new DefaultRetryPolicy(
+                MY_SOCKET_TIMEOUT_MS,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(stringRequest1);
     }
 
@@ -97,32 +107,8 @@ public class Utilities {
         return user_id;
     }
 
+    public static String getGroupId(Context context) {
+        return Utilities.getPrefs(context).getString("group","");
+    }
 
-    /*public static class ImageDownloader<T> extends AsyncTask<String, Void, Bitmap> {
-        T holder;
-        Consumer<Bitmap> postExecute;
-
-        public ImageDownloader(T holder, Consumer<Bitmap> postExecute) {
-            this.holder = holder;
-            this.postExecute = postExecute;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            String urlOfImage = strings[0];
-            Bitmap logo = null;
-            try{
-                InputStream is = new URL(urlOfImage).openStream();
-                logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
-                e.printStackTrace();
-            }
-            return logo;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            postExecute.accept(bitmap);
-        }
-    }*/
 }
