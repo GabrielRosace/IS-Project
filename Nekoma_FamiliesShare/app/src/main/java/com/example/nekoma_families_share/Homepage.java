@@ -101,7 +101,12 @@ public class Homepage extends AppCompatActivity {
         Intent event = new Intent(Homepage.this,YourEvent.class);
         startActivity(event);
     }
+    public void getCreateEvent(View v){
+        Intent event = new Intent(Homepage.this,Creazione_evento.class);
+        startActivity(event);
+    }
     public void getService(View v){
         Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
     }
+
 }
