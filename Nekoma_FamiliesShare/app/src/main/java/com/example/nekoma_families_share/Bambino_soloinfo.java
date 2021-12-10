@@ -142,6 +142,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                         System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
                                 }
+
                                 labels = new ArrayList<>();
                                 id_labels_spinner = new ArrayList<>();
                                 Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
