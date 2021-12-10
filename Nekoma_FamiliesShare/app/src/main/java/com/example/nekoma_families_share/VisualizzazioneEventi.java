@@ -253,7 +253,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         public final int nPart;
         public final String descrizione;
         public final String enddate;
-        public final String labels;
+        public String labels;
         public final String labels_ids;
         public final String owner_id;
 
