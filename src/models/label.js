@@ -9,18 +9,16 @@ const labelSchema = new mongoose.Schema(
     },
     name: {
         type : String,
-        unique : false,
         required : true
     },
     group_id: {
         type : String,
-        unique: false,
         required : true
     }
   }
 )
 
-labelSchema.index({ name: 1, group_id: 1 }, { unique: true })
+ labelSchema.index({ name: 1, group_id: 1 }, { unique: true })
 
 const model = mongoose.model('Label', labelSchema)
 

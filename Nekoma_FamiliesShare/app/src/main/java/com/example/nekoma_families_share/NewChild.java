@@ -58,7 +58,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_child);
 
-        System.out.println(Utilities.getToken(this));
+        // System.out.println(Utilities.getToken(this));
 
         Toolbar t = (Toolbar) findViewById(R.id.newchild_toolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
@@ -78,7 +78,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         labelsSpinner = (Spinner) findViewById(R.id.labelsSpinner);
 
         String userToken = Utilities.getToken(this);
-        System.out.println(userToken);
+       //  System.out.println(userToken);
         // Faccio il parse del token in modo tale da prendermi l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -110,7 +110,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
             }
         }, error -> {
             Toast.makeText(NewChild.this, error.toString(), Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         }, new HashMap<>());
 
         initDatePicker();
@@ -165,7 +165,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
             startActivity(homepage);
         },error -> {
             Toast.makeText(NewChild.this, "Devi specificare: nome,cognome,data di nascita e genere!", Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         },params);
     }
 

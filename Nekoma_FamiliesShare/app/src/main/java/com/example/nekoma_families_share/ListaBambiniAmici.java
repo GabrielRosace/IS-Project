@@ -73,9 +73,9 @@ public class ListaBambiniAmici extends AppCompatActivity {
         t.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                System.out.println(tab.getPosition());
+                // System.out.println(tab.getPosition());
                 if(tab.getPosition()==1){
-                    System.out.println("sono qui dentro prima della getMyKids");
+                    // System.out.println("sono qui dentro prima della getMyKids");
                     addRecyclerView(b_miei);
                 }else{
                     addRecyclerView(b_amici);
@@ -103,7 +103,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/children", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println(response);
+                // System.out.println(response);
                 try{
                     JSONArray tmp = new JSONArray(response);
                     String url = "/children?searchBy=ids";
@@ -111,18 +111,18 @@ public class ListaBambiniAmici extends AppCompatActivity {
                         //todo costruire l'url
                         url += "&ids="+tmp.getString(i);
                     }
-                    System.out.println(url);
+                    // System.out.println(url);
                     Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, url, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            System.out.println(response);
+                            // System.out.println(response);
                             try {
                                 JSONArray kid = new JSONArray(response);
                                 for (int i = 0; i < kid.length(); ++i) {
                                     if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                         b_amici.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }else{
-                                        System.out.println("sono dentro ai miei bambini");
+                                        // System.out.println("sono dentro ai miei bambini");
                                         b_miei.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }
                                 }
@@ -137,7 +137,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            System.err.println(error.toString());
+                            // System.err.println(error.toString());
                             Toast.makeText(ListaBambiniAmici.this, "Richiesta non andata a buon fine", Toast.LENGTH_SHORT).show();
                         }
                     }, new HashMap<>());
@@ -150,7 +150,8 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.err.println(error.toString());
+                Toast.makeText(ListaBambiniAmici.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }

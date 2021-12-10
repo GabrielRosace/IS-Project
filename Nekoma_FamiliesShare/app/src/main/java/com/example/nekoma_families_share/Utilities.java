@@ -111,31 +111,4 @@ public class Utilities {
         return Utilities.getPrefs(context).getString("group","");
     }
 
-    /*public static class ImageDownloader<T> extends AsyncTask<String, Void, Bitmap> {
-        T holder;
-        Consumer<Bitmap> postExecute;
-
-        public ImageDownloader(T holder, Consumer<Bitmap> postExecute) {
-            this.holder = holder;
-            this.postExecute = postExecute;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            String urlOfImage = strings[0];
-            Bitmap logo = null;
-            try{
-                InputStream is = new URL(urlOfImage).openStream();
-                logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
-                e.printStackTrace();
-            }
-            return logo;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            postExecute.accept(bitmap);
-        }
-    }*/
 }

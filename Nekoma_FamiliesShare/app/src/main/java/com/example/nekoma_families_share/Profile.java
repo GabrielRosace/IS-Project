@@ -64,7 +64,7 @@ public class Profile extends AppCompatActivity {
 
         // Ottengo il token
         String userToken = Utilities.getToken(this);
-        System.out.println(userToken);
+        // System.out.println(userToken);
         // Faccio il parse del token in modo tale da prendermi l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -129,7 +129,7 @@ public class Profile extends AppCompatActivity {
             }
         }, error -> {
             Toast.makeText(Profile.this, "Impossibile caricare informazioni del profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         }, new HashMap<>());
 
         editSwitch = (Switch)findViewById(R.id.EditSwitch);
@@ -160,7 +160,7 @@ public class Profile extends AppCompatActivity {
             startActivity(login);
         },error -> {
             Toast.makeText(Profile.this, "Non è possibile eliminare il profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         },new HashMap<>());
     }
 
@@ -185,7 +185,7 @@ public class Profile extends AppCompatActivity {
             startActivity(homepage);
         },error -> {
             Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-            System.err.println(error.getMessage());
+            // System.err.println(error.getMessage());
         },params);
     }
 

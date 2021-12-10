@@ -69,12 +69,12 @@ public class Etichette extends AppCompatActivity {
             public void onResponse(String response) {
                 try{
                     JSONArray tmp = new JSONArray(response);
-                    System.out.println(tmp);
-                    System.out.println(response);
+                   // System.out.println(tmp);
+                    //System.out.println(response);
                     for(int i=0;i<tmp.length();++i){
                         myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                         etichette.add(nuovo);
-                        System.out.println("etichette ******"+etichette.get(i));
+                        //System.out.println("etichette ******"+etichette.get(i));
                     }
                     MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Etichette.this, etichette);
 
@@ -89,7 +89,7 @@ public class Etichette extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
+                // System.err.println(error.getMessage());
             }
         }, new HashMap<>());
     }
@@ -124,7 +124,6 @@ public class Etichette extends AppCompatActivity {
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //todo fai la delete
                     RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
                     // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                     Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
@@ -138,7 +137,7 @@ public class Etichette extends AppCompatActivity {
                                     try{
                                         etichette = new ArrayList<>();
                                         JSONArray tmp = new JSONArray(response1);
-                                        System.out.println(tmp);
+                                        // System.out.println(tmp);
                                         for(int i=0;i<tmp.length();++i){
                                             myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                                             etichette.add(nuovo);
@@ -156,7 +155,7 @@ public class Etichette extends AppCompatActivity {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                                    System.err.println(error.getMessage());
+                                    // System.err.println(error.getMessage());
                                 }
                             }, new HashMap<>());
                         }
@@ -164,7 +163,7 @@ public class Etichette extends AppCompatActivity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                            System.err.println(error.getMessage());
+                           //  System.err.println(error.getMessage());
                         }
                     },new HashMap<>());
                 }
@@ -253,7 +252,7 @@ public class Etichette extends AppCompatActivity {
                     public void onResponse(String response1) {
                         try{
                             JSONArray tmp = new JSONArray(response1);
-                            System.out.println(tmp);
+                            // System.out.println(tmp);
                             for(int i=0;i<tmp.length();++i){
                                 myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                                 etichette.add(nuovo);
@@ -271,7 +270,7 @@ public class Etichette extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                        System.err.println(error.getMessage());
+                       //  System.err.println(error.getMessage());
                     }
                 }, new HashMap<>());
             }
@@ -279,7 +278,7 @@ public class Etichette extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
+                // System.err.println(error.getMessage());
             }
         },data);
 

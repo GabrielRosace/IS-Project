@@ -88,7 +88,7 @@ public class DettagliEvento extends AppCompatActivity {
 
         extraData = intent.getStringExtra("evento");
 
-        System.out.println("-----------" + extraData);
+        // System.out.println("-----------" + extraData);
 
 
         ImageView img = (ImageView) findViewById(R.id.eventImage);

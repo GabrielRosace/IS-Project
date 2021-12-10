@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -113,7 +114,7 @@ public class YourEvent extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 try{
-                    System.out.println("**********"+response);
+                    //System.out.println("**********"+response);
                     JSONArray tmp = new JSONArray(response);
                     for(int i=0;i<tmp.length();++i){
                         final String tmp_activity = tmp.getString(i);
@@ -122,7 +123,7 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onResponse(String response1) {
                                 try {
-                                    System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
+                                    //System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
                                     JSONObject tmp = new JSONObject(response1);
                                     // caso in cui sono il creatore
 
@@ -135,7 +136,7 @@ public class YourEvent extends AppCompatActivity {
                                         //          - altrimenti -> scaduti eventi (fatto)
                                         // altrimenti sono un partecipante?
                                         //      - si, è finito ? -> si -> partecipi eventi -> altrimenti scaduti eventi
-                                        System.out.println("primo caso");
+                                        // System.out.println("primo caso");
                                         if(new JSONObject(tmp_activity).getBoolean("repetition")){
                                             String name= new JSONObject(tmp_activity).getString("name");
                                             String id_activity = new JSONObject(tmp_activity).getString("activity_id");
@@ -244,7 +245,7 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }else{
-                                        System.out.println("secondo caso");
+                                        // System.out.println("secondo caso");
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
@@ -348,7 +349,8 @@ public class YourEvent extends AppCompatActivity {
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                System.err.println(error.toString());
+                                Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                                // System.err.println(error.toString());
                             }
                         }, new HashMap<>());
                     }
@@ -360,7 +362,8 @@ public class YourEvent extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.err.println(error.toString());
+                Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
@@ -400,13 +403,13 @@ public class YourEvent extends AppCompatActivity {
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEventi event = mData.get(position);
-            System.out.println(" ************************* questo è event: "+event.toString());
+            // System.out.println(" ************************* questo è event: "+event.toString());
             holder.btn.setText(event.nome);
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
-                    System.out.println("intent: "+event.toString());
+                    // System.out.println("intent: "+event.toString());
                     evento.putExtra("evento", event.toString());
                     startActivity(evento);
                 }
