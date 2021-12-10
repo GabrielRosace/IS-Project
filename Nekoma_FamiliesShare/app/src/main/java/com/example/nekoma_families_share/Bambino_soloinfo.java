@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,6 +62,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private Boolean isChild = false;
     private Spinner etichette ;
+    String id_child;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +77,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 finish();
             }
         });
-        String id_child = getKid();
+        id_child = getKid();
         String user_id;
         String userToken = Utilities.getToken(Bambino_soloinfo.this);
         String[] split_token = userToken.split("\\.");
@@ -118,20 +120,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 // spinner
 
 
-
-                                String user_id;
-                                String userToken = Utilities.getToken(Bambino_soloinfo.this);
-                                System.out.println(userToken);
-                                // Faccio il parse del token in modo tale da prendermi l'id dell'utente
-                                String[] split_token = userToken.split("\\.");
-                                String base64Body = split_token[1];
-                                String body = new String(Base64.getDecoder().decode(base64Body));
-                                try {
-                                    JSONObject res = new JSONObject(body);
-                                    user_id = res.getString("user_id");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
 
                                 if(new JSONObject(kid.getString(i)).has("labels")){
                                     System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
@@ -239,7 +227,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 addRecyclerView(my_etichette);
                             }
                         }
-
+                        RelativeLayout b = (RelativeLayout) findViewById(R.id.caricamento_id);
+                        b.setVisibility(View.GONE);
                     }catch(JSONException | ParseException e){
                         e.printStackTrace();
                     }
@@ -323,6 +312,9 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                     if(id_labels_spinner.size()==0){
                         aggiungi_etichetta.setEnabled(false);
                     }
+                // label id , child id -> id_child , user id -> user_id
+                System.out.println();
+
             }
         });
     }

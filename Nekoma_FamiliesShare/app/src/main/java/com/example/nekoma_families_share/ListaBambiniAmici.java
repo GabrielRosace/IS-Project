@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -118,17 +119,20 @@ public class ListaBambiniAmici extends AppCompatActivity {
                             try {
                                 JSONArray kid = new JSONArray(response);
                                 for (int i = 0; i < kid.length(); ++i) {
-                                    if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
+                                    if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("parent_id").equals(user_id)){
                                         b_amici.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }else{
                                         System.out.println("sono dentro ai miei bambini");
                                         b_miei.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }
                                 }
+                                RelativeLayout b = (RelativeLayout) findViewById(R.id.caricamento);
+                                b.setVisibility(View.GONE);
                                 addRecyclerView(b_amici);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -141,6 +145,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
+
             }
         }, new Response.ErrorListener() {
             @Override
