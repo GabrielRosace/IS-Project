@@ -1387,7 +1387,16 @@ router.patch(
       if (!member) {
         return res.status(401).send('Unauthorized')
       }
-      const comingevent = req.body
+      let comingevent = req.body
+
+      let input = comingevent.parents.substring(1, comingevent.parents.length - 1).split(",")
+      let arr = []
+
+      for (let i = 0; i < input.length; i++){
+        arr.push(input[i])
+      }
+
+
       const tmp = {
         description: comingevent.description,
         location: comingevent.location,
@@ -1400,7 +1409,7 @@ router.patch(
               requiredChildren: comingevent.requiredParents,
               cost: comingevent.cost,
               parents: JSON.stringify(comingevent.parents),
-              children: JSON.stringify(comingevent.children),
+              children: JSON.stringify(arr),
               externals: '[]',
               status: 'ongoing',
               link: comingevent.link,
@@ -1430,18 +1439,32 @@ router.patch(
       }
       const group = await Group.findOne({ group_id })
       const myChildren = await Parent.distinct('child_id', { parent_id: req.user_id })
-      const event = await calendar.events.get({
+      let event = await calendar.events.get({
         calendarId: group.calendar_id,
         eventId: req.params.timeslotId
       })
-      const oldParents = JSON.parse(event.data.extendedProperties.shared.parents)
+
+      let old_arr = []
+      if (event.data.extendedProperties.shared.parents) {
+        let tmp_parents = event.data.extendedProperties.shared.parents
+        let old_input = tmp_parents.substring(1, tmp_parents.length - 1).split(",")
+  
+        for (let i = 0; i < old_input.length; i++){
+          old_arr.push(old_input[i].substring(1,old_input[i].length-1))
+        }
+        
+      }
+
+      const oldParents = JSON.parse(JSON.stringify(old_arr))
       const oldChildren = JSON.parse(event.data.extendedProperties.shared.children)
-      console.log(JSON.parse(tmp.extendedProperties.shared.parents))
+
       const parents = JSON.parse(tmp.extendedProperties.shared.parents)
       const children = JSON.parse(tmp.extendedProperties.shared.children)
       if (!member.admin) {
+
         if (parents.includes(req.user_id)) {
           tmp.extendedProperties.shared.parents = JSON.stringify([...new Set([...oldParents, req.user_id])])
+
         } else {
           tmp.extendedProperties.shared.parents = JSON.stringify(oldParents.filter(u => u !== req.user_id))
         }
@@ -1455,6 +1478,7 @@ router.patch(
         tmp.extendedProperties.shared.children = JSON.stringify(oldChildren)
       } else {
         if (adminChanges) {
+          console.log("adminchange true")
           if (Object.keys(adminChanges).length > 0) {
             Object.keys(adminChanges).forEach(id => {
               if (adminChanges[id] > 0) {
@@ -1466,6 +1490,17 @@ router.patch(
               }
             })
             nh.timeslotAdminChangesNotification(tmp.summary, adminChanges, req.user_id, group_id, activity_id, timeslot_id)
+          }
+        } else {
+          let str = tmp.extendedProperties.shared.parents
+          if (typeof str == "string") {
+            str = str.substring(1, str.length - 1).split(",")
+            let arr = []
+
+            for (let i = 0; i < str.length; i++){
+              arr.push(str[i].substring(1,str[i].length-1))
+            }
+            tmp.extendedProperties.shared.parents = JSON.stringify(arr)
           }
         }
       }
@@ -1490,8 +1525,6 @@ router.patch(
         eventId: req.params.timeslotId,
         resource: tmp
       })
-      console.log(adminChanges)
-      console.log(notifyUsers)
       res.status(200).send('Timeslot was updated')
     } catch (error) {
       next(error)
