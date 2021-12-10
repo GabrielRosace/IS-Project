@@ -9,12 +9,11 @@
     tools:layout_editor_absoluteY="-31dp">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar4"
+        android:id="@+id/toolbar_profilo"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:onClick="getHomepage"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,6 +32,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profilePicture"
+        tools:ignore="ImageContrastCheck"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
@@ -49,7 +49,7 @@
         app:layout_constraintBottom_toTopOf="@+id/profileImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar4" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_profilo" />
 
     <TextView
         android:id="@+id/profileEmailLabel"
@@ -229,7 +229,7 @@
         android:layout_width="193dp"
         android:layout_height="48dp"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="14dp"
         android:backgroundTint="#AE4848"
         android:onClick="DeleteUser"
         android:text="@string/deleteProfile"

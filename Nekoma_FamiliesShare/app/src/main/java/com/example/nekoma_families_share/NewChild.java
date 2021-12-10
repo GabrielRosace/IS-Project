@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -59,6 +60,14 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
 
         System.out.println(Utilities.getToken(this));
 
+        Toolbar t = (Toolbar) findViewById(R.id.newchild_toolbar);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         childName = findViewById(R.id.childName);
         childSurname = findViewById(R.id.childSurname);
         childGender = findViewById(R.id.childGender);
@@ -96,12 +105,6 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
                 dataSpinner.addAll(labelsName);
                 dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                 labelsSpinner.setAdapter(dataSpinner);
-                for (int i = 0; i < labelsId.size(); i++) {
-                    System.out.println("ID :"+labelsId.get(i));
-                }
-                for (int i = 0; i < labelsName.size(); i++) {
-                    System.out.println("NAME :"+labelsName.get(i));
-                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -112,7 +115,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
 
         initDatePicker();
         dateButton = findViewById(R.id.dateButton);
-        dateButton.setText("Select a date");
+        dateButton.setText("Seleziona una data");
 
         childGender = (Spinner) findViewById(R.id.childGender);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
@@ -121,14 +124,10 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-    }
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {}
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) {}
 
     private void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
@@ -148,52 +147,26 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
     }
 
     public void setNewChild(View v){
-        RequestQueue newChild = Volley.newRequestQueue(this);
-        String url= getString(R.string.url) + "/users/"+user_id+"/children";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Toast.makeText(NewChild.this, "New child added succesfully!", Toast.LENGTH_LONG).show();
-                Intent homepage = new Intent(NewChild.this,Homepage.class);
-                startActivity(homepage);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(NewChild.this, "You have to specify: name, surname, birthdate, gender", Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> headers = new HashMap<String,String>();
-                headers.put("Authorization","Bearer "+Utilities.getToken(NewChild.this));
-                return headers;
-            }
+        Map<String,String> params = new HashMap<>();
+        params.put("birthdate",dateButton.getText().toString());
+        params.put("given_name",childName.getText().toString());
+        params.put("family_name",childSurname.getText().toString());
+        params.put("gender",childGender.getSelectedItem().toString());
+        params.put("allergies",childAllergies.getText().toString());
+        params.put("other_info",childOtherInfos.getText().toString());
+        params.put("special_needs",childSpecialNeeds.getText().toString());
+        params.put("background","#00838F");
+        params.put("labels", childLabels.toString());
+        params.put("image","/images/profiles/child_default_photo.png");
 
-            @Override
-            public byte[] getBody() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("birthdate",dateButton.getText().toString());
-                params.put("given_name",childName.getText().toString());
-                params.put("family_name",childSurname.getText().toString());
-                params.put("gender",childGender.getSelectedItem().toString());
-                params.put("allergies",childAllergies.getText().toString());
-                params.put("other_info",childOtherInfos.getText().toString());
-                params.put("special_needs",childSpecialNeeds.getText().toString());
-                params.put("background","#00838F");
-                params.put("labels", childLabels.toString());
-                params.put("image","/images/profiles/child_default_photo.png");
-                System.out.println("Ecco cosa passo: "+params);
-                return new JSONObject(params).toString().getBytes();
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-        };
-        newChild.add(stringRequest);
+        Utilities.httpRequest(this,Request.Method.POST,"/users/"+user_id+"/children",response -> {
+            Toast.makeText(NewChild.this, "Nuovo figlio aggiunto correttamente!", Toast.LENGTH_LONG).show();
+            Intent homepage = new Intent(NewChild.this,Homepage.class);
+            startActivity(homepage);
+        },error -> {
+            Toast.makeText(NewChild.this, "Devi specificare: nome,cognome,data di nascita e genere!", Toast.LENGTH_LONG).show();
+            System.err.println(error.getMessage());
+        },params);
     }
 
     public void newLabel(View v){

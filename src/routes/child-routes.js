@@ -55,6 +55,8 @@ router.get('/', async (req, res, next) => {
   // }).catch(next)
 
   Child.find({child_id : { $in : ids}}).lean().populate('image').populate('parent').then((c) => {
+    if(c.length === 0) return res.status(400).send('Children non found')
+    
     for( let i = 0 ; i < c.length ; i++){
       Profile.findOne({user_id : c[i].parent.parent_id}).lean().populate('image').then((p) => {
         if(c[i].labels){

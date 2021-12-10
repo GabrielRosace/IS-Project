@@ -19,7 +19,6 @@
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
-            android:onClick="homepage"
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Etichette"
@@ -49,9 +48,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="253dp"
-                android:layout_height="match_parent">
 
                 <EditText
                     android:id="@+id/aggiu_eti"
@@ -67,7 +63,7 @@
                     app:layout_constraintStart_toEndOf="@+id/profileNameLabel"
                     app:layout_constraintTop_toBottomOf="@+id/profileEmail"
                     tools:ignore="DuplicateSpeakableTextCheck,SpeakableTextPresentCheck" />
-            </com.google.android.material.textfield.TextInputLayout>
+
 
         </LinearLayout>
 

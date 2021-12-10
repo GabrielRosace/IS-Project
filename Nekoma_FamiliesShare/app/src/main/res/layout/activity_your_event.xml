@@ -12,7 +12,7 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_archivio"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:background="@color/purple_500"
@@ -45,9 +45,26 @@
                 android:id="@+id/closed_events"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="chiusi" />
+                android:text="scaduti" />
 
         </com.google.android.material.tabs.TabLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/lista_eventi"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/recycler_view_item_2" />
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 

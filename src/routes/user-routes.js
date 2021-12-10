@@ -889,7 +889,9 @@ router.post('/:id/framily', (req, res) => {
 router.get('/:id/children', (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Unauthorized') }
   const { id } = req.params
-  Parent.find({ parent_id: id }).then(children => {
+  Parent.find({ parent_id: id })
+    .populate('child')
+    .then(children => {
     if (children.length === 0) {
       return res.status(404).send('User has no children')
     }
@@ -897,14 +899,21 @@ router.get('/:id/children', (req, res, next) => {
   }).catch(next)
 })
 
+
+
 router.post('/:id/children', childProfileUpload.single('photo'), async (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const {
     birthdate, given_name, family_name, gender, allergies, other_info, special_needs, background, image: imagePath, labels
   } = req.body
 
+  let labelFormatted
+  if (labels) {
+    labelFormatted = labels.substring(1,labels.length-1).replace(/\s+/g, '')
+  }
 
-  let labelsSplit = labels ? labels.split(',') : undefined
+
+  let labelsSplit = labels ? labelFormatted.split(',') : undefined
 
   const { file } = req
   if (!(birthdate && given_name && family_name && gender && background)) {
