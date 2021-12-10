@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,17 +56,19 @@ import java.util.Objects;
 public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private List<String> labels;
     private List<String> id_labels_spinner;
-    private List<String> childLabels = new ArrayList<>();
+    private List<String> childLabels ;
     private ArrayAdapter dataSpinner;
     private List<myEtichette> my_etichette = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private Boolean isChild = false;
     private Spinner etichette ;
+    String id_child;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bambino_soloinfo);
+        childLabels = new ArrayList<>();
         etichette =  (Spinner) findViewById(R.id.spinner_etichette);
         Toolbar t = (Toolbar) findViewById(R.id.bambinotoolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
@@ -74,7 +77,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 finish();
             }
         });
-        String id_child = getKid();
+        id_child = getKid();
         String user_id;
         String userToken = Utilities.getToken(Bambino_soloinfo.this);
         String[] split_token = userToken.split("\\.");
@@ -89,10 +92,10 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                     try{
                         JSONArray kid = new JSONArray(response);
                         for(int i=0;i<kid.length();++i){
-                            System.out.println("sono kid(i):" + kid.getString(i));
+                            // System.out.println("sono kid(i):" + kid.getString(i));
                             if(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                 isChild = true;
-                                System.out.println("sono qui dentro il caso in cui sia mio figlio");
+                               //  System.out.println("sono qui dentro il caso in cui sia mio figlio");
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
                                 new ImageDownloader(img_bambino).execute(getString(R.string.urlnoapi)+bambino.image_path);
@@ -115,43 +118,30 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 layout.setVisibility(View.VISIBLE);
 
                                 // spinner
-
-
-
-                                String user_id;
-                                String userToken = Utilities.getToken(Bambino_soloinfo.this);
-                                System.out.println(userToken);
-                                // Faccio il parse del token in modo tale da prendermi l'id dell'utente
-                                String[] split_token = userToken.split("\\.");
-                                String base64Body = split_token[1];
-                                String body = new String(Base64.getDecoder().decode(base64Body));
-                                try {
-                                    JSONObject res = new JSONObject(body);
-                                    user_id = res.getString("user_id");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
                                 if(new JSONObject(kid.getString(i)).has("labels")){
-                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
+                                    // System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    System.out.println("questo è my tmp : "+my_tmp.toString());
+                                    // System.out.println("questo è my tmp : "+my_tmp.toString());
                                     for(int y =0;y<my_tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
                                         my_etichette.add(et);
-                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
+                                     //    System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
                                 }
+
                                 labels = new ArrayList<>();
                                 id_labels_spinner = new ArrayList<>();
                                 Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
                                     try {
                                         JSONArray user_response = new JSONArray((String) response2);
+                                        int cnt=0;
                                         for (int j = 0; j < user_response.length(); j++) {
+                                           //  System.out.println("DENTRO LO SPINNER "+ (++cnt));
                                             JSONObject obj = user_response.getJSONObject(j);
-                                            System.out.println("sono obj :"+obj);
+                                           //  System.out.println("sono obj :"+obj);
                                             if(!my_etichette.contains(new myEtichette(obj.getString("name"),"",true))){
-                                                System.out.println(user_response.get(j));
+                                               //  System.out.println(" *******POPOLO LO SPINNER "+ (cnt));
+                                             //    System.out.println(user_response.get(j));
                                                 labels.add(obj.getString("name"));
                                                 id_labels_spinner.add(obj.getString("label_id"));
                                             }
@@ -166,13 +156,11 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                     }
                                 }, error -> {
                                     Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                                    System.err.println(error.getMessage());
+                                  //   System.err.println(error.getMessage());
                                 }, new HashMap<>());
                                 // fine spinner
 
-                                //todo mettere la recicle view
-
-                                System.out.println("sono kid di i"+ kid.getString(i));
+                              //   System.out.println("sono kid di i"+ kid.getString(i));
 
                                 TextView text_gender = (TextView) findViewById(R.id.genere_);
                                 if(!new JSONObject(kid.getString(i)).getString("gender").equals("unspecified")){
@@ -194,16 +182,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
-                                if(new JSONObject(kid.getString(i)).has("labels")){
-                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
-                                    JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    System.out.println("questo è my tmp : "+my_tmp.toString());
-                                    for(int y =0;y<my_tmp.length();++y){
-                                        myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
-                                        my_etichette.add(et);
-                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
-                                    }
-                                }
+                                addLabel();
                                 addRecyclerView(my_etichette);
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
@@ -232,19 +211,20 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
                                 if(new JSONObject(kid.getString(i)).has("labels")){
-                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
+                                //     System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    System.out.println("questo è my tmp : "+my_tmp.toString());
+                                 //    System.out.println("questo è my tmp : "+my_tmp.toString());
                                     for(int y =0;y<my_tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),false);
                                         my_etichette.add(et);
-                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
+                                 //        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
                                 }
                                 addRecyclerView(my_etichette);
                             }
                         }
-
+                        RelativeLayout b = (RelativeLayout) findViewById(R.id.caricamento_id);
+                        b.setVisibility(View.GONE);
                     }catch(JSONException | ParseException e){
                         e.printStackTrace();
                     }
@@ -254,7 +234,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                    System.err.println(error.getMessage());
+                //    System.err.println(error.getMessage());
                 }
             },new HashMap<>());
         }catch(JSONException e){
@@ -317,17 +297,60 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
     }
-    public void addLabel(){
+    public void addLabel(){ //todo alla seconda mi da errore
         Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
         aggiungi_etichetta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    childLabels.add(id_labels_spinner.get(etichette.getSelectedItemPosition()));
-                    dataSpinner.remove(etichette.getSelectedItem());
-                    id_labels_spinner.remove(etichette.getSelectedItemPosition());
-                    if(id_labels_spinner.size()==0){
-                        aggiungi_etichetta.setEnabled(false);
+                String rimossa;
+                childLabels.add(id_labels_spinner.get(etichette.getSelectedItemPosition()));
+                rimossa = id_labels_spinner.get(etichette.getSelectedItemPosition());
+                dataSpinner.remove(etichette.getSelectedItem());
+                id_labels_spinner.remove(etichette.getSelectedItemPosition());
+                if(id_labels_spinner.size()==0){
+                    aggiungi_etichetta.setEnabled(false);
+                }
+                // label id , child id -> id_child
+                // System.out.println(rimossa);
+                Map<String, String> add_label = new HashMap<>();
+                add_label.put("child_id",id_child);
+                add_label.put("label_id",rimossa);
+                Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.POST, "/label/child", new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        Toast.makeText(Bambino_soloinfo.this, "Etichetta aggiunta", Toast.LENGTH_SHORT).show();
+                        Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/child/" + id_child, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String responsee) {
+                                try{
+                                    Toast.makeText(Bambino_soloinfo.this, "AGGIUNTA ETICHETTA", Toast.LENGTH_SHORT).show();
+                                    JSONArray tmp = new JSONArray(responsee);
+                                    // popolare la lista di etichette
+                                    my_etichette = new ArrayList<>();
+                                    for(int y =0;y<tmp.length();++y){
+                                        myEtichette et = new myEtichette(new JSONObject(tmp.getString(y)).getString("name"),new JSONObject(tmp.getString(y)).getString("label_id"),true);
+                                        my_etichette.add(et);
+                                      //   System.out.println("sono nel for : "+new JSONObject(tmp.getString(y)).getString("name"));
+                                    }
+                                    addRecyclerView(my_etichette);
+                                }catch (JSONException e){
+                                    Toast.makeText(Bambino_soloinfo.this, "Qualcosa non va", Toast.LENGTH_SHORT).show();
+                                   //  System.err.println(e.toString());
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(Bambino_soloinfo.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new HashMap<>());
                     }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Bambino_soloinfo.this, "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
+                    }
+                }, add_label);
             }
         });
     }
@@ -371,56 +394,24 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             holder.myTextView.setText(name.name);
             if(name.parent == true){
                 holder.btn.setVisibility(View.VISIBLE);
-                /*holder.btn.setOnClickListener(new View.OnClickListener() {
+                holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //todo fai la delete
-                    *//*RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
-                    // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
-                    Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Toast.makeText(Bambino_soloinfo.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
-                            String id_group = Utilities.getPrefs(Bambino_soloinfo.this).getString("group", "");
-                            Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response1) {
-                                    try{
-                                        etichette_figlio = new ArrayList<>();
-                                        JSONArray tmp = new JSONArray(response1);
-                                        System.out.println(tmp);
-                                        for(int i=0;i<tmp.length();++i){
-                                            myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"),true);
-                                            etichette_figlio.add(nuovo);
-                                        }
-                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Bambino_soloinfo.this, etichette_figlio);
-
-                                        grouplist.setLayoutManager(grouplistManager);
-                                        grouplist.setAdapter(adapter);
-                                    }catch(JSONException e){
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                                    System.err.println(error.getMessage());
-                                }
-                            }, new HashMap<>());
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                            System.err.println(error.getMessage());
-                        }
-                    },new HashMap<>());*//*
+                        Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/child/" + name.id +"/"+ id_child, new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                recreate();
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(Bambino_soloinfo.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new HashMap<>());
                     }
-                });*/
+                });
             }
-
         }
 
         // total number of rows

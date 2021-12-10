@@ -29,6 +29,14 @@ public class Homepage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
 
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_archivio);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent profile = new Intent(Homepage.this,Profile.class);
+                startActivity(profile);
+            }
+        });
 
 
         String id_group = Utilities.getPrefs(this).getString("group","");
@@ -65,7 +73,7 @@ public class Homepage extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Homepage.this, error.toString(), Toast.LENGTH_LONG).show();
-                    System.err.println(error.getMessage());
+                    // System.err.println(error.getMessage());
                 }
             },new HashMap<>());
         }catch(JSONException e){
@@ -88,10 +96,7 @@ public class Homepage extends AppCompatActivity {
         startActivity(group);
     }
 
-    public void getProfile(View v){
-        Intent profile = new Intent(Homepage.this,Profile.class);
-        startActivity(profile);
-    }
+
 
     public void getActivities(View v){
         Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);
@@ -101,7 +106,12 @@ public class Homepage extends AppCompatActivity {
         Intent event = new Intent(Homepage.this,YourEvent.class);
         startActivity(event);
     }
+    public void getCreateEvent(View v){
+        Intent event = new Intent(Homepage.this,Creazione_evento.class);
+        startActivity(event);
+    }
     public void getService(View v){
         Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
     }
+
 }

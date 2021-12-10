@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(MainActivity.this, "Le credenziali non sono corrette, riprova.", Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
+                // System.err.println(error.getMessage());
             }
         }){
             // creare una classe anonima che estende string request :(
