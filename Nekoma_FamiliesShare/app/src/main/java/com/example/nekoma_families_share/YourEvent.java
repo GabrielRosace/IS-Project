@@ -2,6 +2,7 @@ package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -333,8 +334,11 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }
+                                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
+                                    pr.setVisibility(View.GONE);
                                     if(tuoi_eventi.size()>0){
-                                        addRecyclerView(tuoi_eventi); //error
+
+                                        addRecyclerView(tuoi_eventi);
                                     }
                                 } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
@@ -461,7 +465,7 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public String toString() {
-            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels;
+            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
         }
     }
 

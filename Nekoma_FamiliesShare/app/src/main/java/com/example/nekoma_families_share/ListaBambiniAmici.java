@@ -119,7 +119,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                             try {
                                 JSONArray kid = new JSONArray(response);
                                 for (int i = 0; i < kid.length(); ++i) {
-                                    if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("parent_id").equals(user_id)){
+                                    if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                         b_amici.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }else{
                                         System.out.println("sono dentro ai miei bambini");

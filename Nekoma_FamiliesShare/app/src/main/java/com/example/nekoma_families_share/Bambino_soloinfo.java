@@ -118,9 +118,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 layout.setVisibility(View.VISIBLE);
 
                                 // spinner
-
-
-
                                 if(new JSONObject(kid.getString(i)).has("labels")){
                                     System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
@@ -163,8 +160,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 }, new HashMap<>());
                                 // fine spinner
 
-                                //todo mettere la recicle view
-
                                 System.out.println("sono kid di i"+ kid.getString(i));
 
                                 TextView text_gender = (TextView) findViewById(R.id.genere_);
@@ -187,6 +182,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
+                                addLabel();
                                 addRecyclerView(my_etichette);
                             }else{
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
@@ -301,20 +297,60 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
     }
-    public void addLabel(){
+    public void addLabel(){ //todo alla seconda mi da errore
         Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
         aggiungi_etichetta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    childLabels.add(id_labels_spinner.get(etichette.getSelectedItemPosition()));
-                    dataSpinner.remove(etichette.getSelectedItem());
-                    id_labels_spinner.remove(etichette.getSelectedItemPosition());
-                    if(id_labels_spinner.size()==0){
-                        aggiungi_etichetta.setEnabled(false);
+                String rimossa;
+                childLabels.add(id_labels_spinner.get(etichette.getSelectedItemPosition()));
+                rimossa = id_labels_spinner.get(etichette.getSelectedItemPosition());
+                dataSpinner.remove(etichette.getSelectedItem());
+                id_labels_spinner.remove(etichette.getSelectedItemPosition());
+                if(id_labels_spinner.size()==0){
+                    aggiungi_etichetta.setEnabled(false);
+                }
+                // label id , child id -> id_child
+                System.out.println(rimossa);
+                Map<String, String> add_label = new HashMap<>();
+                add_label.put("child_id",id_child);
+                add_label.put("label_id",rimossa);
+                Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.POST, "/label/child", new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        Toast.makeText(Bambino_soloinfo.this, "Etichetta aggiunta", Toast.LENGTH_SHORT).show();
+                        Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/child/" + id_child, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String responsee) {
+                                try{
+                                    Toast.makeText(Bambino_soloinfo.this, "AGGIUNTA ETICHETTA", Toast.LENGTH_SHORT).show();
+                                    JSONArray tmp = new JSONArray(responsee);
+                                    // popolare la lista di etichette
+                                    my_etichette = new ArrayList<>();
+                                    for(int y =0;y<tmp.length();++y){
+                                        myEtichette et = new myEtichette(new JSONObject(tmp.getString(y)).getString("name"),new JSONObject(tmp.getString(y)).getString("label_id"),true);
+                                        my_etichette.add(et);
+                                        System.out.println("sono nel for : "+new JSONObject(tmp.getString(y)).getString("name"));
+                                    }
+                                    addRecyclerView(my_etichette);
+                                }catch (JSONException e){
+                                    Toast.makeText(Bambino_soloinfo.this, "Qualcosa non va", Toast.LENGTH_SHORT).show();
+                                    System.err.println(e.toString());
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(Bambino_soloinfo.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new HashMap<>());
                     }
-                // label id , child id -> id_child , user id -> user_id
-                System.out.println();
-
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Bambino_soloinfo.this, "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
+                    }
+                }, add_label);
             }
         });
     }
@@ -358,56 +394,24 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             holder.myTextView.setText(name.name);
             if(name.parent == true){
                 holder.btn.setVisibility(View.VISIBLE);
-                /*holder.btn.setOnClickListener(new View.OnClickListener() {
+                holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //todo fai la delete
-                    *//*RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
-                    // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
-                    Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Toast.makeText(Bambino_soloinfo.this, "ELIMINATA", Toast.LENGTH_SHORT).show();
-                            String id_group = Utilities.getPrefs(Bambino_soloinfo.this).getString("group", "");
-                            Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response1) {
-                                    try{
-                                        etichette_figlio = new ArrayList<>();
-                                        JSONArray tmp = new JSONArray(response1);
-                                        System.out.println(tmp);
-                                        for(int i=0;i<tmp.length();++i){
-                                            myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"),true);
-                                            etichette_figlio.add(nuovo);
-                                        }
-                                        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Bambino_soloinfo.this, etichette_figlio);
-
-                                        grouplist.setLayoutManager(grouplistManager);
-                                        grouplist.setAdapter(adapter);
-                                    }catch(JSONException e){
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                                    System.err.println(error.getMessage());
-                                }
-                            }, new HashMap<>());
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                            System.err.println(error.getMessage());
-                        }
-                    },new HashMap<>());*//*
+                        Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/child/" + name.id +"/"+ id_child, new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                recreate();
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(Bambino_soloinfo.this, "ERRORE", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new HashMap<>());
                     }
-                });*/
+                });
             }
-
         }
 
         // total number of rows
