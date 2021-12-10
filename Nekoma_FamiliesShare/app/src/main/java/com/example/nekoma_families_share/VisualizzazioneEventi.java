@@ -210,7 +210,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Evento eve = eventoList.get(position);
-            System.out.println(" ************************* questo è event: "+eve.toString());
+//            System.out.println(" ************************* questo è event: "+eve.toString());
             holder.tv.setText(eve.nome);
             holder.btn.setText("Info");
             holder.btn.setOnClickListener(new View.OnClickListener() {
@@ -219,6 +219,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEvento.class);
 //                    System.out.println("intent: "+eve.toString());
                     evento.putExtra("evento", eve.toString());
+                    //evento.putExtra("partecipa", true);
                     startActivity(evento);
                 }
             });
