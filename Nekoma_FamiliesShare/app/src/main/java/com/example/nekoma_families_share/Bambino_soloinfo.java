@@ -55,7 +55,7 @@ import java.util.Objects;
 public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private List<String> labels;
     private List<String> id_labels_spinner;
-    private List<String> childLabels = new ArrayList<>();
+    private List<String> childLabels ;
     private ArrayAdapter dataSpinner;
     private List<myEtichette> my_etichette = new ArrayList<>();
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
@@ -66,6 +66,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bambino_soloinfo);
+        childLabels = new ArrayList<>();
         etichette =  (Spinner) findViewById(R.id.spinner_etichette);
         Toolbar t = (Toolbar) findViewById(R.id.bambinotoolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
@@ -148,10 +149,13 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
                                     try {
                                         JSONArray user_response = new JSONArray((String) response2);
+                                        int cnt=0;
                                         for (int j = 0; j < user_response.length(); j++) {
+                                            System.out.println("DENTRO LO SPINNER "+ (++cnt));
                                             JSONObject obj = user_response.getJSONObject(j);
                                             System.out.println("sono obj :"+obj);
                                             if(!my_etichette.contains(new myEtichette(obj.getString("name"),"",true))){
+                                                System.out.println(" *******POPOLO LO SPINNER "+ (cnt));
                                                 System.out.println(user_response.get(j));
                                                 labels.add(obj.getString("name"));
                                                 id_labels_spinner.add(obj.getString("label_id"));
@@ -194,16 +198,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 TextView text_bisgoni = (TextView) findViewById(R.id.bisogni_);
                                 if(!new JSONObject(kid.getString(i)).getString("special_needs").equals("")){
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
-                                }
-                                if(new JSONObject(kid.getString(i)).has("labels")){
-                                    System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
-                                    JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    System.out.println("questo è my tmp : "+my_tmp.toString());
-                                    for(int y =0;y<my_tmp.length();++y){
-                                        myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
-                                        my_etichette.add(et);
-                                        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
-                                    }
                                 }
                                 addRecyclerView(my_etichette);
                             }else{
