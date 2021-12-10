@@ -88,7 +88,7 @@ public class Etichette extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(Etichette.this, "ERRORE", Toast.LENGTH_LONG).show();
                 // System.err.println(error.getMessage());
             }
         }, new HashMap<>());
@@ -154,7 +154,7 @@ public class Etichette extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(Etichette.this, "ERRORE", Toast.LENGTH_LONG).show();
                                     // System.err.println(error.getMessage());
                                 }
                             }, new HashMap<>());
@@ -162,7 +162,7 @@ public class Etichette extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(Etichette.this, "ETICHETTA ESISTENTE", Toast.LENGTH_LONG).show();
                            //  System.err.println(error.getMessage());
                         }
                     },new HashMap<>());

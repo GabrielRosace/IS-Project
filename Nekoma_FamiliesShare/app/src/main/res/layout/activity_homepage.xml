@@ -13,7 +13,6 @@
         android:layout_marginBottom="7dp"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:onClick="getProfile"
         android:theme="?attr/actionOverflowMenuStyle"
         app:layout_constraintBottom_toTopOf="@+id/description"
         app:layout_constraintEnd_toEndOf="parent"

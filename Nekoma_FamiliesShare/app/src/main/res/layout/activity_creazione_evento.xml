@@ -16,8 +16,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/actionModeCloseDrawable"
-        app:title="crea un evento" />
+        app:navigationIcon="@drawable/abc_vector_test"
+        app:title="Crea un evento"
+        app:titleTextColor="#FFFFFF" />
 
     <TextView
         android:id="@+id/textView5"

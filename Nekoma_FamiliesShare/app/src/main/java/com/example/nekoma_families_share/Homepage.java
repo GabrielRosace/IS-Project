@@ -29,6 +29,16 @@ public class Homepage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
 
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_archivio);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent profile = new Intent(Homepage.this,Profile.class);
+                startActivity(profile);
+            }
+        });
+
+
         String id_group = Utilities.getPrefs(this).getString("group","");
         String user_id;
         String userToken = Utilities.getToken(Homepage.this);
@@ -86,10 +96,7 @@ public class Homepage extends AppCompatActivity {
         startActivity(group);
     }
 
-    public void getProfile(View v){
-        Intent profile = new Intent(Homepage.this,Profile.class);
-        startActivity(profile);
-    }
+
 
     public void getActivities(View v){
         Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);

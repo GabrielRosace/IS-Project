@@ -2,6 +2,7 @@ package com.example.nekoma_families_share;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,6 +34,15 @@ public class Creazione_evento extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_creazione_evento);
+
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar7);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         String id_group = Utilities.getPrefs(this).getString("group", "");
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
             @Override
