@@ -16,7 +16,7 @@
             android:name=".Creazione_evento2"
             android:exported="false" />
         <activity
-            android:name=".creazione_evento"
+            android:name=".Creazione_evento"
             android:exported="false"
             android:label="@string/title_activity_creazione_evento1"
             android:theme="@style/Theme.Nekoma_FamiliesShare.NoActionBar" />
