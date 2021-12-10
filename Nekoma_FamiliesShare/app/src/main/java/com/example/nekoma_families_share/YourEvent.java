@@ -156,7 +156,8 @@ public class YourEvent extends AppCompatActivity {
                                             }else{
                                                 labels=",";
                                             }
-                                            myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                            String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+                                            myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                             tuoi_eventi.add(eve);
                                         }else if(!new JSONObject(tmp_activity).getBoolean("repetition")){
 
@@ -181,7 +182,8 @@ public class YourEvent extends AppCompatActivity {
                                                 }else{
                                                     labels=",";
                                                 }
-                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                 tuoi_eventi.add(eve);
                                             }else{
                                                 String date =tmp.getString("end");
@@ -210,7 +212,8 @@ public class YourEvent extends AppCompatActivity {
                                                     }else{
                                                         labels=",";
                                                     }
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                    String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                     tuoi_eventi.add(eve);
                                                 }else{
                                                     String name= new JSONObject(tmp_activity).getString("name");
@@ -233,7 +236,8 @@ public class YourEvent extends AppCompatActivity {
                                                     }else{
                                                         labels=",";
                                                     }
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                    String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                     scaduti_eventi.add(eve);
                                                 }
                                             }
@@ -269,7 +273,8 @@ public class YourEvent extends AppCompatActivity {
                                                 }else{
                                                     labels=",";
                                                 }
-                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                 tuoi_eventi.add(eve);
                                             }else{
                                                 String date =tmp.getString("end");
@@ -297,7 +302,8 @@ public class YourEvent extends AppCompatActivity {
                                                     }else{
                                                         labels=",";
                                                     }
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                    String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                     partecipi_eventi.add(eve);
                                                 }else{
                                                     String name= new JSONObject(tmp_activity).getString("name");
@@ -320,7 +326,8 @@ public class YourEvent extends AppCompatActivity {
                                                     }else{
                                                         labels=",";
                                                     }
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels);
+                                                    String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                     scaduti_eventi.add(eve);
                                                 }
                                             }
@@ -439,8 +446,9 @@ public class YourEvent extends AppCompatActivity {
         public final String descrizione;
         public final String enddate;
         public final String labels;
+        public final String owner_id;
 
-        public myEventi(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels) {
+        public myEventi(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id) {
             this.nome = nome;
             this.img = img;
             this.event_id = event_id;
@@ -448,6 +456,7 @@ public class YourEvent extends AppCompatActivity {
             this.descrizione = descrizione;
             this.enddate = enddate;
             this.labels = labels;
+            this.owner_id = owner_id;
         }
 
         @Override
