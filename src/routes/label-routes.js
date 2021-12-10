@@ -53,7 +53,7 @@ router.post('/', (req, res, next) => {
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
 		// console.log(g);
 		if(g){
-			Label.findOne({name : labelName}).exec().then((l) => {
+			Label.findOne({name : labelName, group_id : g.group_id}).exec().then((l) => {
 				if(!l){
 					const { 
 						name, group_id

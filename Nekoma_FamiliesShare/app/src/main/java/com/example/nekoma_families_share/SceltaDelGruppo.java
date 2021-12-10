@@ -196,7 +196,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
                                 }
                             }, error1 -> {
                                 Toast.makeText(SceltaDelGruppo.this, error1.toString(), Toast.LENGTH_LONG).show();
-                                System.err.println(error1.getMessage());
+                                // System.err.println(error1.getMessage());
                             }, new HashMap<>());
                         }
                     } catch (JSONException e) {
