@@ -53,42 +53,47 @@ router.get('/', async (req, res, next) => {
   //     }
   //   })
   // }).catch(next)
+  
 
-  Child.find({child_id : { $in : ids}}).lean().populate('image').populate('parent').then((c) => {
-    if(c.length === 0) return res.status(400).send('Children non found')
+  // await Child.find({child_id : { $in : ids}}).lean().populate('image').populate('parent').then( async (c) => {
+  //   if(c.length === 0) return res.status(400).send('Children non found')
     
-    for( let i = 0 ; i < c.length ; i++){
-      Profile.findOne({user_id : c[i].parent.parent_id}).lean().populate('image').then((p) => {
-        if(c[i].labels){
-          for( let j = 0; j < c[i].labels.length; j++){
-            Label.findOne({label_id : c[i].labels[j]}).then((l) => {
-              c[i].labels[j] = l
-            })
-          }
-        }
-      })
-    }
-    return res.json(c)
-  })
+  //   for( let i = 0 ; i < c.length ; i++){
+  //     await Profile.findOne({user_id : c[i].parent.parent_id}).lean().populate('image').then( async (p) => {
+  //       if(c[i].labels){
+  //         for( let j = 0; j < c[i].labels.length; j++){
+  //           await Label.findOne({label_id : c[i].labels[j]}).then((l) => {
+  //             console.log(l);
+  //             c[i].labels[j] = l
+  //           })
+  //         }
+  //       }
+  //     })
+  //   }
+  //   console.log("return");
+  //   return res.json(c)
+  // })
+
+  
 
 
-  // const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
+  const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
 
   // console.log(profiles);
   
-  // if (profiles.length === 0) {
-  //   return res.status(404).send('Children not found')
-  // }
+  if (profiles.length === 0) {
+    return res.status(404).send('Children not found')
+  }
 
-  // for (let i = 0; i < profiles.length; i++){
-  //   profiles[i].parent = await Profile.findOne({ user_id: profiles[i].parent.parent_id }, 'user_id given_name family_name image_id').lean().populate('image')
-  //   if (profiles[i].labels) {
-  //     for (let j = 0; j < profiles[i].labels.length; j++){
-  //       profiles[i].labels[j] = await Label.findOne({label_id : profiles[i].labels[j]})
-  //     }
-  //   }
-  // }
-  // return res.json(profiles)
+  for (let i = 0; i < profiles.length; i++){
+    profiles[i].parent = await Profile.findOne({ user_id: profiles[i].parent.parent_id }, 'user_id given_name family_name image_id').lean().populate('image')
+    if (profiles[i].labels) {
+      for (let j = 0; j < profiles[i].labels.length; j++){
+        profiles[i].labels[j] = await Label.findOne({label_id : profiles[i].labels[j]})
+      }
+    }
+  }
+  return res.json(profiles)
 })
 
 
