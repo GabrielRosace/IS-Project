@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:onClick="showModalLabel"
     tools:context=".Creazione_evento">
 
     <androidx.appcompat.widget.Toolbar
@@ -175,5 +176,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView23"
         tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/labelsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="136dp"
+        android:onClick="showModalLabel"
+        android:text="MODAL"
+        app:layout_constraintEnd_toStartOf="@+id/nextButtonEvent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputDescEvent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
