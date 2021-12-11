@@ -51,11 +51,11 @@ public class YourEvent extends AppCompatActivity {
     private String user_id;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_your_event);
-
-
+    protected void onPostResume() {
+        super.onPostResume();
+        tuoi_eventi = new ArrayList<>();
+        partecipi_eventi = new ArrayList<>();
+        scaduti_eventi = new ArrayList<>();
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -107,6 +107,12 @@ public class YourEvent extends AppCompatActivity {
             }
         });
         this.getEvents();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_your_event);
     }
 
     public void getEvents(){
