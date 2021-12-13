@@ -78,8 +78,6 @@ router.get('/', async (req, res, next) => {
 
 
   const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
-
-  // console.log(profiles);
   
   if (profiles.length === 0) {
     return res.status(404).send('Children not found')

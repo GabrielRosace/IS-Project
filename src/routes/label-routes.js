@@ -9,7 +9,7 @@ const Parent = require('../models/parent')
 const Activity = require('../models/activity')
 const objectid = require('objectid')
 
-// Get all labels of the group 
+// Ritorna tutte le etichette appartenenti al gruppo specificato tramite l'id
 router.get('/:group_id', (req, res, next) => {
     if (!req.user_id) { return res.status(401).send('Not authenticated') }
 	let groupId = req.params.group_id
@@ -27,7 +27,8 @@ router.get('/:group_id', (req, res, next) => {
 	})
 })
 
-// Create a new label
+// Crea un'etichetta, associandola ad un gruppo. Non possono esistere etichette appartenenti allo stesso gruppo con nomi uguali.
+// Inoltre solo il capo gruppo può creare etichette nuove.
 router.post('/', (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
@@ -40,6 +41,7 @@ router.post('/', (req, res, next) => {
 	if(!groupId)
 		return res.status(400).send('Bad Request')
 	
+	// Controllo se l'utente che fa la richiesta di creazione dell'etichetta è capogruppo.
 	Group.findOne({group_id : groupId}).then((g) => {
 		if(g){
 			if(g.owner_id != userId)
@@ -50,8 +52,9 @@ router.post('/', (req, res, next) => {
 		}
 	})
 
+	// Inizialmente viene cercato il gruppo al quale associare l'etichetta, poi viene verificato se esiste già un'etichetta con il nome specificato.
+	// Nel caso non esistesse un'etichetta, allora viene creata, altrimenti viene ritornato un messaggio di errore.
 	Group.findOne({group_id : groupId, owner_id : userId}).exec().then((g) => {
-		// console.log(g);
 		if(g){
 			Label.findOne({name : labelName, group_id : g.group_id}).exec().then((l) => {
 				if(!l){
@@ -86,7 +89,8 @@ router.post('/', (req, res, next) => {
 	})
 })
 
-// delete a label
+// Elimina un'etichetta che viene specificata tramite l'id. Solo il capogruppo di un gruppo può effettuare questa operazione.
+// Quest'operazione ha effetto anche sulla stessa etichetta associata a bambini ed eventi, venendo quindi eliminata anche in queste entità.
 router.delete('/:label_id', async (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
@@ -94,6 +98,7 @@ router.delete('/:label_id', async (req, res, next) => {
 	let label_id = req.params.label_id
 	if(!label_id) return res.status(400).send('Bad Request')
 
+	// Controllo se l'utente che fa la richiesta di creazione dell'etichetta è capogruppo.
 	Label.findOne({label_id : label_id}).then((l) => {
 		Group.findOne({group_id : l.group_id}).then((g) => {
 			if(g.owner_id != userId)
@@ -101,6 +106,7 @@ router.delete('/:label_id', async (req, res, next) => {
 		})
 	})
 
+	// Qui viene eliminata la stessa etichetta che si trova associata ai bambini e agli eventi
 	Label.findOne({label_id : label_id}).then((l) => {
 		if(!l) return res.status(400).send('Label does not exist')
 		Group.findOne({group_id : l.group_id}).then((g) => {
@@ -132,7 +138,7 @@ router.delete('/:label_id', async (req, res, next) => {
 	return res.status(200).send('Label deleted')
 })
 
-// Add a label to a child
+// Associa un'etichetta esistente ad un bambino. Questa richiesta può essere fatta solo da un utente che è anche genitore del bambino specificato
 router.post('/child', (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
@@ -168,7 +174,7 @@ router.post('/child', (req, res, next) => {
 	})
 })
 
-// Get all labels of a child
+// Ritorna tutte le etichette associate ad un bambino. Questa richiesta può essere fatta solo da un utente che è anche genitore del bambino specificato
 router.get('/child/:child_id', async (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
@@ -197,7 +203,7 @@ router.get('/child/:child_id', async (req, res, next) => {
 	})
 })
 
-// Delete a label of a child
+// Elimina un etichetta associata ad un bambino. Questa richiesta può essere fatta solo da un utente che è anche genitore del bambino specificato
 router.delete('/child/:label_id/:child_id', (req, res, next) => {
 	let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
