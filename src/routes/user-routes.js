@@ -451,7 +451,6 @@ router.get('/:id', (req, res, next) => {
 })
 
 router.delete('/:id', async (req, res, next) => {
-  console.log('Entrato');
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const user_id = req.params.id
   try {
@@ -487,8 +486,6 @@ router.delete('/:id', async (req, res, next) => {
       const groupEvents = response.data.items
       await Promise.all(groupEvents.map(async (event) => {
         const parentParticipants = JSON.parse(event.extendedProperties.shared.parents)
-        console.log(typeof parentParticipants + '\n');
-        console.log(parentParticipants);
         const childParticipants = JSON.parse(event.extendedProperties.shared.children)
         const filteredParents = parentParticipants.filter(id => id !== user_id)
         const filteredChildren = childParticipants.filter(id => childDeleteIds.indexOf(id) === -1)
