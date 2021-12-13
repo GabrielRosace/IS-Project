@@ -98,12 +98,12 @@ public class DettagliEvento extends AppCompatActivity {
         progress_layout = (ConstraintLayout) findViewById(R.id.progress_layout_det);
         progress_bar = (ProgressBar) findViewById(R.id.progress_bar_det);
 
-
+        // Aggiunta dell'evento torna indietro nella toolbar
         Toolbar t = (Toolbar) findViewById(R.id.toolbar2);
         t.setNavigationOnClickListener(v -> finish());
 
         Intent intent = getIntent();
-
+        // Ottengo informazioni dall'activity precedente
         extraData = intent.getStringExtra("evento");
 
 
@@ -121,7 +121,7 @@ public class DettagliEvento extends AppCompatActivity {
         selectedLabel = new ArrayList<>();
 
 
-        VisualizzazioneEventi.Evento evento = VisualizzazioneEventi.Evento.getEventoFromString(extraData); // Parsing intent params
+        VisualizzazioneEventi.Evento evento = VisualizzazioneEventi.Evento.getEventoFromString(extraData); // Parsing dei parametri dell'intent
 
 
         activity_id = evento.event_id;
@@ -129,9 +129,9 @@ public class DettagliEvento extends AppCompatActivity {
 
         isCreator = Utilities.getUserID(this).equals(creator_id);
 
-        getTimeslot(); // getting information about timeslot
+        getTimeslot(); // Ottengo le informazioni riguardo al timeslot
 
-        if (isCreator) {
+        if (isCreator) { // Se chi sta visualizzando i dettagli dell'evento è il creatore allora gli fornisco la possibilità di modificarlo
             findViewById(R.id.delete_action).setVisibility(View.VISIBLE);
             misc.setText("Modifica");
             desc.setEnabled(true);
@@ -149,7 +149,7 @@ public class DettagliEvento extends AppCompatActivity {
 
             findViewById(R.id.add_label).setVisibility(View.VISIBLE);
             misc.setOnClickListener(v -> modify_event());
-        } else {
+        } else { // Altrimenti può solo visualizzare i dati e dichiarare la partecipazione
             Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/nekomaActivities/" + activity_id + "/information", response -> {
                 try {
                     JSONObject obj = new JSONObject((String) response);
@@ -175,26 +175,22 @@ public class DettagliEvento extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }, error -> {
             }, new HashMap<>());
         }
 
-
-
-
-        if (evento.labels.equals("")) {
+        if (evento.labels.equals("")) { // Non è presente nessuna etichetta
             eventLabels = new ArrayList<>();
         } else {
             eventLabels = Arrays.asList(evento.labels.split(","));
         }
-        addRecyclerView(eventLabels);
+        addRecyclerView(eventLabels); // Aggiungo le informazioni dell'etichette alla view
 
 
         eventName.setText(evento.nome);
-        if (evento.img.equals("nan")) {
+        if (evento.img.equals("nan")) { // Non è stata specificata nessun immagine, ne setto una di default
             img.setImageDrawable(getDrawable(R.drawable.persone));
-        } else {
+        } else { // Scarico l'immagine dal server e la aggiungo alla view
             Utilities.httpRequest(DettagliEvento.this, Request.Method.GET, "/image/"+evento.img, response -> {
                 String url="";
                 try {
@@ -220,7 +216,7 @@ public class DettagliEvento extends AppCompatActivity {
 
 
 
-
+        // Ottengo le informazioni riguardo al timeslot e aggiorna la view
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/activities/" + activity_id + "/timeslots", response -> {
             try {
                 JSONArray arr = new JSONArray(response.toString());
@@ -243,7 +239,7 @@ public class DettagliEvento extends AppCompatActivity {
         }, error -> {
         }, new HashMap<>());
 
-
+        // Ottengo i partecipanti e la data relativi all'evento
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/nekomaActivities/" + evento.event_id + "/information", response -> {
             try {
                 JSONObject obj = new JSONObject(response.toString());
@@ -267,7 +263,6 @@ public class DettagliEvento extends AppCompatActivity {
 
                     endDate.setText(getDate(cal));
 
-
                     try {
                         initDatePickerStart();
                         initDatePickerEnd();
@@ -285,7 +280,7 @@ public class DettagliEvento extends AppCompatActivity {
                     startDate.setText("nan");
                     endDate.setText("nan");
                 }
-
+                // Rimuovo la view di caricamento
                 progress_layout.setVisibility(View.GONE);
                 progress_bar.setVisibility(View.GONE);
 
@@ -296,7 +291,7 @@ public class DettagliEvento extends AppCompatActivity {
         }, error -> {
         }, new HashMap<>());
 
-
+        // Colleziono l'etichette che sono disponibili in un gruppo, così da permettere l'aggiunta mediante uno spinner al creatore
         List<String> labelsName = new ArrayList<>();
         labelsId = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/label/" + Utilities.getPrefs(this).getString("group", ""), response -> {
@@ -345,6 +340,7 @@ public class DettagliEvento extends AppCompatActivity {
         String startFormat = "";
         String endFormat = "";
 
+        // Parsing delle date secondo il formato richiesto
         try {
             Calendar cal = Calendar.getInstance();
             SimpleDateFormat sdfStart = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
@@ -363,7 +359,7 @@ public class DettagliEvento extends AppCompatActivity {
         String finalStartFormat = startFormat;
         String finalEndFormat = endFormat;
 
-        // Date and description update
+        // Aggiornamento della data e delle descrizione
         Map<String, String> data = new HashMap<>();
         try {
             JSONArray arr = new JSONArray((String) timeSlot);
@@ -380,7 +376,7 @@ public class DettagliEvento extends AppCompatActivity {
         }
     }
 
-
+    // Ottengo le informazioni del timeslot riguardanti l'evento
     public void getTimeslot() {
         Utilities.httpRequest(DettagliEvento.this, Request.Method.GET, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/activities/" + activity_id + "/timeslots", response -> {
             Map<String, String> data = new HashMap<>();
@@ -397,7 +393,7 @@ public class DettagliEvento extends AppCompatActivity {
         }, System.err::println, new HashMap<>());
     }
 
-
+    // Creo l'oggetto che contiene il body della richiesta per l'aggiornamento del timeslot
     public Map<String, String> fillMapTimeslot(Map<String, String> data, String response, String descrizione, String finalStartFormat, String finalEndFormat, String partecipants) throws JSONException {
         JSONArray arr = new JSONArray((String) response);
         if (!arr.isNull(0)) {
@@ -434,6 +430,7 @@ public class DettagliEvento extends AppCompatActivity {
         return data;
     }
 
+    // Parsing della data
     public String fromCalToString(Calendar cal, String hour) {
         int month = (cal.get(Calendar.MONTH) + 1);
         int day = (cal.get(Calendar.DAY_OF_MONTH));
@@ -442,6 +439,7 @@ public class DettagliEvento extends AppCompatActivity {
         return cal.get(Calendar.YEAR) + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day) + "T" + hour + "Z";
     }
 
+    // Richiesta di partecipare ad un evento
     public void join_event() {
         progress_layout.setVisibility(View.VISIBLE);
         progress_bar.setVisibility(View.VISIBLE);
@@ -469,6 +467,7 @@ public class DettagliEvento extends AppCompatActivity {
         }
     }
 
+    // Richiesta di annullamento della partecipazione ad un evento
     public void dejoin_event() {
         progress_layout.setVisibility(View.VISIBLE);
         progress_bar.setVisibility(View.VISIBLE);
@@ -497,6 +496,7 @@ public class DettagliEvento extends AppCompatActivity {
         }
     }
 
+    // Aggiunta delle etichette all'evento
     public void newLabel(View v) {
         String id = labelsId.get(spinner.getSelectedItemPosition());
         selectedLabel.add(labelsId.get(spinner.getSelectedItemPosition()));
@@ -514,7 +514,7 @@ public class DettagliEvento extends AppCompatActivity {
         return cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR);
     }
 
-
+    // Classe per la gestione del recycle view, permette la visualizzazione delle etichette
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<String> label_list;
@@ -572,6 +572,8 @@ public class DettagliEvento extends AppCompatActivity {
 
     }
 
+
+    // Ricarica l'activity aggiornando i dati dopo che è stata effettuata una modifica
     private void reloadActivity(String labelToErase, boolean labelToAdd) {
         VisualizzazioneEventi.Evento e = VisualizzazioneEventi.Evento.getEventoFromString(extraData);
         String newLabel = "";
@@ -598,6 +600,8 @@ public class DettagliEvento extends AppCompatActivity {
         startActivity(intent);
     }
 
+
+    // Aggiunta dei dati nella recycle view
     private void addRecyclerView(List<String> list) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_label);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DettagliEvento.this);
@@ -606,7 +610,7 @@ public class DettagliEvento extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
+    // Classe che permette di scaricare le immagini dell'evento
     private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
         ImageView holder;
 
@@ -634,16 +638,17 @@ public class DettagliEvento extends AppCompatActivity {
     }
 
 
-
+    // Gestione del datepicker per l'aggiornamento della data di inizio dell'evento
     public void openDatePickerStart(View v) {
         datePickerStart.show();
     }
 
+    // Gestione del datepicker per l'aggiornamento della data di inizio dell'evento
     public void openDatePickerEnd(View v){
         datePickerEnd.show();
     }
 
-
+    // Inizializzazione dei date picker
     private void initDatePickerStart() throws ParseException {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
