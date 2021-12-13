@@ -13,6 +13,9 @@ public class Guide extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_guide);
+
+        // permette di tornare all'interfaccia di login
+
         Toolbar t = (Toolbar) findViewById(R.id.toolbar_archivio);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -20,10 +23,6 @@ public class Guide extends AppCompatActivity {
                 finish();
             }
         });
-    }
-    public void getLogin(View v){
-        Intent login = new Intent(Guide.this,MainActivity.class);
-        startActivity(login);
     }
 
 }

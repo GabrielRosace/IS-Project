@@ -62,10 +62,9 @@ public class Profile extends AppCompatActivity {
         });
 
 
-        // Ottengo il token
+        // Token dell'utente, mi permette di fare le chiamate al server
         String userToken = Utilities.getToken(this);
-        // System.out.println(userToken);
-        // Faccio il parse del token in modo tale da prendermi l'id dell'utente
+        // Parse del token, che permette di conoscere l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
         String body = new String(Base64.getDecoder().decode(base64Body));
@@ -76,13 +75,13 @@ public class Profile extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // Chiamata al server, che restituisce tutti i dati personali di un utente, che verranno usati per riempire i vari campi del profilo
         Utilities.httpRequest(this,Request.Method.GET,"/users/"+user_id+"/profile",response -> {
             try {
                 JSONObject user_response = new JSONObject((String) response);
-                // user_response.getJSONObject("address") viene usato per prendere tutti oggetti contenuti nell'oggetto JSON principale in modo tale da non dover fare chiamate aggiuntive
                 JSONObject user_address = user_response.getJSONObject("address");
                 JSONObject user_image = user_response.getJSONObject("image");
-                // Informazioni personali utente
+                // Informazioni personali dell'utente
                 emailLabel = findViewById(R.id.profileEmail);
                 emailLabel.setEnabled(false);
                 emailLabel.setText(user_response.getString("email"));
@@ -122,6 +121,7 @@ public class Profile extends AppCompatActivity {
                 } else {
                     cityLabel.setHint("Non specificato");
                 }
+                // Immagine profilo dell'utente
                 ImageDownloader image = new ImageDownloader(findViewById(R.id.profileImage));
                 image.execute(getString(R.string.urlnoapi)+user_image.getString("path"));
             } catch (JSONException e) {
@@ -129,9 +129,9 @@ public class Profile extends AppCompatActivity {
             }
         }, error -> {
             Toast.makeText(Profile.this, "Impossibile caricare informazioni del profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
-            // System.err.println(error.getMessage());
         }, new HashMap<>());
 
+        // Metodo che permette di cambiare stato ai vari campi della pagina in base al valore dello switch
         editSwitch = (Switch)findViewById(R.id.EditSwitch);
         editSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -154,16 +154,17 @@ public class Profile extends AppCompatActivity {
         });
     }
 
+    // Metodo che permette di comunicare con il server, usato per eliminare un utente
     public void DeleteUser(View v){
         Utilities.httpRequest(this,Request.Method.DELETE,"/users/"+user_id,response -> {
             Intent login = new Intent(Profile.this,MainActivity.class);
             startActivity(login);
         },error -> {
             Toast.makeText(Profile.this, "Non è possibile eliminare il profilo, riprova più tardi.", Toast.LENGTH_LONG).show();
-            // System.err.println(error.getMessage());
         },new HashMap<>());
     }
 
+    // Metodo che permette di comunicare con il server, usato per modificare i dati personali di un utente
     public void EditUser(View v){
         Map<String,String> params = new HashMap<>();
         params.put("given_name",nameLabel.getText().toString());
@@ -185,10 +186,10 @@ public class Profile extends AppCompatActivity {
             startActivity(homepage);
         },error -> {
             Toast.makeText(Profile.this, error.toString(), Toast.LENGTH_LONG).show();
-            // System.err.println(error.getMessage());
         },params);
     }
 
+    // Metodo che mi permette di scaricare l'immagine dell'utente
     private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
        ImageView holder;
 

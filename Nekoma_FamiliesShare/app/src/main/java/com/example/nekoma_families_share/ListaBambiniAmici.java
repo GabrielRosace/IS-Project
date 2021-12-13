@@ -69,13 +69,12 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }
         id_group = Utilities.getPrefs(this).getString("group","");
 
+        // mi permette di spostarmi tra le tab
         TabLayout t = (TabLayout)findViewById(R.id.bambini_tab);
         t.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // System.out.println(tab.getPosition());
                 if(tab.getPosition()==1){
-                    // System.out.println("sono qui dentro prima della getMyKids");
                     addRecyclerView(b_miei);
                 }else{
                     addRecyclerView(b_amici);
@@ -93,17 +92,19 @@ public class ListaBambiniAmici extends AppCompatActivity {
 
             }
         });
-        this.Kids();
+        this.Kids(); // chiamo e popolo gli array con le informazioni
 
     }
 
+    // questo metodo mi permette di popolare l'interfaccia andando a distinguere se il figlio
+    // è dell'utente oppure se il figlio è di uno dei componenti del gruppo
+    // popolando la recycle view
     public void Kids(){
         b_miei = new ArrayList<>();
         b_amici = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/children", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                // System.out.println(response);
                 try{
                     JSONArray tmp = new JSONArray(response);
                     String url = "/children?searchBy=ids";
@@ -111,18 +112,15 @@ public class ListaBambiniAmici extends AppCompatActivity {
                         //todo costruire l'url
                         url += "&ids="+tmp.getString(i);
                     }
-                    // System.out.println(url);
                     Utilities.httpRequest(ListaBambiniAmici.this, Request.Method.GET, url, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // System.out.println(response);
                             try {
                                 JSONArray kid = new JSONArray(response);
                                 for (int i = 0; i < kid.length(); ++i) {
                                     if(!new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                         b_amici.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }else{
-                                        // System.out.println("sono dentro ai miei bambini");
                                         b_miei.add(new Bambini(new JSONObject(kid.getString(i)).getString("child_id"), new JSONObject(kid.getString(i)).getString("given_name"), new JSONObject(kid.getString(i)).getString("family_name"), new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path")));
                                     }
                                 }
@@ -137,7 +135,6 @@ public class ListaBambiniAmici extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // System.err.println(error.toString());
                             Toast.makeText(ListaBambiniAmici.this, "Richiesta non andata a buon fine", Toast.LENGTH_SHORT).show();
                         }
                     }, new HashMap<>());
@@ -156,6 +153,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+    // metodo che permette di popolare la recycle view
     private void addRecyclerView(List<Bambini> list){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.listabambiniamici);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -165,27 +163,26 @@ public class ListaBambiniAmici extends AppCompatActivity {
     }
 
 
-
+    // nested class che permette di popolare la recycle view con la classe Bambini
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Bambini> mData;
-
         private LayoutInflater mInflater;
 
-        // data is passed into the constructor
+
         MyRecyclerViewAdapter(Context context, List<Bambini> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
 
-        // inflates the row layout from xml when needed
+
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mInflater.inflate(R.layout.recycler_view_item, parent, false);
             return new ViewHolder(view);
         }
 
-        // binds the data to the TextView in each row
+        // definizione dell'OnClick savando l'id del bambino nelle preferenze
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             Bambini kid = mData.get(position);
@@ -208,14 +205,14 @@ public class ListaBambiniAmici extends AppCompatActivity {
 
         }
 
-        // total number of rows
+
         @Override
         public int getItemCount() {
             return mData.size();
         }
 
 
-        // stores and recycles views as they are scrolled off screen
+
         public class ViewHolder extends RecyclerView.ViewHolder{
             TextView myTextView;
             Button btn;
@@ -229,7 +226,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
             }
         }
 
-        // convenience method for getting data at click position
+
         Bambini getItem(int id) {
             return mData.get(id);
         }
@@ -260,6 +257,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
         }
     }
 
+    //
     private static class Bambini{
         public final String id;
         public final String name;
@@ -284,17 +282,20 @@ public class ListaBambiniAmici extends AppCompatActivity {
     }
 
 
-
+    // non più usato sostituito dall'onclick della toolbar nell'OnCreate
     public void getHomepage(View v){
         Intent  homepage= new Intent(ListaBambiniAmici.this,Homepage.class);
         startActivity(homepage);
     }
+
+    // per le info condivise
     public SharedPreferences getPrefs(){
         SharedPreferences prefs;
         prefs=ListaBambiniAmici.this.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         return prefs;
     }
 
+    // metodo che permette di spostarsi nell'interfaccia di creazione del bambino
     public void getNewKid(View v){
         Intent  kid= new Intent(ListaBambiniAmici.this,NewChild.class);
         startActivity(kid);
