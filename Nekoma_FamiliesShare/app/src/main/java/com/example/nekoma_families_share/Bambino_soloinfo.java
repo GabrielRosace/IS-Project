@@ -62,14 +62,16 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
     private LinearLayoutManager grouplistManager = new LinearLayoutManager(this);
     private Boolean isChild = false;
     private Spinner etichette ;
-    String id_child;
+    private String id_child;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bambino_soloinfo);
+
         childLabels = new ArrayList<>();
         etichette =  (Spinner) findViewById(R.id.spinner_etichette);
+
         Toolbar t = (Toolbar) findViewById(R.id.bambinotoolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +79,12 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 finish();
             }
         });
+
+        // questa chiamata permette di avere l'id del bambino salvato nelle preferenze
+        // preso dall'interfaccia precedente
         id_child = getKid();
+
+        // permette di avere lo user id grazie al token
         String user_id;
         String userToken = Utilities.getToken(Bambino_soloinfo.this);
         String[] split_token = userToken.split("\\.");
@@ -86,16 +93,18 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         try{
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
+
+            // questa chiamata permette di avere le informazioni del bambino quali: info del bambino, del genitore, le label
             Utilities.httpRequest(this,Request.Method.GET,"/children?ids[]="+id_child+"&searchBy=ids",new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try{
                         JSONArray kid = new JSONArray(response);
                         for(int i=0;i<kid.length();++i){
-                            // System.out.println("sono kid(i):" + kid.getString(i));
+
+                            // Popolare gli oggetti dell'interfaccia : caso in cui il bambino sia figlio dell'utente loggato
                             if(new JSONObject(new JSONObject(kid.getString(i)).getString("parent")).getString("user_id").equals(user_id)){
                                 isChild = true;
-                               //  System.out.println("sono qui dentro il caso in cui sia mio figlio");
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
                                 new ImageDownloader(img_bambino).execute(getString(R.string.urlnoapi)+bambino.image_path);
@@ -117,31 +126,26 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 LinearLayout layout = (LinearLayout) findViewById(R.id.aggiunta_etichette);
                                 layout.setVisibility(View.VISIBLE);
 
-                                // spinner
+                                // popolazione spinner
                                 if(new JSONObject(kid.getString(i)).has("labels")){
-                                    // System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                    // System.out.println("questo è my tmp : "+my_tmp.toString());
                                     for(int y =0;y<my_tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),true);
                                         my_etichette.add(et);
-                                     //    System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
                                 }
 
                                 labels = new ArrayList<>();
                                 id_labels_spinner = new ArrayList<>();
+
+                                // chiamata per popolare lo spinner con le etichette decise dal capogruppo
                                 Utilities.httpRequest(Bambino_soloinfo.this,Request.Method.GET,"/label/"+Utilities.getPrefs(Bambino_soloinfo.this).getString("group",""),response2 -> {
                                     try {
                                         JSONArray user_response = new JSONArray((String) response2);
                                         int cnt=0;
                                         for (int j = 0; j < user_response.length(); j++) {
-                                           //  System.out.println("DENTRO LO SPINNER "+ (++cnt));
                                             JSONObject obj = user_response.getJSONObject(j);
-                                           //  System.out.println("sono obj :"+obj);
                                             if(!my_etichette.contains(new myEtichette(obj.getString("name"),"",true))){
-                                               //  System.out.println(" *******POPOLO LO SPINNER "+ (cnt));
-                                             //    System.out.println(user_response.get(j));
                                                 labels.add(obj.getString("name"));
                                                 id_labels_spinner.add(obj.getString("label_id"));
                                             }
@@ -156,11 +160,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                     }
                                 }, error -> {
                                     Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                                  //   System.err.println(error.getMessage());
                                 }, new HashMap<>());
                                 // fine spinner
-
-                              //   System.out.println("sono kid di i"+ kid.getString(i));
 
                                 TextView text_gender = (TextView) findViewById(R.id.genere_);
                                 if(!new JSONObject(kid.getString(i)).getString("gender").equals("unspecified")){
@@ -185,6 +186,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                 addLabel();
                                 addRecyclerView(my_etichette);
                             }else{
+                                // Popolare oggetti dell'interfaccia : caso in cui il bambino sia figlio di un componente del gruppo
+
                                 Bambini bambino = new Bambini(new JSONObject(kid.getString(i)).getString("_id"),new JSONObject(kid.getString(i)).getString("given_name"),new JSONObject(kid.getString(i)).getString("family_name"),new JSONObject(new JSONObject(kid.getString(i)).getString("image")).getString("path"));
                                 ImageView img_bambino = (ImageView) findViewById(R.id.img_bambino);
                                 new ImageDownloader(img_bambino).execute(getString(R.string.urlnoapi)+bambino.image_path);
@@ -211,20 +214,20 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                                     text_bisgoni.setText(new JSONObject(kid.getString(i)).getString("special_needs"));
                                 }
                                 if(new JSONObject(kid.getString(i)).has("labels")){
-                                //     System.out.println(new JSONArray(new JSONObject(kid.getString(i)).getString("labels")).toString());
                                     JSONArray my_tmp = new JSONArray( new JSONObject(kid.getString(i)).getString("labels"));
-                                 //    System.out.println("questo è my tmp : "+my_tmp.toString());
                                     for(int y =0;y<my_tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(my_tmp.getString(y)).getString("name"),new JSONObject(my_tmp.getString(y)).getString("label_id"),false);
                                         my_etichette.add(et);
-                                 //        System.out.println("sono nel for : "+new JSONObject(my_tmp.getString(y)).getString("name"));
                                     }
                                 }
-                                addRecyclerView(my_etichette);
+
+                                addRecyclerView(my_etichette); // necessario per popolare la recycle view con le etichette del bambino
                             }
                         }
+
                         RelativeLayout b = (RelativeLayout) findViewById(R.id.caricamento_id);
                         b.setVisibility(View.GONE);
+
                     }catch(JSONException | ParseException e){
                         e.printStackTrace();
                     }
@@ -234,8 +237,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Bambino_soloinfo.this, error.toString(), Toast.LENGTH_LONG).show();
-                //    System.err.println(error.getMessage());
                 }
+
             },new HashMap<>());
         }catch(JSONException e){
             e.printStackTrace();
@@ -253,6 +256,7 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
 
     }
 
+    // questa nested class permette di facilitare la definizione del bambino nell'interfaccia
     private static class Bambini{
         public final String id;
         public final String name;
@@ -266,6 +270,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             this.image_path = image_path;
         }
     }
+
+    // questa nested class permette di caricare l'immagine del genitore e del bambino
     private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
         public final ImageView image;
         public ImageDownloader(ImageView image) {
@@ -290,6 +296,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             image.setImageBitmap(bitmap);
         }
     }
+
+    // metodo che permette di popolare la recycle view
     private void addRecyclerView(List<myEtichette> list){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.label_info);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -297,7 +305,11 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
     }
-    public void addLabel(){ //todo alla seconda mi da errore
+
+    // funzione che permette di aggiungere un'etichetta grazie alla chiamata post al suo interno,
+    // a sua volta permette inoltre di aggiornare la recycle view delle etichette del bambino,
+    // rimuovendo ogni qualvolta l'utente aggiunge un etichetta al proprio figlio la rimuove dallo spinner
+    public void addLabel(){
         Button aggiungi_etichetta = (Button) findViewById(R.id.add_etichetta);
         aggiungi_etichetta.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -310,8 +322,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 if(id_labels_spinner.size()==0){
                     aggiungi_etichetta.setEnabled(false);
                 }
-                // label id , child id -> id_child
-                // System.out.println(rimossa);
                 Map<String, String> add_label = new HashMap<>();
                 add_label.put("child_id",id_child);
                 add_label.put("label_id",rimossa);
@@ -322,64 +332,71 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                         Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.GET, "/label/child/" + id_child, new Response.Listener<String>() {
                             @Override
                             public void onResponse(String responsee) {
+
                                 try{
+
                                     Toast.makeText(Bambino_soloinfo.this, "AGGIUNTA ETICHETTA", Toast.LENGTH_SHORT).show();
                                     JSONArray tmp = new JSONArray(responsee);
-                                    // popolare la lista di etichette
                                     my_etichette = new ArrayList<>();
                                     for(int y =0;y<tmp.length();++y){
                                         myEtichette et = new myEtichette(new JSONObject(tmp.getString(y)).getString("name"),new JSONObject(tmp.getString(y)).getString("label_id"),true);
                                         my_etichette.add(et);
-                                      //   System.out.println("sono nel for : "+new JSONObject(tmp.getString(y)).getString("name"));
                                     }
                                     addRecyclerView(my_etichette);
+
                                 }catch (JSONException e){
                                     Toast.makeText(Bambino_soloinfo.this, "Qualcosa non va", Toast.LENGTH_SHORT).show();
-                                   //  System.err.println(e.toString());
                                 }
                             }
                         }, new Response.ErrorListener() {
+
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(Bambino_soloinfo.this, "ERRORE", Toast.LENGTH_SHORT).show();
                             }
+
                         }, new HashMap<>());
                     }
                 }, new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(Bambino_soloinfo.this, "Qualcosa è andato storto", Toast.LENGTH_SHORT).show();
                     }
+
                 }, add_label);
             }
         });
     }
+
+    // non più usato permetteva di tornare all'interfaccia precedente
+    // sostituito con la chiamata all'onClik nell'onCreate della Toolbar
     public void getLista(View v) {
         Intent homepage = new Intent(Bambino_soloinfo.this, ListaBambiniAmici.class);
         startActivity(homepage);
     }
-    public String getToken(){
-        SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return  prefs.getString("token","");
-    }
+
+    // metodo che chiama dalle preferenze l'id del bambino precedentemente salvato
     public String getKid(){
         SharedPreferences prefs = getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         return  prefs.getString("id_child","");
     }
+
+    // nested class che permette di adattare la recyle view con i parametri da noi decisi quali
+    // in questo caso le etichette
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<myEtichette> mData;
-
         private LayoutInflater mInflater;
 
-        // data is passed into the constructor
+        // dati sono passati al costruttore
         MyRecyclerViewAdapter(Context context, List<myEtichette> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
 
 
-        // inflates the row layout from xml when needed
+        // aggiugge le righe al layout dell'xml quando necessario
         @NonNull
         @Override
         public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -387,7 +404,8 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             return new MyRecyclerViewAdapter.ViewHolder(view);
         }
 
-        // binds the data to the TextView in each row
+        // lega i dati alla View in ogni riga
+        // in questo particolare caso permette di eliminare l'etichetta all'onClik del bottone legandolo ad ogni riga (ogni riga corrisponde ad un particolare id)
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEtichette name = mData.get(position);
@@ -397,7 +415,6 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //todo fai la delete
                         Utilities.httpRequest(Bambino_soloinfo.this, Request.Method.DELETE, "/label/child/" + name.id +"/"+ id_child, new Response.Listener() {
                             @Override
                             public void onResponse(Object response) {
@@ -414,39 +431,13 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             }
         }
 
-        // total number of rows
+        // numero totale delle righe della view
         @Override
         public int getItemCount() {
             return mData.size();
         }
 
-        private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
-            MyRecyclerViewAdapter.ViewHolder holder;
-
-            public ImageDownloader(MyRecyclerViewAdapter.ViewHolder holder) {
-                this.holder = holder;
-            }
-
-            @Override
-            protected Bitmap doInBackground(String... strings) {
-                String urlOfImage = strings[0];
-                Bitmap logo = null;
-                try{
-                    InputStream is = new URL(urlOfImage).openStream();
-                    logo = BitmapFactory.decodeStream(is);
-                }catch(Exception e){ // Catch the download exception
-                    e.printStackTrace();
-                }
-                return logo;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-            }
-        }
-
-
-        // stores and recycles views as they are scrolled off screen
+        //memorizza e ricicla le visualizzazioni mentre vengono fatte scorrere fuori dallo schermo
         public class ViewHolder extends RecyclerView.ViewHolder{
             TextView myTextView;
             ImageButton btn;
@@ -458,12 +449,14 @@ public class Bambino_soloinfo extends AppCompatActivity implements AdapterView.O
             }
         }
 
-        // convenience method for getting data at click position
+        // metodo conveniente per ottenere i dati nella posizione del clic
         myEtichette getItem(int id) {
             return mData.get(id);
         }
 
     }
+
+    // nested class che permette di facilitare l'uso delle etichette
     private class myEtichette {
         public final String name;
         public final String id;

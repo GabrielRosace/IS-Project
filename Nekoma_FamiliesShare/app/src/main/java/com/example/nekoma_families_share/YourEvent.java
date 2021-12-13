@@ -50,6 +50,8 @@ public class YourEvent extends AppCompatActivity {
     private String id_group;
     private String user_id;
 
+    // metodo che permette di avere i dati aggiornati
+    // anche quando si torna indietro dall'activity successiva
     @Override
     protected void onPostResume() {
         super.onPostResume();
@@ -115,6 +117,10 @@ public class YourEvent extends AppCompatActivity {
         setContentView(R.layout.activity_your_event);
     }
 
+    // questo metodo mi permette di popolare le 3 liste che riguardano
+    // gli eventi con possibilità di definizione di etichette dei bambini
+    //todo parte non ancora completamente implementata manca la definizione di ricorrenza
+    //todo che sarà sviluppata nella versione 1.1 del codice sorgente
     public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
@@ -396,6 +402,7 @@ public class YourEvent extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+    // metodo che popola la recycle view
     private void addRecyclerView(List<myEventi> list){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.lista_eventi);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -407,27 +414,27 @@ public class YourEvent extends AppCompatActivity {
 
 
 
-    // recicle view
+    // recycle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<myEventi> mData;
 
         private LayoutInflater mInflater;
 
-        // data is passed into the constructor
+
         MyRecyclerViewAdapter(Context context, List<myEventi> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
 
-        // inflates the row layout from xml when needed
+
         @Override
         public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mInflater.inflate(R.layout.recycler_view_item_2, parent, false);
             return new MyRecyclerViewAdapter.ViewHolder(view);
         }
 
-        // binds the data to the TextView in each row
+
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEventi event = mData.get(position);
@@ -445,14 +452,14 @@ public class YourEvent extends AppCompatActivity {
 
         }
 
-        // total number of rows
+
         @Override
         public int getItemCount() {
             return mData.size();
         }
 
 
-        // stores and recycles views as they are scrolled off screen
+
         public class ViewHolder extends RecyclerView.ViewHolder{
             TextView myTextView;
             Button btn;
@@ -464,15 +471,15 @@ public class YourEvent extends AppCompatActivity {
             }
         }
 
-        // convenience method for getting data at click position
+
         myEventi getItem(int id) {
             return mData.get(id);
         }
 
     }
-    // recicle view
+    // recycle view
 
-
+    // permette di usare gli eventi in modo più semplice
     private class  myEventi{
         public final String nome;
         public final String event_id;
