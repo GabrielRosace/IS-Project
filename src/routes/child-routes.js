@@ -6,6 +6,9 @@ const Label = require('../models/label')
 const Profile = require('../models/profile')
 const Parent = require('../models/parent')
 
+// Ritorna tutte le informazioni riguardanti il bambino specificato.
+// In particolare viene inviato al client un JSON con tutti i dati del bambino compresa l'immagine, le etichette associate e le informazioni di un genitore, compresa anche l'immagine 
+// di quest'ultimo.
 router.get('/', async (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Not authenticated') }
 
