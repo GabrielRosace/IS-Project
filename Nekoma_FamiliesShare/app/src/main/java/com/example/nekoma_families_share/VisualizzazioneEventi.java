@@ -45,12 +45,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     public ConstraintLayout progress_layout;
     public ProgressBar progress_bar;
 
-
+    // Permette di ricaricare le informazioni una volta che si torna indietro dall'activity successiva
     @Override
     protected void onPostResume() {
         super.onPostResume();
-
-//        System.out.println("------ Le ricreo -----");
 
         userid = Utilities.getUserID(this);
         groupid = Utilities.getPrefs(this).getString("group", "");
@@ -63,7 +61,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
             }
         });
 
-
+        // Inizializzo i filtri per quanto riguarda la visualizzazione degli eventi
         ChipGroup chipGroup = (ChipGroup) findViewById(R.id.chipgroup);
 
         chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
@@ -78,6 +76,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 }
             }
         });
+
+        // Aggiungo i dati alla view
         getActivities(() -> {
             addRecyclerView(activities);
         });
@@ -89,10 +89,12 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_visualizzazione_eventi);
+        // Schermata di caricamento
         progress_layout = (ConstraintLayout) findViewById(R.id.progress_layout);
         progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
     }
 
+    // Ottengo gli interessi dei figli del visualizzatore della view
     private void getMyChildPref() {
         String my_id = Utilities.getUserID(this);
         child_pref = new ArrayList<>();
@@ -118,6 +120,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+    // Ottengo tutte le attività, le salvo nella struttura e infine le aggiungo alla recycle view
     private void getActivities(Runnable r) {
         activities = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + groupid + "/activities", reason -> {
@@ -159,13 +162,14 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }, new HashMap<>());
     }
 
-    private void getServPerson() { //TODO not implemented yet
+    private void getServPerson() { //TODO not implemented yet, è parte della seconda feature
         List<Evento> activities = new ArrayList<>();
         Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         addRecyclerView(activities);
     }
 
 
+    // Ottengo le attività che possono interessare ai figli
     private List<Evento> getRecommendedActivities() {
         List<Evento> recommendedActivities = new ArrayList<>();
         if (child_pref != null) {
@@ -203,7 +207,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         startActivity(homepage);
     }
 
-
+    // Classe per la gestione della recycle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Evento> eventoList;
@@ -235,6 +239,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 }
             });
 
+            // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
             if (eve.img.equals("nan")) {
                 holder.img.setImageDrawable(getDrawable(R.drawable.persone));
             } else {
@@ -284,6 +289,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }
     }
 
+
+    // Classe per il download delle immagini
     private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
         ImageView holder;
 
@@ -310,7 +317,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }
     }
 
-
+    // Model di evento
     public static class Evento {
         public final String nome;
         public final String event_id;
@@ -335,26 +342,20 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }
 
         public Evento(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id) {
-//            this.nome = nome;
-//            this.img = img;
-//            this.event_id = event_id;
-//            this.nPart = nPart;
-//            this.descrizione = descrizione;
-//            this.enddate = enddate;
-//            this.labels = labels;
-//            this.labels_ids = null;
             this(nome, img, event_id, nPart, descrizione, enddate, labels, null, owner_id);
         }
 
+        // Parsing della string in Evento
         public static Evento getEventoFromString(String toParse) {
             String[] parsed = toParse.split("/");
-//            System.out.println(parsed.length);
-            if (parsed.length <= 6) { //? Forse 7?
+
+            if (parsed.length <= 6) {
                 return new Evento(parsed[0], parsed[2], parsed[1], Integer.parseInt(parsed[3]), parsed[4], parsed[5], "", parsed[6]);
             }
             return new Evento(parsed[0], parsed[2], parsed[1], Integer.parseInt(parsed[3]), parsed[4], parsed[5], parsed[6], parsed[7]);
         }
 
+        // Trasformo da evento a stringa così da poter inviare il dato tramite intent
         @Override
         public String toString() {
             return nome + '/' + event_id + '/' + img + '/' + nPart + '/' + descrizione + '/' + enddate + '/' + labels + '/' + owner_id;
