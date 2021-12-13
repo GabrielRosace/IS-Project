@@ -29,7 +29,7 @@ router.get('/', async (req, res, next) => {
   //   }).catch(next)
 
 
-  //? Si può fare meglio
+  //* Working query but too slow
   // Child.find({ child_id: { $in: ids } })
   // .select('given_name family_name image_id child_id birthdate suspended gender allergies other_info special_needs labels')
   // .lean()
@@ -74,23 +74,126 @@ router.get('/', async (req, res, next) => {
   //   return res.json(c)
   // })
 
+
+  //* Working query a little bit faster
+  // const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
+
+  // // console.log(profiles);
   
+  // if (profiles.length === 0) {
+  //   return res.status(404).send('Children not found')
+  // }
 
-
-  const profiles = await Child.find({ child_id: { $in: ids } }).lean().populate('image').populate('parent').exec()
+  // for (let i = 0; i < profiles.length; i++){
+  //   profiles[i].parent = await Profile.findOne({ user_id: profiles[i].parent.parent_id }, 'user_id given_name family_name image_id').lean().populate('image')
+  //   if (profiles[i].labels) {
+  //     for (let j = 0; j < profiles[i].labels.length; j++){
+  //       profiles[i].labels[j] = await Label.findOne({label_id : profiles[i].labels[j]})
+  //     }
+  //   }
+  // }
+  // return res.json(profiles)
   
-  if (profiles.length === 0) {
-    return res.status(404).send('Children not found')
-  }
-
-  for (let i = 0; i < profiles.length; i++){
-    profiles[i].parent = await Profile.findOne({ user_id: profiles[i].parent.parent_id }, 'user_id given_name family_name image_id').lean().populate('image')
-    if (profiles[i].labels) {
-      for (let j = 0; j < profiles[i].labels.length; j++){
-        profiles[i].labels[j] = await Label.findOne({label_id : profiles[i].labels[j]})
+  //* The final query that uses aggregate is faster than the others
+  const profiles = await Child.aggregate([
+    {
+      '$lookup': {
+        'from': 'Label', 
+        'localField': 'labels', 
+        'foreignField': 'label_id', 
+        'as': 'labels'
       }
+    }, {
+      '$lookup': {
+        'from': 'Image', 
+        'localField': 'image_id', 
+        'foreignField': 'image_id', 
+        'as': 'image'
+      }
+    }, {
+      '$lookup': {
+        'from': 'Parent', 
+        'localField': 'child_id', 
+        'foreignField': 'child_id', 
+        'as': 'parent'
+      }
+    }, {
+      '$lookup': {
+        'from': 'Profile', 
+        'localField': 'parent.parent_id', 
+        'foreignField': 'user_id', 
+        'as': 'parent'
+      }
+    }, {
+      '$project': {
+        'labels': 1, 
+        'birthdate': 1, 
+        'given_name': 1, 
+        'family_name': 1, 
+        'gender': 1, 
+        'allergies': 1, 
+        'other_info': 1, 
+        'special_needs': 1, 
+        'background': 1, 
+        'suspended': 1, 
+        'child_id': 1, 
+        'image_id': 1, 
+        'createdAt': 1, 
+        'updatedAt': 1, 
+        'parent': {
+          '$arrayElemAt': [
+            '$parent', 0
+          ]
+        }, 
+        'image': {
+          '$arrayElemAt': [
+            '$image', 0
+          ]
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'Image', 
+        'localField': 'parent.image_id', 
+        'foreignField': 'image_id', 
+        'as': 'parent.image'
+      }
+    }, {
+      '$project': {
+        'labels': 1, 
+        'birthdate': 1, 
+        'given_name': 1, 
+        'family_name': 1, 
+        'gender': 1, 
+        'allergies': 1, 
+        'other_info': 1, 
+        'special_needs': 1, 
+        'background': 1, 
+        'suspended': 1, 
+        'child_id': 1, 
+        'image_id': 1, 
+        'createdAt': 1, 
+        'updatedAt': 1, 
+        'parent': {
+          '_id': 1, 
+          'given_name': 1, 
+          'family_name': 1, 
+          'user_id': 1, 
+          'image_id': 1, 
+          'image': {
+            '$arrayElemAt': [
+              '$parent.image', 0
+            ]
+          }
+        }, 
+        'image': 1
+      }
+    }, {
+    "$match": {
+      child_id: {$in: ids}
     }
   }
+  ])  
   return res.json(profiles)
 })
 

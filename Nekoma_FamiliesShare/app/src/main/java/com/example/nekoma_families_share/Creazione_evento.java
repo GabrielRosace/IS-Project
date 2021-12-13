@@ -1,16 +1,19 @@
 package com.example.nekoma_families_share;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 
-import android.content.Intent;
+import android.annotation.SuppressLint;
+
+
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -22,13 +25,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-public class Creazione_evento extends AppCompatActivity {
+public class Creazione_evento extends AppCompatActivity  {
     private List<MyEtichette> etichette;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,7 @@ public class Creazione_evento extends AppCompatActivity {
                 finish();
             }
         });
+
 
         String id_group = Utilities.getPrefs(this).getString("group", "");
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
@@ -79,7 +80,34 @@ public class Creazione_evento extends AppCompatActivity {
 
     }
 
+    public void showModalLabel(View v){
+        DialogFragment newFragment = new SelectorLabels();
+        newFragment.show(getSupportFragmentManager(), "missiles");
+    }
+
     public void onClickNextButton(View v){
+
+    }
+
+    private class SelectorLabels extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("PROVA")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // FIRE ZE MISSILES!
+                        }
+                    })
+                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            // Create the AlertDialog object and return it
+            return builder.create();
+        }
 
     }
 

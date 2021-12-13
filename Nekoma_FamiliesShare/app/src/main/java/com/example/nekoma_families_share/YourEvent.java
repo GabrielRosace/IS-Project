@@ -51,11 +51,11 @@ public class YourEvent extends AppCompatActivity {
     private String user_id;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_your_event);
-
-
+    protected void onPostResume() {
+        super.onPostResume();
+        tuoi_eventi = new ArrayList<>();
+        partecipi_eventi = new ArrayList<>();
+        scaduti_eventi = new ArrayList<>();
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -109,6 +109,12 @@ public class YourEvent extends AppCompatActivity {
         this.getEvents();
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_your_event);
+    }
+
     public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
@@ -140,7 +146,10 @@ public class YourEvent extends AppCompatActivity {
                                         if(new JSONObject(tmp_activity).getBoolean("repetition")){
                                             String name= new JSONObject(tmp_activity).getString("name");
                                             String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                            String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                            String id_img = "nan";
+                                            if(new JSONObject(tmp_activity).has("image_id")){
+                                                id_img = new JSONObject(tmp_activity).getString("image_id");
+                                            }
                                             int nPart = new JSONArray(tmp.getString("parents")).length();
                                             String descrizione = new JSONObject(tmp_activity).getString("description");
                                             String end = "TODO"; //todo finire di implemetare in 1.1
@@ -166,7 +175,10 @@ public class YourEvent extends AppCompatActivity {
                                             if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
                                                 String name= new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                String id_img = "nan";
+                                                if(new JSONObject(tmp_activity).has("image_id")){
+                                                    id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
                                                 String end = "todo"; //todo finire di implemetare in 1.1
@@ -195,7 +207,10 @@ public class YourEvent extends AppCompatActivity {
                                                 if(Calendar.getInstance().before(cal)){
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                    String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    String id_img = "nan";
+                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                        id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
                                                     String end = "todo";
@@ -220,7 +235,10 @@ public class YourEvent extends AppCompatActivity {
                                                 }else{
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                    String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    String id_img = "nan";
+                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                        id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
                                                     String end = "todo";
@@ -249,6 +267,7 @@ public class YourEvent extends AppCompatActivity {
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
+                                            System.out.println(Part.getString(i));
                                             if(Part.getString(i).equals(user_id)){
                                                 find = true;
                                             }
@@ -257,7 +276,10 @@ public class YourEvent extends AppCompatActivity {
                                             if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
                                                 String name= new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                String id_img = "nan";
+                                                if(new JSONObject(tmp_activity).has("image_id")){
+                                                    id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
                                                 String end = "todo"; //todo finire di implemetare in 1.1
@@ -286,7 +308,10 @@ public class YourEvent extends AppCompatActivity {
                                                 if(Calendar.getInstance().before(cal)){
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                    String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    String id_img = "nan";
+                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                        id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
                                                     String end = "todo";
@@ -310,7 +335,10 @@ public class YourEvent extends AppCompatActivity {
                                                 }else{
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
-                                                    String id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    String id_img = "nan";
+                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                        id_img = new JSONObject(tmp_activity).getString("image_id");
+                                                    }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
                                                     String end = "todo";

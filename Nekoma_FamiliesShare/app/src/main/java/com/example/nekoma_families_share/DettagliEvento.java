@@ -3,8 +3,12 @@ package com.example.nekoma_families_share;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Pair;
@@ -14,13 +18,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 //import android.widget.Toolbar;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +37,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,10 +73,21 @@ public class DettagliEvento extends AppCompatActivity {
 
     private String startTime;
     private String endTime;
+    private String timeSlot;
+    private String timeSlot_id;
+
+    public DatePickerDialog datePickerStart;
+    public DatePickerDialog datePickerEnd;
+
+    public ConstraintLayout progress_layout;
+    public ProgressBar progress_bar;
 
 
     public void deleteActivity(View v) {
-        Toast.makeText(this, "Questa activity deve sparire: " + activity_id, Toast.LENGTH_SHORT).show();
+        Utilities.httpRequest(this, Request.Method.DELETE, "/groups/" + Utilities.getGroupId(this) + "/activities/" + activity_id, response -> {
+            finish();
+        }, System.err::println, new HashMap<>());
+
     }
 
     @Override
@@ -75,20 +95,16 @@ public class DettagliEvento extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dettagli_evento);
 
+        progress_layout = (ConstraintLayout) findViewById(R.id.progress_layout_det);
+        progress_bar = (ProgressBar) findViewById(R.id.progress_bar_det);
+
 
         Toolbar t = (Toolbar) findViewById(R.id.toolbar2);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        t.setNavigationOnClickListener(v -> finish());
 
         Intent intent = getIntent();
 
         extraData = intent.getStringExtra("evento");
-
-        // System.out.println("-----------" + extraData);
 
 
         ImageView img = (ImageView) findViewById(R.id.eventImage);
@@ -113,27 +129,59 @@ public class DettagliEvento extends AppCompatActivity {
 
         isCreator = Utilities.getUserID(this).equals(creator_id);
 
+        getTimeslot(); // getting information about timeslot
+
         if (isCreator) {
             findViewById(R.id.delete_action).setVisibility(View.VISIBLE);
             misc.setText("Modifica");
             desc.setEnabled(true);
+
             startDate.setEnabled(true);
+            startDate.setFocusable(false);
+            startDate.setClickable(true);
+            startDate.setOnClickListener(v -> openDatePickerStart(v));
+
             endDate.setEnabled(true);
+            endDate.setFocusable(false);
+            endDate.setClickable(true);
+            endDate.setOnClickListener(v -> openDatePickerEnd(v));
+
+
             findViewById(R.id.add_label).setVisibility(View.VISIBLE);
-            misc.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    modify_event();
-                }
-            });
+            misc.setOnClickListener(v -> modify_event());
         } else {
-            misc.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    join_event();
+            Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/nekomaActivities/" + activity_id + "/information", response -> {
+                try {
+                    JSONObject obj = new JSONObject((String) response);
+                    if (obj.has("parents")) {
+                        boolean found = false;
+                        if (!obj.getString("parents").equals("[]") && !obj.getString("parents").equals(""))  {
+                            JSONArray arr = obj.getJSONArray("parents");
+                            for (int i = 0; i < arr.length() && !found; i++) {
+                                if (arr.getString(i).equals(Utilities.getUserID(this))) {
+                                    found = true;
+                                }
+                            }
+
+                        }
+                        if (!found) {
+                            misc.setText("Partecipa");
+                            misc.setOnClickListener(v -> join_event());
+                        } else {
+                            misc.setText("Cancella part.");
+                            misc.setOnClickListener(v -> dejoin_event());
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            });
+
+            }, error -> {
+            }, new HashMap<>());
         }
+
+
+
 
         if (evento.labels.equals("")) {
             eventLabels = new ArrayList<>();
@@ -144,18 +192,48 @@ public class DettagliEvento extends AppCompatActivity {
 
 
         eventName.setText(evento.nome);
-        img.setImageDrawable(getDrawable(R.drawable.persone)); // TODO aggiungi immagine
+        if (evento.img.equals("nan")) {
+            img.setImageDrawable(getDrawable(R.drawable.persone));
+        } else {
+            Utilities.httpRequest(DettagliEvento.this, Request.Method.GET, "/image/"+evento.img, response -> {
+                String url="";
+                try {
+                    JSONObject obj = new JSONObject((String)response);
+                    if(obj.has("url") && !obj.getString("url").equals("image.url")){
+                        if(obj.getString("url").contains(".svg")){
+                            url = getString(R.string.urlnoapi)+obj.getString("path");
+                        }else{
+                            url = obj.getString("url");
+
+                        }
+                    }else{
+                        url = getString(R.string.urlnoapi)+obj.getString("path");
+                    }
+                    new ImageDownloader(img).execute(url);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }, System.err::println, new HashMap<>());
+
+        }
 
 
 
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/"+Utilities.getGroupId(this)+"/activities/"+activity_id+"/timeslots", response -> {
+
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/activities/" + activity_id + "/timeslots", response -> {
             try {
                 JSONArray arr = new JSONArray(response.toString());
-                if(!arr.isNull(0)){
+                if (!arr.isNull(0)) {
                     JSONObject obj = arr.getJSONObject(0);
-                    String description =obj.getString("description");
-                    desc.setText(description.equals("")?"Non specificato":description);
-                }else{
+                    String description;
+                    if (obj.has("description")) {
+                        description = obj.getString("description");
+                    } else {
+                        description = "";
+                    }
+                    desc.setText(description.equals("") ? "Non specificato" : description);
+                } else {
                     desc.setText("Non specificato");
                 }
             } catch (JSONException e) {
@@ -163,7 +241,6 @@ public class DettagliEvento extends AppCompatActivity {
             }
 
         }, error -> {
-
         }, new HashMap<>());
 
 
@@ -173,7 +250,7 @@ public class DettagliEvento extends AppCompatActivity {
                 String start = obj.getString("start");
                 String end = obj.getString("end");
 
-                if(!start.equals("") || !end.equals("")){
+                if (!start.equals("") || !end.equals("")) {
                     Calendar cal = Calendar.getInstance();
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
                     cal.setTime(sdf.parse(start));
@@ -190,22 +267,33 @@ public class DettagliEvento extends AppCompatActivity {
 
                     endDate.setText(getDate(cal));
 
-                    if (obj.getString("parents").equals("[]")) {
+
+                    try {
+                        initDatePickerStart();
+                        initDatePickerEnd();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (obj.getString("parents").equals("[]") || obj.getString("parents").equals("") || obj.getString("parents").equals("[\"\"]")) {
                         nPart.setText(nPart.getText() + "0");
                     } else {
-                        nPart.setText(nPart.getText() + "" + obj.getJSONArray("parents").length());
+                        String[] str = obj.getString("parents").substring(1, obj.getString("parents").length() - 1).split(",");
+                        nPart.setText(nPart.getText() + "" + str.length);
                     }
-                }else{
+                } else {
                     startDate.setText("nan");
                     endDate.setText("nan");
                 }
+
+                progress_layout.setVisibility(View.GONE);
+                progress_bar.setVisibility(View.GONE);
 
             } catch (JSONException | ParseException e) {
                 e.printStackTrace();
             }
 
         }, error -> {
-
         }, new HashMap<>());
 
 
@@ -250,8 +338,6 @@ public class DettagliEvento extends AppCompatActivity {
 
 
     public void modify_event() {
-        // Quando lo clicco devo:
-        // - aggiungere le etichette
         String start = startDate.getText().toString();
         String end = endDate.getText().toString();
         String descrizione = desc.getText().toString();
@@ -277,57 +363,75 @@ public class DettagliEvento extends AppCompatActivity {
         String finalStartFormat = startFormat;
         String finalEndFormat = endFormat;
 
-        // Modifica di descrizione e date
-        Utilities.httpRequest(DettagliEvento.this, Request.Method.GET, "/groups/"+Utilities.getGroupId(DettagliEvento.this)+"/activities/"+activity_id+"/timeslots", response -> {
-            Map<String,String> data = new HashMap<>();
-            String timeslot_id;
+        // Date and description update
+        Map<String, String> data = new HashMap<>();
+        try {
+            JSONArray arr = new JSONArray((String) timeSlot);
+            if (!arr.isNull(0)) {
+                fillMapTimeslot(data, timeSlot, descrizione, finalStartFormat, finalEndFormat, "");
+                Utilities.httpRequest(DettagliEvento.this, Request.Method.PATCH, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/nekomaActivities/" + activity_id + "/timeslots/" + timeSlot_id, response1 -> {
+                    reloadActivity("", false);
+                }, error -> {
+                    Toast.makeText(DettagliEvento.this, "Hai impostato delle date errate", Toast.LENGTH_SHORT).show();
+                }, data);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void getTimeslot() {
+        Utilities.httpRequest(DettagliEvento.this, Request.Method.GET, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/activities/" + activity_id + "/timeslots", response -> {
+            Map<String, String> data = new HashMap<>();
             try {
-                JSONArray arr = new JSONArray((String)response);
-                if(!arr.isNull(0)){
+                JSONArray arr = new JSONArray((String) response);
+                if (!arr.isNull(0)) {
                     JSONObject obj = arr.getJSONObject(0);
-                    timeslot_id = obj.getString("id");
-                    data.put("status",obj.getString("status"));
-                    data.put("summary",obj.getString("summary"));
-                    data.put("notifyUsers","false");
-                    data.put("description",descrizione);
-                    data.put("location",obj.getString("location"));
-                    data.put("start", finalStartFormat);
-                    data.put("end", finalEndFormat);
-
-                    JSONObject prop;
-                    if(obj.has("extendedProperties")){
-                        prop = obj.getJSONObject("extendedProperties");
-
-                        data.put("cost",prop.has("cost")?prop.getString("cost"):"");
-                        data.put("requiredChildren",prop.has("requiredChildren")?prop.getString("requiredChildren"):"[]");
-                        data.put("groupId",prop.has("groupId")?prop.getString("groupId"):"");
-                        data.put("startHour",prop.has("start")?prop.getString("start"):"");
-                        data.put("link",prop.has("link")?prop.getString("link"):"");
-                        data.put("requiredParents",prop.has("requiredParents")?prop.getString("requiredParents"):"");
-                        data.put("activityId",prop.has("activityId")?prop.getString("activityId"):"");
-                        data.put("repetition",prop.has("repetition")?prop.getString("repetition"):"");
-                        data.put("activityColor",prop.has("activityColor")?prop.getString("activityColor"):"");
-                        data.put("children",prop.has("children")?prop.getString("children"):"[]");
-                        data.put("externals",prop.has("externals")?prop.getString("externals"):"[]");
-                        data.put("endHour",prop.has("endHour")?prop.getString("end"):"");
-                        data.put("category",prop.has("category")?prop.getString("category"):"");
-                        data.put("status",prop.has("status")?prop.getString("status"):"");
-                        data.put("parents",prop.has("parents")?prop.getString("parents"):"[]");
-                    }
-
-                    Utilities.httpRequest(DettagliEvento.this, Request.Method.PATCH, "/groups/"+Utilities.getGroupId(DettagliEvento.this)+"/nekomaActivities/"+activity_id+"/timeslots/"+timeslot_id, response1 -> {
-                        //System.out.println(response1);
-                        reloadActivity("",false); //! Prima di ricaricare passano secoli ;)
-                    }, error -> {
-                        Toast.makeText(DettagliEvento.this, "È successo un casino", Toast.LENGTH_SHORT).show();
-                    }, data);
+                    timeSlot_id = obj.getString("id");
+                    timeSlot = (String) response;
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-
         }, System.err::println, new HashMap<>());
+    }
+
+
+    public Map<String, String> fillMapTimeslot(Map<String, String> data, String response, String descrizione, String finalStartFormat, String finalEndFormat, String partecipants) throws JSONException {
+        JSONArray arr = new JSONArray((String) response);
+        if (!arr.isNull(0)) {
+            JSONObject obj = arr.getJSONObject(0);
+            data.put("status", obj.getString("status"));
+            data.put("summary", obj.getString("summary"));
+            data.put("notifyUsers", "false");
+            data.put("description", descrizione);
+            data.put("location", obj.getString("location"));
+            data.put("start", finalStartFormat);
+            data.put("end", finalEndFormat);
+
+            JSONObject prop;
+            if (obj.has("extendedProperties")) {
+                prop = obj.getJSONObject("extendedProperties").getJSONObject("shared");
+
+                data.put("cost", prop.has("cost") ? prop.getString("cost") : "");
+                data.put("requiredChildren", prop.has("requiredChildren") ? prop.getString("requiredChildren") : "");
+                data.put("groupId", prop.has("groupId") ? prop.getString("groupId") : "");
+                data.put("startHour", prop.has("start") ? prop.getString("start") : "");
+                data.put("link", prop.has("link") ? prop.getString("link") : "");
+                data.put("requiredParents", prop.has("requiredParents") ? prop.getString("requiredParents") : "");
+                data.put("activityId", prop.has("activityId") ? prop.getString("activityId") : "");
+                data.put("repetition", prop.has("repetition") ? prop.getString("repetition") : "");
+                data.put("activityColor", prop.has("activityColor") ? prop.getString("activityColor") : "");
+                data.put("children", "[]");
+                data.put("externals", prop.has("externals") ? prop.getString("externals") : "[]");
+                data.put("endHour", prop.has("endHour") ? prop.getString("end") : "");
+                data.put("category", prop.has("category") ? prop.getString("category") : "");
+                data.put("status", prop.has("status") ? prop.getString("status") : "");
+                data.put("parents", partecipants);
+            }
+        }
+        return data;
     }
 
     public String fromCalToString(Calendar cal, String hour) {
@@ -339,8 +443,58 @@ public class DettagliEvento extends AppCompatActivity {
     }
 
     public void join_event() {
-        // GET del timeslot -> PATCH localhost:8080/api/groups/:id_gruppo/nekomaActivities/:id_attività/timeslots/:id_timeslot
-        Toast.makeText(DettagliEvento.this, "Partecipa", Toast.LENGTH_SHORT).show(); // TODO fai in modo che partecipi
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
+
+        Map<String, String> data = new HashMap<>();
+        try {
+            JSONArray arr = new JSONArray((String) timeSlot);
+            if (!arr.isNull(0)) {
+                JSONObject obj = arr.getJSONObject(0);
+                String descrizione = obj.has("description") ? obj.getString("description") : "";
+                String finalStartFormat = obj.getJSONObject("start").getString("dateTime");
+                String finalEndFormat = obj.getJSONObject("end").getString("dateTime");
+                String partecipants = "[" + Utilities.getUserID(this) + "]";
+
+
+                fillMapTimeslot(data, timeSlot, descrizione, finalStartFormat, finalEndFormat, partecipants);
+                Utilities.httpRequest(DettagliEvento.this, Request.Method.PATCH, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/nekomaActivities/" + activity_id + "/timeslots/" + timeSlot_id, response1 -> {
+                    reloadActivity("", false);
+                }, error -> {
+                    Toast.makeText(DettagliEvento.this, error.toString(), Toast.LENGTH_SHORT).show();
+                }, data);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dejoin_event() {
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
+
+        Map<String, String> data = new HashMap<>();
+        try {
+            JSONArray arr = new JSONArray((String) timeSlot);
+            if (!arr.isNull(0)) {
+                JSONObject obj = arr.getJSONObject(0);
+                String descrizione = obj.has("description") ? obj.getString("description") : "";
+                String finalStartFormat = obj.getJSONObject("start").getString("dateTime");
+                String finalEndFormat = obj.getJSONObject("end").getString("dateTime");
+                String payload = "[]";
+
+
+                fillMapTimeslot(data, timeSlot, descrizione, finalStartFormat, finalEndFormat, payload);
+
+                Utilities.httpRequest(DettagliEvento.this, Request.Method.PATCH, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/nekomaActivities/" + activity_id + "/timeslots/" + timeSlot_id, response1 -> {
+                    reloadActivity("", false);
+                }, error -> {
+                    Toast.makeText(DettagliEvento.this, error.toString(), Toast.LENGTH_SHORT).show();
+                }, data);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void newLabel(View v) {
@@ -352,7 +506,7 @@ public class DettagliEvento extends AppCompatActivity {
         Map<String, String> data = new HashMap<>();
         data.put("label_id", id);
         Utilities.httpRequest(DettagliEvento.this, Request.Method.POST, "/groups/" + Utilities.getGroupId(DettagliEvento.this) + "/activities/" + activity_id + "/label", System.out::println, System.out::println, data);
-        reloadActivity("",true);
+        reloadActivity("", true);
 
     }
 
@@ -415,9 +569,10 @@ public class DettagliEvento extends AppCompatActivity {
                 this.btn = itemView.findViewById(R.id.edit_label);
             }
         }
+
     }
 
-    private void reloadActivity(String labelToErase, boolean labelToAdd) { // Mi fa un pò schifo....
+    private void reloadActivity(String labelToErase, boolean labelToAdd) {
         VisualizzazioneEventi.Evento e = VisualizzazioneEventi.Evento.getEventoFromString(extraData);
         String newLabel = "";
         String[] split = e.labels.split(",");
@@ -437,9 +592,10 @@ public class DettagliEvento extends AppCompatActivity {
             }
         }
         Intent intent = getIntent();
+        finish();
         e.labels = newLabel;
         intent.putExtra("evento", e.toString());
-        recreate();
+        startActivity(intent);
     }
 
     private void addRecyclerView(List<String> list) {
@@ -450,4 +606,81 @@ public class DettagliEvento extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
+
+    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+        ImageView holder;
+
+        public ImageDownloader(ImageView holder) {
+            this.holder = holder;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String urlOfImage = strings[0];
+            Bitmap logo = null;
+            try{
+                InputStream is = new URL(urlOfImage).openStream();
+                logo = BitmapFactory.decodeStream(is);
+            }catch(Exception e){ // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            holder.setImageBitmap(bitmap);
+        }
+    }
+
+
+
+    public void openDatePickerStart(View v) {
+        datePickerStart.show();
+    }
+
+    public void openDatePickerEnd(View v){
+        datePickerEnd.show();
+    }
+
+
+    private void initDatePickerStart() throws ParseException {
+        DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month = month+1;
+                String date = dayOfMonth+"/"+month+"/"+year;
+                startDate.setText(date);
+            }
+        };
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(startDate.getText().toString()));
+
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        datePickerStart = new DatePickerDialog(this,dateListener,year,month,day);
+    }
+
+    private void initDatePickerEnd() throws ParseException {
+        DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month = month+1;
+                String date = dayOfMonth+"/"+month+"/"+year;
+                endDate.setText(date);
+            }
+        };
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(endDate.getText().toString()));
+
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        datePickerEnd = new DatePickerDialog(this,dateListener,year,month,day);
+    }
 }
