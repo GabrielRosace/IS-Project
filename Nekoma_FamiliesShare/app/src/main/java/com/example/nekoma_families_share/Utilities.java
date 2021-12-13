@@ -34,19 +34,21 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Utilities {
-    private static final int MY_SOCKET_TIMEOUT_MS = 1000000000;
+    // Timeout per le richieste http
+    private static final int MY_SOCKET_TIMEOUT_MS = 60000;
 
+    // Creo lo spazio nelle shared preferences per salvare le informazioni che mi servono durante la navigazione
     public static SharedPreferences setSharedPreferences(Context context){
         SharedPreferences prefs;
         prefs=context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         return prefs;
     }
-
+    // Ottengo queste preferenze
     public static SharedPreferences getPrefs(Context context){
         return context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
     }
 
-
+    // Salvo il jwt nelle shared preferences
     public static void setToken(Context context,String token){
         SharedPreferences prefs = getPrefs(context);
         SharedPreferences.Editor edit;
@@ -55,13 +57,13 @@ public class Utilities {
         edit.apply();
     }
 
-
+    // Ottengo il token
     public static String getToken(Context context){
         SharedPreferences prefs = getPrefs(context);
         return  prefs.getString("token","");
     }
 
-    /** With bearer token authentication and params */
+    /** With bearer token authentication and params */ // Metodo per semplificare le richieste http
     public static void httpRequest(Context context,int method, String endpoint , Response.Listener onSuccess, Response.ErrorListener onError, Map<String,String> params){
         RequestQueue queue = Volley.newRequestQueue(context);
         String url= context.getString(R.string.url) + endpoint;
@@ -91,7 +93,7 @@ public class Utilities {
         queue.add(stringRequest1);
     }
 
-
+    // Parsing del token per ottenere lo user id
     public static String getUserID(Context context){
         String user_id = "";
         String userToken = getToken(context);
@@ -107,6 +109,7 @@ public class Utilities {
         return user_id;
     }
 
+    // Ottengo il group id dalle shared preferences
     public static String getGroupId(Context context) {
         return Utilities.getPrefs(context).getString("group","");
     }

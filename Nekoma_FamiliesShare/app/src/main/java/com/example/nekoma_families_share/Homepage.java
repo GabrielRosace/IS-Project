@@ -48,6 +48,9 @@ public class Homepage extends AppCompatActivity {
         try{
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
+
+            // permette di vedere se l'utente è il capogruppo
+
             Utilities.httpRequest(this, Request.Method.GET, "/groups?searchBy=ids&ids=" + id_group, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -86,6 +89,8 @@ public class Homepage extends AppCompatActivity {
         return  prefs.getString("token","");
     }
 
+    // tutti i seguenti metodi sono necessari per spostarsi attraverso le interfacce
+
     public void getBambini(View v){
         Intent bambino = new Intent(Homepage.this,ListaBambiniAmici.class);
         startActivity(bambino);
@@ -102,14 +107,17 @@ public class Homepage extends AppCompatActivity {
         Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);
         startActivity(activities);
     }
+
     public void getEvent(View v){
         Intent event = new Intent(Homepage.this,YourEvent.class);
         startActivity(event);
     }
+
     public void getCreateEvent(View v){
         Intent event = new Intent(Homepage.this,Creazione_evento.class);
         startActivity(event);
     }
+
     public void getService(View v){
         Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
     }

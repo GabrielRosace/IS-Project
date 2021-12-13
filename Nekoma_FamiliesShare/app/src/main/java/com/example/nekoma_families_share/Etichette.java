@@ -64,17 +64,17 @@ public class Etichette extends AppCompatActivity {
 
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
         String id_group = Utilities.getPrefs(this).getString("group", "");
+
+        // chiamata che permette di avere le etichette aggiornate del gruppo
+        // questo è possibile solo per chi è capogruppo in quanto è solo il capogruppo a poter aggiungere le etichette
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
                     JSONArray tmp = new JSONArray(response);
-                   // System.out.println(tmp);
-                    //System.out.println(response);
                     for(int i=0;i<tmp.length();++i){
                         myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                         etichette.add(nuovo);
-                        //System.out.println("etichette ******"+etichette.get(i));
                     }
                     MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(Etichette.this, etichette);
 
@@ -94,20 +94,20 @@ public class Etichette extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+    // nested class che permette di popolare la recycle view dell'xml con le informazioni
+    // definite nell'onCreate
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<myEtichette> mData;
 
         private LayoutInflater mInflater;
 
-        // data is passed into the constructor
         MyRecyclerViewAdapter(Context context, List<myEtichette> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
 
 
-        // inflates the row layout from xml when needed
         @NonNull
         @Override
         public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -115,7 +115,8 @@ public class Etichette extends AppCompatActivity {
             return new MyRecyclerViewAdapter.ViewHolder(view);
         }
 
-        // binds the data to the TextView in each row
+
+        // permette la cancellazione delle etichette
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             myEtichette name = mData.get(position);
@@ -125,7 +126,6 @@ public class Etichette extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
-                    // String id_group = Utilities.getPrefs(Etichette.this).getString("group", "");
                     Utilities.httpRequest(Etichette.this, Request.Method.DELETE, "/label/"+name.id, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -137,7 +137,6 @@ public class Etichette extends AppCompatActivity {
                                     try{
                                         etichette = new ArrayList<>();
                                         JSONArray tmp = new JSONArray(response1);
-                                        // System.out.println(tmp);
                                         for(int i=0;i<tmp.length();++i){
                                             myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                                             etichette.add(nuovo);
@@ -155,7 +154,7 @@ public class Etichette extends AppCompatActivity {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     Toast.makeText(Etichette.this, "ERRORE", Toast.LENGTH_LONG).show();
-                                    // System.err.println(error.getMessage());
+
                                 }
                             }, new HashMap<>());
                         }
@@ -163,14 +162,13 @@ public class Etichette extends AppCompatActivity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(Etichette.this, "ETICHETTA ESISTENTE", Toast.LENGTH_LONG).show();
-                           //  System.err.println(error.getMessage());
+
                         }
                     },new HashMap<>());
                 }
             });
         }
 
-        // total number of rows
         @Override
         public int getItemCount() {
             return mData.size();
@@ -202,7 +200,7 @@ public class Etichette extends AppCompatActivity {
         }
 
 
-        // stores and recycles views as they are scrolled off screen
+
         public class ViewHolder extends RecyclerView.ViewHolder{
             TextView myTextView;
             ImageButton btn;
@@ -214,13 +212,14 @@ public class Etichette extends AppCompatActivity {
             }
         }
 
-        // convenience method for getting data at click position
+
         myEtichette getItem(int id) {
             return mData.get(id);
         }
 
     }
 
+    // metodo che permette di aggiungere etichette
     public void addLable(View v){
         etichette = new ArrayList<>();
         RecyclerView grouplist = (RecyclerView) findViewById(R.id.etichette_g);
@@ -284,6 +283,8 @@ public class Etichette extends AppCompatActivity {
 
 
     }
+
+    //nested class utile per la gestione delle etichette
     private class myEtichette {
         public final String name;
         public final String id;
