@@ -1202,14 +1202,7 @@ router.delete('/:id/activities/:activityId/label/:labelId', async (req, res, nex
   }
 })
 
-/*
-
-TO DO
-- Lista partecipanti
-- Data evento
-- Aggiunta/rimozione etichette
-- Modifica activity nuovo post/patch senza events
-*/
+// retrive the essential information of one activity: start date, end date, children and parents partecipants.
 router.get('/:id/nekomaActivities/:activityId/information', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -1235,6 +1228,7 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
     if (!activity) {
       return res.status(404).send('Not existing activity')
     }
+    // get the information from google calendar
     const events = await ah.fetchAGroupEventActivity(group.group_id, group.calendar_id, activity_id)
     if (events.length === 0) {
       return res.status(200).send({
@@ -1244,21 +1238,19 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
         parents: []
       })
     }
-    const parenti = JSON.parse(events[0].extendedProperties.shared.parents)
-    console.log(parenti.length)
+    // i build the response of the api
     const myresponse = {
       start: events[0].start.dateTime,
       end: events[0].end.dateTime,
       children: JSON.parse(events[0].extendedProperties.shared.children),
       parents: JSON.parse(events[0].extendedProperties.shared.parents)
     }
-    console.log(myresponse)
     res.json(myresponse)
   } catch (error) {
     next(error)
   }
 })
-
+// create an activity with more option of the default one
 router.post('/:id/nekomaActivities', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -1287,6 +1279,7 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
       image_id,
       owner_type: 'user',
       owner_id: user_id,
+      // if noone pass an imageurl, then i use an default image
       url: (!activity.imgUrl || activity.imgUrl === '') ? 'https://avatars.dicebear.com/api/adventurer/dinosauro.svg' : activity.imgUrl,
       path: '/images/profiles/user_default_photo.png',
       thumbnail_path: '/images/profiles/user_default_photo.png'
@@ -1306,7 +1299,7 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     next(error)
   }
 })
-
+// create a timeslot with date, partecipats of one activity
 router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -1333,6 +1326,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
       return res.status(404).send('Not existing activity')
     }
     const group = await Group.findOne({ group_id })
+    // create the timeslot objet
     const tmp = { description: comingevent.description,
       location: comingevent.location,
       summary: comingevent.summary,
@@ -1358,6 +1352,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
         }
      }
     }
+    // i post the object in google calendar
     await calendar.events.insert({
       calendarId: group.calendar_id,
       resource: tmp
@@ -1368,7 +1363,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
     next(error)
   }
 })
-
+// update the timeslot of one activity
 router.patch(
   '/:groupId/nekomaActivities/:activityId/timeslots/:timeslotId',
   async (req, res, next) => {
@@ -1389,14 +1384,13 @@ router.patch(
       }
       let comingevent = req.body
 
-      let input = comingevent.parents.substring(1, comingevent.parents.length - 1).split(",")
+      let input = comingevent.parents.substring(1, comingevent.parents.length - 1).split(',')
       let arr = []
 
-      for (let i = 0; i < input.length; i++){
+      for (let i = 0; i < input.length; i++) {
         arr.push(input[i])
       }
-
-
+      // generete the object of the timeslot
       const tmp = {
         description: comingevent.description,
         location: comingevent.location,
@@ -1437,6 +1431,7 @@ router.patch(
       ) {
         return res.status(400).send('Bad Request')
       }
+      // now i start to get the old information and merge with the new one
       const group = await Group.findOne({ group_id })
       const myChildren = await Parent.distinct('child_id', { parent_id: req.user_id })
       let event = await calendar.events.get({
@@ -1447,24 +1442,20 @@ router.patch(
       let old_arr = []
       if (event.data.extendedProperties.shared.parents) {
         let tmp_parents = event.data.extendedProperties.shared.parents
-        let old_input = tmp_parents.substring(1, tmp_parents.length - 1).split(",")
-  
-        for (let i = 0; i < old_input.length; i++){
-          old_arr.push(old_input[i].substring(1,old_input[i].length-1))
-        }
-        
-      }
+        let old_input = tmp_parents.substring(1, tmp_parents.length - 1).split(',')
 
+        for (let i = 0; i < old_input.length; i++) {
+          old_arr.push(old_input[i].substring(1, old_input[i].length - 1))
+        }
+      }
       const oldParents = JSON.parse(JSON.stringify(old_arr))
       const oldChildren = JSON.parse(event.data.extendedProperties.shared.children)
 
       const parents = JSON.parse(tmp.extendedProperties.shared.parents)
       const children = JSON.parse(tmp.extendedProperties.shared.children)
       if (!member.admin) {
-
         if (parents.includes(req.user_id)) {
           tmp.extendedProperties.shared.parents = JSON.stringify([...new Set([...oldParents, req.user_id])])
-
         } else {
           tmp.extendedProperties.shared.parents = JSON.stringify(oldParents.filter(u => u !== req.user_id))
         }
@@ -1478,7 +1469,7 @@ router.patch(
         tmp.extendedProperties.shared.children = JSON.stringify(oldChildren)
       } else {
         if (adminChanges) {
-          console.log("adminchange true")
+          console.log('adminchange true')
           if (Object.keys(adminChanges).length > 0) {
             Object.keys(adminChanges).forEach(id => {
               if (adminChanges[id] > 0) {
@@ -1493,12 +1484,12 @@ router.patch(
           }
         } else {
           let str = tmp.extendedProperties.shared.parents
-          if (typeof str == "string") {
-            str = str.substring(1, str.length - 1).split(",")
+          if (typeof str === 'string') {
+            str = str.substring(1, str.length - 1).split(',')
             let arr = []
 
-            for (let i = 0; i < str.length; i++){
-              arr.push(str[i].substring(1,str[i].length-1))
+            for (let i = 0; i < str.length; i++) {
+              arr.push(str[i].substring(1, str[i].length - 1))
             }
             tmp.extendedProperties.shared.parents = JSON.stringify(arr)
           }
@@ -1520,6 +1511,7 @@ router.patch(
       } else if (volunteersReq && childrenReq) {
         await nh.timeslotRequirementsNotification(tmp.summary, parents, group_id, activity_id, timeslot_id)
       }
+      // update the new information on google calendar
       await calendar.events.patch({
         calendarId: group.calendar_id,
         eventId: req.params.timeslotId,
@@ -1590,7 +1582,7 @@ router.post('/:id/activities', async (req, res, next) => {
     next(error)
   }
 })
-
+// get all the activity of one group, with labels if they exists
 router.get('/:id/activities', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -2470,7 +2462,7 @@ router.delete('/:groupId/service/:servizioId', async (req, res, next) => {
     next(error)
   }
 })
-
+// get all the service of one group
 router.get('/:id/service', (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -2500,6 +2492,8 @@ router.get('/:id/service', (req, res, next) => {
     })
     .catch(next)
 })
+
+// get one service of one group by the id of the service
 router.get('/:id/service/:servizioId', (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -2531,6 +2525,7 @@ router.get('/:id/service/:servizioId', (req, res, next) => {
     .catch(next)
 })
 
+// update a service by id
 router.patch('/:id/service/:servizioId', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
