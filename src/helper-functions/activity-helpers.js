@@ -67,7 +67,7 @@ const fetchAllGroupEvents = async (groupId, calendarId) => {
   } while (nextPageToken)
   return events
 }
-
+// i get basic information of one timeslot of one activity, star/end date and children/parents partecipants
 const fetchAGroupEventActivity = async (groupId, calendarId, activityId) => {
   const pendingActivities = await Activity.find({ group_id: groupId, status: 'pending' }).distinct('activity_id')
   let events = []
@@ -82,6 +82,7 @@ const fetchAGroupEventActivity = async (groupId, calendarId, activityId) => {
     }
     const pageEvents = resp.data.items
     const pageAcceptedEvents = pageEvents.filter(event => pendingActivities.indexOf(event.extendedProperties.shared.activityId) === -1)
+    // i get the only those that have my activity id
     const eventfromActivityId = pageAcceptedEvents.filter(event => event.extendedProperties.shared.activityId === activityId)
     events = events.concat(eventfromActivityId)
     nextPageToken = resp.data.nextPageToken

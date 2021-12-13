@@ -10,6 +10,7 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // added image id for the image of the activity
   image_id: {
     type: String,
     required: true
@@ -40,6 +41,7 @@ const activitySchema = new mongoose.Schema({
     type: Boolean,
     required: true
   },
+  // added labels of the activity
   labels: {
     type: [String],
     require: true

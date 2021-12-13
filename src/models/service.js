@@ -12,7 +12,7 @@ const ruleSchema = new mongoose.Schema({
     required: true
   }
 })
-
+// model for the service that provides our app
 const serviceSchema = new mongoose.Schema({
   servizio_id: {
     type: String,
