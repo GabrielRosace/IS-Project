@@ -12,7 +12,7 @@ const Parent = require('../models/parent')
 router.get('/', async (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Not authenticated') }
 
-  const { ids } = req.query
+  let { ids } = req.query
   if (!ids) {
     return res.status(400).send('Bad Request')
   }
@@ -98,6 +98,10 @@ router.get('/', async (req, res, next) => {
   // return res.json(profiles)
   
   //* The final query that uses aggregate is faster than the others
+
+  if(typeof ids == 'string') ids = [ids]
+
+
   const profiles = await Child.aggregate([
     {
       '$lookup': {
