@@ -69,6 +69,7 @@ app.use('/api/github', require('./routes/github-routes'))
 app.use('/api/community', require('./routes/community-routes'))
 app.use('/api/label', require('./routes/label-routes'))
 app.use('/api/image', require("./routes/image-routes"))
+app.use('/api/recurringActivity', require('./routes/recurring-activity-routes'))
 
 if (config.util.getEnv('NODE_ENV') === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')))
