@@ -132,6 +132,9 @@ public class Creazione_evento extends AppCompatActivity  {
         s = format2.format(d);
         Date DFine = format2.parse(s);
         System.out.println(DInizio + " " +DFine);
+        String DateEnd = format2.format(DFine);
+        String DateStart = format2.format(DInizio);
+        System.out.println(DateStart + " " +DateEnd);
         String labels = "[";
         Iterator i = labelSelect.iterator();
         boolean control = true;
@@ -150,8 +153,9 @@ public class Creazione_evento extends AppCompatActivity  {
                 }
             }
         }
-        System.out.println("----->"+labels);
         labels = labels + "]";
+        System.out.println("----->"+labels);
+
         HashMap<String,String> map = new HashMap<>();
         String id_group = Utilities.getPrefs(this).getString("group", "");
         map.put("group_id",id_group);
@@ -191,8 +195,8 @@ public class Creazione_evento extends AppCompatActivity  {
         HashMap<String,String> mapTime = new HashMap<>();
         mapTime.put("summary",nome);
         mapTime.put("location",luogo);
-        mapTime.put("start",DInizio.toString());
-        mapTime.put("end",DFine.toString());
+        mapTime.put("start",DateStart);
+        mapTime.put("end",DateEnd);
         mapTime.put("cost","");
         mapTime.put("requiredChildren","2");
         mapTime.put("groupId",id_group);
@@ -207,6 +211,7 @@ public class Creazione_evento extends AppCompatActivity  {
         mapTime.put("category","");
         mapTime.put("status","ongoing");
         mapTime.put("parents","[]");
+        System.out.println("----->"+mapTime);
         Utilities.httpRequest(this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -214,6 +219,7 @@ public class Creazione_evento extends AppCompatActivity  {
                 try {
                     tmp = new JSONObject(response);
                     mapTime.put("activityId",tmp.getString("id"));
+                    System.out.println("----->"+mapTime);
                     Utilities.httpRequest(Creazione_evento.this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities/"+tmp.getString("id")+"/date", new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -223,7 +229,6 @@ public class Creazione_evento extends AppCompatActivity  {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            System.out.println("------>"+tmp);
                         }
                     },new Response.ErrorListener(){
                         @Override
