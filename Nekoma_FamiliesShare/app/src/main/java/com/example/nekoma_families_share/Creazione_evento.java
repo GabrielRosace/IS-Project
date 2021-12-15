@@ -158,12 +158,11 @@ public class Creazione_evento extends AppCompatActivity  {
         map.put("location", luogo);
         map.put("repetition","false");
         map.put("repetition_type", "");
+        map.put("different_timeslots","false");
         map.put("labels",labels);
         map.put("status", "accepted");
         map.put("activity_id","");
-
-        map.put("imageUrl","");
-        System.out.println("------>"+labels);
+        map.put("imgUrl","");
 
         Utilities.httpRequest(this, Request.Method.GET, "/groups?searchBy=ids&ids=" + id_group, new Response.Listener<String>() {
             @Override
@@ -183,11 +182,38 @@ public class Creazione_evento extends AppCompatActivity  {
                 System.err.println(error.getMessage());
             }
         },new HashMap<>());
-
+        String[] Hinizio = inizio.split(":");
+        String[] Hfine = fine.split(":");
+        HashMap<String,String> mapTime = new HashMap<>();
+        mapTime.put("summary",nome);
+        mapTime.put("location",luogo);
+        mapTime.put("start",DInizio.toString());
+        mapTime.put("end",DFine.toString());
+        mapTime.put("cost","");
+        mapTime.put("requiredChildren","2");
+        mapTime.put("groupId",id_group);
+        mapTime.put("startHour",Hinizio[0]);//--------
+        mapTime.put("link","");
+        mapTime.put("requiredParents","2");
+        mapTime.put("repetition","none");
+        mapTime.put("activityColor","#000000");
+        mapTime.put("children","[]");
+        mapTime.put("externals","[]");
+        mapTime.put("endHour",Hfine[0]);
+        mapTime.put("category","");
+        mapTime.put("status","ongoing");
+        mapTime.put("parents","[]");
         Utilities.httpRequest(this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println("--------------POST---------------");
+                JSONObject tmp = null;
+                try {
+                    tmp = new JSONObject(response);
+                    mapTime.put("activityId",tmp.getString("activity_id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("------>"+tmp);
             }
         },new Response.ErrorListener(){
             @Override
@@ -196,6 +222,9 @@ public class Creazione_evento extends AppCompatActivity  {
                 System.err.println(error.getMessage());
             }
         },map);
+
+       
+
 
     }
 
