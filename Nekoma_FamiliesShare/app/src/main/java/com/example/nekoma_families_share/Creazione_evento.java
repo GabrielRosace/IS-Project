@@ -139,14 +139,18 @@ public class Creazione_evento extends AppCompatActivity  {
             Button b = (Button) i.next();
             int buttonColor = ((ColorDrawable) b.getBackground()).getColor();
             if(buttonColor == Color.GREEN) {
-                if(control){
-                    labels = labels + b.getText().toString();
-                    control = false;
-                }else
-                    labels = labels + "," + b.getText().toString();
-
+                for (MyEtichette m:etichette) {
+                    if(m.getName().equals(b.getText().toString())){
+                        if(control){
+                            labels = labels = labels + m.getId();
+                            control = false;
+                        }else
+                            labels = labels + "," + m.getId();
+                    }
+                }
             }
         }
+        System.out.println("----->"+labels);
         labels = labels + "]";
         HashMap<String,String> map = new HashMap<>();
         String id_group = Utilities.getPrefs(this).getString("group", "");
@@ -209,11 +213,28 @@ public class Creazione_evento extends AppCompatActivity  {
                 JSONObject tmp = null;
                 try {
                     tmp = new JSONObject(response);
-                    mapTime.put("activityId",tmp.getString("activity_id"));
+                    mapTime.put("activityId",tmp.getString("id"));
+                    Utilities.httpRequest(Creazione_evento.this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities/"+tmp.getString("id")+"/date", new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            JSONObject tmp = null;
+                            try {
+                                tmp = new JSONObject(response);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            System.out.println("------>"+tmp);
+                        }
+                    },new Response.ErrorListener(){
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(Creazione_evento.this, error.toString(), Toast.LENGTH_LONG).show();
+                            System.err.println(error.getMessage());
+                        }
+                    },mapTime);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                System.out.println("------>"+tmp);
             }
         },new Response.ErrorListener(){
             @Override
@@ -223,7 +244,9 @@ public class Creazione_evento extends AppCompatActivity  {
             }
         },map);
 
-       
+
+
+
 
 
     }
@@ -266,6 +289,9 @@ public class Creazione_evento extends AppCompatActivity  {
 
         private String getName(){
             return this.name;
+        }
+        private String getId(){
+            return this.id;
         }
 
     }
