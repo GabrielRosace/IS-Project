@@ -1290,7 +1290,12 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     activity.group_name = group.name
     activity.image_id = image_id
 
-    let labels = activity.labels.substring(1,activity.labels.length-1).split(",")
+
+    let labels = activity.labels.substring(1, activity.labels.length - 1).split(",")
+    if (activity.labels == "[]") {
+      labels = []
+    }
+
 
     activity.labels = labels
     await Image.create(image)
