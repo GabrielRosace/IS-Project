@@ -4,7 +4,7 @@
     <string name="email">Email:</string>
     <string name="password">Password:</string>
     <string name="login">Login</string>
-    <string name="url">http://10.0.2.2:8080/api</string>
+    <string name="url">http://192.168.1.11:8080/api</string>
     <string name="chisiamo">Siamo un team di studenti della facoltà di informatica dell\'Università Ca Foscari di Venezia.</string>
     <string name="lapplicazione">Questa applicazione ha lo scopo di estendere l\'esistente Famiglie e Condividi, evolvendolo alla situazione attuale. Offre nuove funzionalità come la creazione di servizi finalizzati al prestito di beni, la creazione di eventi e l\'inclusione dei propri figli in una società cambiata dalla pandemia.</string>
     <string name="eventi">Gli eventi possono essere comodamente creati attraverso l\'apposita sezione. Sono riservati al gruppo con cui si decide di condividere l\'evento.</string>
