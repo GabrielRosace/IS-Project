@@ -1294,7 +1294,7 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     if (member.admin) {
       await nh.newActivityNotification(group_id, user_id)
     }
-    res.json({ status: activity.status })
+    res.json({ id: activity_id })
   } catch (error) {
     next(error)
   }
