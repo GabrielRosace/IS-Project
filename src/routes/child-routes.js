@@ -6,10 +6,13 @@ const Label = require('../models/label')
 const Profile = require('../models/profile')
 const Parent = require('../models/parent')
 
+// Ritorna tutte le informazioni riguardanti il bambino specificato.
+// In particolare viene inviato al client un JSON con tutti i dati del bambino compresa l'immagine, le etichette associate e le informazioni di un genitore, compresa anche l'immagine 
+// di quest'ultimo.
 router.get('/', async (req, res, next) => {
   if (!req.user_id) { return res.status(401).send('Not authenticated') }
 
-  const { ids } = req.query
+  let { ids } = req.query
   if (!ids) {
     return res.status(400).send('Bad Request')
   }
@@ -95,6 +98,10 @@ router.get('/', async (req, res, next) => {
   // return res.json(profiles)
   
   //* The final query that uses aggregate is faster than the others
+
+  if(typeof ids == 'string') ids = [ids]
+
+
   const profiles = await Child.aggregate([
     {
       '$lookup': {

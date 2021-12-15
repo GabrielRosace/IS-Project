@@ -139,7 +139,6 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textEmailAddress"
-                    android:text="a@a.it"
                     tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                 <Space
@@ -173,7 +172,6 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textPassword"
-                    android:text="12345678"
                     tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                 <Space

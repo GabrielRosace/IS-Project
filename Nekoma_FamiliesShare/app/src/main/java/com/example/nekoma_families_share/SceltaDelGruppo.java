@@ -46,6 +46,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
         startActivity(logout);
     }
 
+    // Classe per la gestione della recycle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<String> mData;
@@ -95,6 +96,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
         public int getItemCount() {
             return mData.size();
         }
+
 
         private class ImageDownloader extends AsyncTask<String, Void, Bitmap>{
             ViewHolder holder;
@@ -163,13 +165,14 @@ public class SceltaDelGruppo extends AppCompatActivity {
 
         String user_id;
         String userToken = Utilities.getToken(SceltaDelGruppo.this);
+        // Parsing del token per ottenere lo user_id
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
         String body = new String(Base64.getDecoder().decode(base64Body));
         try {
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
-
+            // Ottengo la lista dei gruppi in cui si trova l'utente
             Utilities.httpRequest(SceltaDelGruppo.this, Request.Method.GET,"/users/" + user_id + "/groups", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -177,6 +180,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
                         JSONArray res = new JSONArray(response);
                         for (int i = 0; i < res.length(); i++) {
                             String group_id = new JSONObject(res.getString(i)).get("group_id").toString();
+                            // Ottengo le informazioni relative al gruppo
                             Utilities.httpRequest(SceltaDelGruppo.this,Request.Method.GET,"/groups/"+group_id,response1 -> {
                                 try {
                                     JSONObject object = new JSONObject((String) response1);
@@ -184,7 +188,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
                                     groupPhoto.add(new JSONObject(object.getString("image")).getString("path"));
                                     groupId.add(group_id);
 
-
+                                    // Aggiungo le informazioni alla view
                                     RecyclerView grouplist = (RecyclerView) findViewById(R.id.grouplist);
                                     LinearLayoutManager grouplistManager = new LinearLayoutManager(SceltaDelGruppo.this);
                                     MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(SceltaDelGruppo.this, groupName,groupPhoto,groupId);

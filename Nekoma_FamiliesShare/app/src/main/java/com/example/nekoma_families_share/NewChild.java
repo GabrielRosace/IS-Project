@@ -58,8 +58,6 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_child);
 
-        // System.out.println(Utilities.getToken(this));
-
         Toolbar t = (Toolbar) findViewById(R.id.newchild_toolbar);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,9 +75,8 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         confirmButton = findViewById(R.id.confirmlabel);
         labelsSpinner = (Spinner) findViewById(R.id.labelsSpinner);
 
+        // Token dell'utente, mi permette di fare le chiamate al server
         String userToken = Utilities.getToken(this);
-       //  System.out.println(userToken);
-        // Faccio il parse del token in modo tale da prendermi l'id dell'utente
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
         String body = new String(Base64.getDecoder().decode(base64Body));
@@ -90,8 +87,11 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
             e.printStackTrace();
         }
 
+        // Lista che contiene i nomi delle etichette che possono essere associate ad un bambino (usata solo per riferimento grafico)
         labelsName = new ArrayList<>();
+        // Lista che contiene gli id delle etichette (usata per le operazioni con il db)
         labelsId = new ArrayList<>();
+        // Chiamata al server che popola le liste con le etichette presenti nel gruppo
         Utilities.httpRequest(this,Request.Method.GET,"/label/"+Utilities.getPrefs(this).getString("group",""),response -> {
             try {
                 JSONArray user_response = new JSONArray((String) response);
@@ -104,19 +104,21 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
                 dataSpinner = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item);
                 dataSpinner.addAll(labelsName);
                 dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                // Inserisco i risultati nello spinner
                 labelsSpinner.setAdapter(dataSpinner);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }, error -> {
             Toast.makeText(NewChild.this, error.toString(), Toast.LENGTH_LONG).show();
-            // System.err.println(error.getMessage());
         }, new HashMap<>());
 
+        // Metodo che inizializza il date picker per la data di nascita del bambino
         initDatePicker();
         dateButton = findViewById(R.id.dateButton);
         dateButton.setText("Seleziona una data");
 
+        // Popolo lo spinner del genere del bambino utilizzando un array statico di elementi specificato nelle resources
         childGender = (Spinner) findViewById(R.id.childGender);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.gendervalues, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
@@ -129,6 +131,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
     @Override
     public void onNothingSelected(AdapterView<?> parent) {}
 
+    // Metodo che permette di inzializzare il date picker, impostandolo alla data odierna
     private void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -146,6 +149,7 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         datePicker = new DatePickerDialog(this,dateListener,year,month,day);
     }
 
+    // Metodo che permette di aggiungere i dati di un nuovo bambino nel database
     public void setNewChild(View v){
         Map<String,String> params = new HashMap<>();
         params.put("birthdate",dateButton.getText().toString());
@@ -165,10 +169,10 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
             startActivity(homepage);
         },error -> {
             Toast.makeText(NewChild.this, "Devi specificare: nome,cognome,data di nascita e genere!", Toast.LENGTH_LONG).show();
-            // System.err.println(error.getMessage());
         },params);
     }
 
+    // Metodo che permette di aggiungere ad un bambino una specifica etichetta, e la rimuove dallo spinner
     public void newLabel(View v){
         childLabels.add(labelsId.get(labelsSpinner.getSelectedItemPosition()));
         dataSpinner.remove(labelsSpinner.getSelectedItem());

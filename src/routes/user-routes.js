@@ -900,7 +900,6 @@ router.get('/:id/children', (req, res, next) => {
 })
 
 
-
 router.post('/:id/children', childProfileUpload.single('photo'), async (req, res, next) => {
   if (req.user_id !== req.params.id) { return res.status(401).send('Unauthorized') }
   const {
