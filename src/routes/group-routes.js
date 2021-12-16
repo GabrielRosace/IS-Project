@@ -1289,12 +1289,21 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     const group = await Group.findOne({ group_id })
     activity.group_name = group.name
     activity.image_id = image_id
+
+
+    let labels = activity.labels.substring(1, activity.labels.length - 1).split(",")
+    if (activity.labels == "[]") {
+      labels = []
+    }
+
+
+    activity.labels = labels
     await Image.create(image)
     await Activity.create(activity)
     if (member.admin) {
       await nh.newActivityNotification(group_id, user_id)
     }
-    res.json({ status: activity.status })
+    res.json({ id: activity_id })
   } catch (error) {
     next(error)
   }
