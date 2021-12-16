@@ -114,4 +114,68 @@ public class Utilities {
         return Utilities.getPrefs(context).getString("group","");
     }
 
+    public static class myService{
+        public final String service_id;
+        public final String owner_id;
+        public final String nome;
+        public final String descrizione;
+        public final String location;
+        public final String pattern;
+        public final String car_space;
+        public final String lend_obj;
+        public final String lend_time;
+        public final String pickuplocation;
+        public final String img;
+        public final String nPart;
+        public final String recurrence;
+
+        public myService(String service_id, String owner_id, String nome, String descrizione, String location, String pattern, String car_space, String lend_obj, String lend_time, String pickuplocation, String img, String nPart, String recurrence) {
+            this.service_id = service_id;
+            this.owner_id = owner_id;
+            this.nome = nome;
+            this.descrizione = descrizione;
+            this.location = location;
+            this.pattern = pattern; // il pattern che sceglie l'utente quando lo sceglie
+            this.car_space = car_space;
+            this.lend_obj = lend_obj; // l'oggetto dato in prestito
+            this.lend_time = lend_time; // quando va restituito l'oggetto preso in prestito
+            this.pickuplocation = pickuplocation; // il posto in cui devi andare a prendere qualcosa per un terzo
+            this.img = img;
+            this.nPart = nPart;
+            this.recurrence = recurrence;
+        }
+
+        @Override
+        public String toString() {
+            return service_id +'/'+owner_id +'/'+nome +'/'+descrizione +'/'+location +'/'+pattern +'/'+car_space +'/'+lend_obj +'/'+lend_time +'/'+pickuplocation +'/'+img +'/'+nPart+'/'+recurrence;
+        }
+    }
+    public static class myRecEvent{
+        public final String nome;
+        public final String event_id;
+        public final String img;
+        public final int nPart;
+        public final String descrizione;
+        public final String enddate;
+        public final String labels;
+        public final String owner_id;
+        public final String recurrence;
+
+        public myRecEvent(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id, String recurrence) {
+            this.nome = nome;
+            this.img = img;
+            this.event_id = event_id;
+            this.nPart = nPart;
+            this.descrizione = descrizione;
+            this.enddate = enddate;
+            this.labels = labels;
+            this.owner_id = owner_id;
+            this.recurrence = recurrence;
+        }
+
+        @Override
+        public String toString() {
+            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
+        }
+    }
 }

@@ -20,7 +20,7 @@
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Archivio Servizi"
-            app:titleTextColor="#FFFFFF" />
+            app:titleTextColor="?attr/colorOnPrimary" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/service_tab"
