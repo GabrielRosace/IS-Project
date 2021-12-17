@@ -22,6 +22,7 @@ router.post('/', (req, res, next) => {
     RecurringActivity.findOne({activity_id: req.body.activity_id}).exec().then((a) => {
         if(a){
             Recurrence.findOne({activity_id: a.activity_id}).exec().then((r) => {
+                let valid = false
                 switch(r.type){
                     case 'daily':
                         for(let i = 0; i < days.length; i++){                       
@@ -32,7 +33,7 @@ router.post('/', (req, res, next) => {
                         break
                     
                     case 'weekly':
-                        let valid = false
+                        valid = false
                         for(let i = 0; i < days.length; i++){
                             for(let j = 0; j < start_date.length; j++){
                                 if(days[i] < r.start_date[0] || days[i] > r.end_date[end_date.length - 1]){
@@ -49,12 +50,12 @@ router.post('/', (req, res, next) => {
                     case 'monthly':
                         valid = false
                         for(let i = 0; i < days.length; i++){
-                            for(let j = 0; j < start_date.length; j++){
+                            for(let j = 0; j < r.start_date.length; j++){
                                 if(days[i].getDate() == r.start_date[j].getDate()){
                                     valid = true
                                 }
                                 if(!valid) return res.status(400).send('Incorrect days')
-                                if(days[i] < r.start_date[0] || days[i] > r.end_date[end_date.length - 1]) return res.status(400).send('Incorrect days')
+                                if(days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return res.status(400).send('Incorrect days')
                             }
                         }
                         break
