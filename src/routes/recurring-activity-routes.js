@@ -11,12 +11,13 @@ const Image = require('../models/image')
 const RecurringActivity = require('../models/recurring-activity')
 const Recurrence = require('../models/recurrence')
 const objectid = require('objectid')
+const { newExportEmail } = require('../helper-functions/export-activity-data')
 
 // TODO endpoint per avere eventi con lo le stesse label (stessi interessi)
 
 // Crea una nuova attività ricorrente
-// TODO verificare che in caso di weekly e monthly i giorni siano rispettati
-// TODO group_name non serve
+// // TODO verificare che in caso di weekly e monthly i giorni siano rispettati
+// // TODO group_name non serve
 router.post('/', (req, res, next) => {
     let userId = req.user_id
     if (!userId) { return res.status(401).send('Not authenticated') }
@@ -29,7 +30,7 @@ router.post('/', (req, res, next) => {
                 group_id,
                 image_url,
                 name,
-                group_name,
+                // group_name,
                 description,
                 location,
                 color
@@ -53,6 +54,49 @@ router.post('/', (req, res, next) => {
             let end_date = []
             for(i = 0; i < end_dateSplitted.length; i++){
                 end_date.push(new Date(end_dateSplitted[i]))
+            }
+
+			if(start_date.length != end_date.length) return res.status(400).send('Dates does not match')
+			switch(req.body.type){
+				case 'daily':
+					if(start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
+					break
+                case 'weekly':
+					let start_tmp = new Date(start_date[0].toString())
+					let start_nextMonday = start_tmp.getDate() + (8 - start_tmp.getDay())
+					start_nextMonday = new Date(start_tmp.setDate(start_nextMonday))
+
+					let end_tmp = new Date(end_date[0].toString())
+					let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
+					end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
+
+					if(start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+
+					for(let i = 0; i < start_date.length; i++){
+						if(start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+						if(i < start_date.length - 1){
+							if(start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
+							if(end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+						}
+						else{
+							if(start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
+							if(end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+						}
+					}
+
+                    break
+
+                case 'monthly':
+					if(start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+
+					for(let i = 0; i < end_date.length; i++){
+						if(start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+						if(i < start_date.length - 1){
+							if(start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+							if(end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+						}
+					}
+					break
             }
 
             const newRecurrence = {
