@@ -24,9 +24,12 @@
     <string name="savechanges">Salva Modifiche</string>
     <string name="deleteProfile">Elimina Profilo</string>
     <string name="urlnoapi">http://10.0.2.2:8080</string>
-    <string name="attivitàricorrenti">Attività ricorrenti</string>
+    <string name="attivitàricorrenti">Attività</string>
     <string name="servizipersona">Servizi alla persona</string>
     <string name="attivitàconsigliate">Attività consigliate</string>
+    <string name="serviziricorrenti">Attività ricorrenti</string>
+    <string name="carsharing">Carsharing</string>
+    <string name="prestito">Prestito</string>
     <string-array name="eventName">
         <item>Evento semplice</item>
         <item>Carsharing</item>

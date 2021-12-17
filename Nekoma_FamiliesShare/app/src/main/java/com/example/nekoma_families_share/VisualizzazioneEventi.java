@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,7 +39,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
     private String userid;
     private String groupid;
-    private List<Evento> activities = null;
+    private List<Situation> activities = null;
     private List<String> child_pref = null;
     public ConstraintLayout progress_layout;
     public ProgressBar progress_bar;
@@ -71,8 +70,14 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     addRecyclerView(activities);
                 } else if (checkedId == R.id.servPersona) {
                     getServPerson();
-                } else {
+                } else if(checkedId == R.id.consigliate){
                     addRecyclerView(getRecommendedActivities());
+                }else if(checkedId == R.id.servRicorrenti){
+                    getRecurring();
+                }else if(checkedId == R.id.prestito){
+                    Toast.makeText(VisualizzazioneEventi.this, "Prestito, coming soon", Toast.LENGTH_SHORT).show();
+                }else if(checkedId == R.id.carsharing){
+                    Toast.makeText(VisualizzazioneEventi.this, "Carsharing, coming soon", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -163,18 +168,34 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     private void getServPerson() { //TODO not implemented yet, è parte della seconda feature
-        List<Evento> activities = new ArrayList<>();
+        List<Situation> activities = new ArrayList<>();
         Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         addRecyclerView(activities);
     }
 
 
+    private void getRecurring(){ //TODO not implemented yet // Questi li aggiungo anche a activities, naturalmente subsumendo
+        List<Situation> services = new ArrayList<>();
+
+        // Richiesta di recurrent event
+        Utilities.httpRequest(this,Request.Method.GET, "/groups/"+Utilities.getGroupId(this)+"/services?filterBy=recurrent",response -> {
+            System.out.println(response); // Ora resta da parsare le info
+            // Va fatta anche la richiesta di recurring services
+        }, error -> {
+            System.out.println(error);
+        }, new HashMap<>());
+
+//        Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
+        addRecyclerView(services);
+    }
+
     // Ottengo le attività che possono interessare ai figli
-    private List<Evento> getRecommendedActivities() {
-        List<Evento> recommendedActivities = new ArrayList<>();
+    private List<Situation> getRecommendedActivities() {
+        List<Situation> recommendedActivities = new ArrayList<>();
+
         if (child_pref != null) {
-            for (Evento a : activities) {
-                String[] lab = a.labels_ids.split(",");
+            for (Situation a : activities) {
+                String[] lab = a.getLabels_id().split(",");
                 for (String l : lab) {
                     if (l != "") {
                         if (child_pref.contains(l) && !recommendedActivities.contains(a)) {
@@ -193,7 +214,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    private void addRecyclerView(List<Evento> list) {
+    private void addRecyclerView(List<Situation> list) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activities_recycle_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(VisualizzazioneEventi.this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(VisualizzazioneEventi.this, list);
@@ -202,18 +223,18 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    public void goBack(View v) {
-        Intent homepage = new Intent(VisualizzazioneEventi.this, Homepage.class);
-        startActivity(homepage);
-    }
+//    public void goBack(View v) {
+//        Intent homepage = new Intent(VisualizzazioneEventi.this, Homepage.class);
+//        startActivity(homepage);
+//    }
 
     // Classe per la gestione della recycle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<Evento> eventoList;
+        private List<Situation> eventoList;
         private LayoutInflater mInflater;
 
-        public MyRecyclerViewAdapter(Context context, List<Evento> eventoList) {
+        public MyRecyclerViewAdapter(Context context, List<Situation> eventoList) {
             this.eventoList = eventoList;
             this.mInflater = LayoutInflater.from(context);
         }
@@ -227,8 +248,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final Evento eve = eventoList.get(position);
-            holder.tv.setText(eve.nome);
+            final Situation eve = eventoList.get(position);
+            holder.tv.setText(eve.getName());
             holder.btn.setText("Info");
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -240,10 +261,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
             });
 
             // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
-            if (eve.img.equals("nan")) {
+            if (eve.getImage().equals("nan")) {
                 holder.img.setImageDrawable(getDrawable(R.drawable.persone));
             } else {
-                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/"+eve.img, response -> {
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/"+eve.getImage(), response -> {
                     String url="";
                     try {
                         JSONObject obj = new JSONObject((String)response);
@@ -318,7 +339,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     // Model di evento
-    public static class Evento {
+    public static class Evento implements Situation {
         public final String nome;
         public final String event_id;
         public final String img;
@@ -360,6 +381,27 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         public String toString() {
             return nome + '/' + event_id + '/' + img + '/' + nPart + '/' + descrizione + '/' + enddate + '/' + labels + '/' + owner_id;
         }
+
+        @Override
+        public String getName() {
+            return this.nome;
+        }
+
+        @Override
+        public String getImage() {
+            return this.img;
+        }
+
+        @Override
+        public String getLabels_id() {
+            return this.labels_ids;
+        }
+    }
+
+    private interface Situation {
+        String getName();
+        String getImage();
+        String getLabels_id();
     }
 
 }
