@@ -103,9 +103,10 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
-const Service = require('../models/service')
-const RecurringActivity = require('../models/recurring-activity')
+// const Service = require('../models/service')
+// const RecurringActivity = require('../models/recurring-activity')
 const Recurrence = require('../models/recurrence')
+const Partecipant = require('../models/partecipant')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1756,6 +1757,24 @@ router.get('/:id/services', async (req, res, next) => {
 			break
 	}
 
+})
+
+router.get('/:id/partecipations', (req, res, next) => {
+  if (!req.user_id) return res.status(401).send('Not authenticated')
+
+  let filterBy = req.query.filterBy
+
+  switch(filterBy){
+    case 'none':
+      
+      break
+    case 'expired':
+      break
+    case 'not-expired':
+      break
+    default:
+      break
+  }
 })
 
 router.patch('/:id/activities/:activityId', async (req, res, next) => {
