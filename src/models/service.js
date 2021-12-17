@@ -1,17 +1,5 @@
 const mongoose = require('mongoose')
 
-const participantSchema = new mongoose.Schema({
-  user_id: {
-    type: String,
-    required: true
-  }
-})
-const ruleSchema = new mongoose.Schema({
-  rule: {
-    type: String,
-    required: true
-  }
-})
 // model for the service that provides our app
 const serviceSchema = new mongoose.Schema({
   service_id: {
@@ -19,51 +7,39 @@ const serviceSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  owner_id: {
+    type: String,
+    required: true
+  },
   group_id: {
     type: String,
     required: true
   },
-  group_name: {
-    type: String,
-    required: true
-  },
-  description: String,
   name: {
     type: String,
     required: true
   },
-  // userid
-  creator_id: {
+  description: String,
+  location: {
     type: String,
     required: true
   },
-  image_id: {
+  pattern: {
     type: String,
     required: true
   },
-  partecipants: {
-    type: [participantSchema],
-    require: true
-  },
-  rules: {
-    type: [ruleSchema],
-    require: true
-  },
-  tipo: {
+  car_space: String,
+  lend_obj: String,
+  lend_time: Date,
+  pickuplocation: String,
+  img: {
     type: String,
     required: true
   },
-  repetition: {
-    type: Boolean,
-    required: true
-  },
-  repetition_type: {
-    type: String
-  },
-  status: {
-    type: String,
-    required: true
+  recurrence: {
+    type: Boolean
   }
+
 }, { timestamps: true, toJSON: { virtuals: true } })
 
 serviceSchema.index({ group_id: 1, createdAt: -1 })
