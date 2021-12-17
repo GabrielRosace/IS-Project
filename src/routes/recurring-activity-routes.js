@@ -156,4 +156,23 @@ router.get('/:activity_id', (req, res, next) => {
     })
 })
 
+// Elimina un evento ricorrente
+router.delete('/:activity_id', (req, res, user) => {
+    let userId = req.user_id
+    if (!userId) { return res.status(401).send('Not authenticated') }
+
+    Partecipant.deleteMany({activity_id: req.params.activity_id}).catch( error => {
+        console.log('Deleting error');
+    })
+
+    Recurrence.deleteMany({activity_id: req.params.activity_id}).catch( error => {
+        console.log('Deleting error');
+    })
+
+    RecurringActivity.deleteOne({activity_id: req.params.activity_id}).catch( error => {
+        console.log('Deleting error');
+    })
+    return res.status(200).send('Event deleted')
+})
+
 module.exports = router

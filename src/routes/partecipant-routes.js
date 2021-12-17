@@ -12,9 +12,6 @@ router.post('/', (req, res, next) => {
 
     let daysSplitted = req.body.days ? req.body.days.split(',') : undefined
     let days = []
-    // daysSplitted.forEach( element => {
-    //     days.push(new Date(element))
-    // })
 
     for(let i = 0; i < daysSplitted.length; i++){
         days.push(new Date(daysSplitted[i]))
