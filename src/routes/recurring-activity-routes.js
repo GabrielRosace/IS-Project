@@ -60,6 +60,7 @@ router.post('/', (req, res, next) => {
 			if(start_date.length != end_date.length) return res.status(400).send('Dates does not match')
 			switch(req.body.type){
 				case 'daily':
+                    if(start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
 					if(start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
 					break
                 case 'weekly':
