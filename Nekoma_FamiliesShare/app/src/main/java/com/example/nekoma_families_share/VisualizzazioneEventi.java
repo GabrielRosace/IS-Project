@@ -39,7 +39,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
     private String userid;
     private String groupid;
-    private List<Situation> activities = null;
+    private List<Utilities.Situation> activities = null;
     private List<String> child_pref = null;
     public ConstraintLayout progress_layout;
     public ProgressBar progress_bar;
@@ -70,13 +70,13 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     addRecyclerView(activities);
                 } else if (checkedId == R.id.servPersona) {
                     getServPerson();
-                } else if(checkedId == R.id.consigliate){
+                } else if (checkedId == R.id.consigliate) {
                     addRecyclerView(getRecommendedActivities());
-                }else if(checkedId == R.id.servRicorrenti){
+                } else if (checkedId == R.id.servRicorrenti) {
                     getRecurring();
-                }else if(checkedId == R.id.prestito){
+                } else if (checkedId == R.id.prestito) {
                     Toast.makeText(VisualizzazioneEventi.this, "Prestito, coming soon", Toast.LENGTH_SHORT).show();
-                }else if(checkedId == R.id.carsharing){
+                } else if (checkedId == R.id.carsharing) {
                     Toast.makeText(VisualizzazioneEventi.this, "Carsharing, coming soon", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -168,33 +168,52 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     private void getServPerson() { //TODO not implemented yet, è parte della seconda feature
-        List<Situation> activities = new ArrayList<>();
+        List<Utilities.Situation> activities = new ArrayList<>();
         Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         addRecyclerView(activities);
     }
 
 
-    private void getRecurring(){ //TODO not implemented yet // Questi li aggiungo anche a activities, naturalmente subsumendo
-        List<Situation> services = new ArrayList<>();
+    private void getRecurring() {
+        List<Utilities.Situation> services = new ArrayList<>();
 
-        // Richiesta di recurrent event
-        Utilities.httpRequest(this,Request.Method.GET, "/groups/"+Utilities.getGroupId(this)+"/services?filterBy=recurrent",response -> {
-            System.out.println(response); // Ora resta da parsare le info
-            // Va fatta anche la richiesta di recurring services
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    services.add(new Utilities.myRecEvent(obj));
+                }
+
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/service", response1 -> {
+                    try {
+                        JSONArray arr1 = new JSONArray((String)response1);
+                        for (int j = 0; j < arr1.length(); j++) {
+                            JSONObject obj1 = arr1.getJSONObject(j);
+                            services.add(new Utilities.myService(obj1));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> {
+                    System.out.println(error);
+                }, new HashMap<>());
+
+                addRecyclerView(services);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }, error -> {
             System.out.println(error);
         }, new HashMap<>());
-
-//        Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
-        addRecyclerView(services);
     }
 
     // Ottengo le attività che possono interessare ai figli
-    private List<Situation> getRecommendedActivities() {
-        List<Situation> recommendedActivities = new ArrayList<>();
+    private List<Utilities.Situation> getRecommendedActivities() {
+        List<Utilities.Situation> recommendedActivities = new ArrayList<>();
 
         if (child_pref != null) {
-            for (Situation a : activities) {
+            for (Utilities.Situation a : activities) {
                 String[] lab = a.getLabels_id().split(",");
                 for (String l : lab) {
                     if (l != "") {
@@ -214,7 +233,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    private void addRecyclerView(List<Situation> list) {
+    private void addRecyclerView(List<Utilities.Situation> list) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activities_recycle_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(VisualizzazioneEventi.this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(VisualizzazioneEventi.this, list);
@@ -231,10 +250,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     // Classe per la gestione della recycle view
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<Situation> eventoList;
+        private List<Utilities.Situation> eventoList;
         private LayoutInflater mInflater;
 
-        public MyRecyclerViewAdapter(Context context, List<Situation> eventoList) {
+        public MyRecyclerViewAdapter(Context context, List<Utilities.Situation> eventoList) {
             this.eventoList = eventoList;
             this.mInflater = LayoutInflater.from(context);
         }
@@ -248,7 +267,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final Situation eve = eventoList.get(position);
+            final Utilities.Situation eve = eventoList.get(position);
             holder.tv.setText(eve.getName());
             holder.btn.setText("Info");
             holder.btn.setOnClickListener(new View.OnClickListener() {
@@ -264,19 +283,19 @@ public class VisualizzazioneEventi extends AppCompatActivity {
             if (eve.getImage().equals("nan")) {
                 holder.img.setImageDrawable(getDrawable(R.drawable.persone));
             } else {
-                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/"+eve.getImage(), response -> {
-                    String url="";
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/" + eve.getImage(), response -> {
+                    String url = "";
                     try {
-                        JSONObject obj = new JSONObject((String)response);
-                        if(obj.has("url") && !obj.getString("url").equals("image.url")){
-                            if(obj.getString("url").contains(".svg")){
-                                url = getString(R.string.urlnoapi)+obj.getString("path");
-                            }else{
+                        JSONObject obj = new JSONObject((String) response);
+                        if (obj.has("url") && !obj.getString("url").equals("image.url")) {
+                            if (obj.getString("url").contains(".svg")) {
+                                url = getString(R.string.urlnoapi) + obj.getString("path");
+                            } else {
                                 url = obj.getString("url");
 
                             }
-                        }else{
-                            url = getString(R.string.urlnoapi)+obj.getString("path");
+                        } else {
+                            url = getString(R.string.urlnoapi) + obj.getString("path");
                         }
                         new ImageDownloader(holder.img).execute(url);
 
@@ -323,10 +342,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         protected Bitmap doInBackground(String... strings) {
             String urlOfImage = strings[0];
             Bitmap logo = null;
-            try{
+            try {
                 InputStream is = new URL(urlOfImage).openStream();
                 logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
+            } catch (Exception e) { // Catch the download exception
                 e.printStackTrace();
             }
             return logo;
@@ -339,7 +358,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     // Model di evento
-    public static class Evento implements Situation {
+    public static class Evento implements Utilities.Situation {
         public final String nome;
         public final String event_id;
         public final String img;
@@ -398,10 +417,5 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }
     }
 
-    private interface Situation {
-        String getName();
-        String getImage();
-        String getLabels_id();
-    }
 
 }
