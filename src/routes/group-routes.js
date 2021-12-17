@@ -103,7 +103,9 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
-const Servizio = require('../models/service')
+const Service = require('../models/service')
+const RecurringActivity = require('../models/recurring-activity')
+const Recurrence = require('../models/recurrence')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1636,6 +1638,124 @@ router.get('/:id/activities', async (req, res, next) => {
   }
 
   return res.json(activities)
+})
+
+router.get('/:id/services', async (req, res, next) => {
+  if (!req.user_id) return res.status(401).send('Not authenticated')
+
+	let filterBy = req.query.filterBy
+
+	switch(filterBy){
+		case 'none':
+			let activities = await Recurrence.aggregate([
+				{
+					'$lookup': {
+						'from': 'RecurringActivity', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'RecurringActivity'
+					}
+				}, {
+					'$lookup': {
+						'from': 'Service', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'Service'
+					}
+				}
+			])
+			return res.status(200).json(activities)
+			break
+		case 'expired':
+			let expiredActivities = await Recurrence.aggregate([
+				{
+					'$lookup': {
+						'from': 'RecurringActivity', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'RecurringActivity'
+					}
+				}, {
+					'$lookup': {
+						'from': 'Service', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'Service'
+					}
+				}, {
+					'$match': {
+						'end_date': {
+							'$elemMatch': {
+								'$lt': new Date(Date.now())
+							}
+						}
+					}
+				}
+			])
+			return res.status(200).json(expiredActivities)
+			break
+		case 'not-expired':
+			let noExpiredActivities = await Recurrence.aggregate([
+				{
+					'$lookup': {
+						'from': 'RecurringActivity', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'RecurringActivity'
+					}
+				}, {
+					'$lookup': {
+						'from': 'Service', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'Service'
+					}
+				}, {
+					'$match': {
+						'end_date': {
+							'$elemMatch': {
+								'$gte': new Date(Date.now())
+							}
+						}
+					}
+				}
+			])
+			return res.status(200).json(noExpiredActivities)
+			break
+		case 'recurrent':
+      Recurrence.aggregate([
+        {
+        '$lookup': {
+          'from': 'RecurringActivity', 
+          'localField': 'activity_id', 
+          'foreignField': 'activity_id', 
+          'as': 'RecurringActivity'
+          }
+        }
+      ]).then(a => {
+        return res.status(200).json(a)
+      })
+			break
+		case 'service':
+      // TODO controllare se funziona
+      Recurrence.aggregate([
+        {
+        '$lookup': {
+          'from': 'Service', 
+          'localField': 'activity_id', 
+          'foreignField': 'activity_id', 
+          'as': 'Service'
+          }
+        }
+      ]).then(s => {
+        return res.status(200).json(s)
+      })
+			break
+		default:
+      return res.status(400).send('Bad request')
+			break
+	}
+
 })
 
 router.patch('/:id/activities/:activityId', async (req, res, next) => {

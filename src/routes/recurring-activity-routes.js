@@ -23,54 +23,62 @@ router.post('/', (req, res, next) => {
 
     Group.findOne({group_id: req.body.group_id, name: req.body.group_name}).exec().then((g) => {
         if(g){
-            Image.findOne({image_id: req.body.image_id}).exec().then((i) => {
-                if(i){
-                    const { group_id, image_id, name, group_name, description, location, color } = req.body
+            const { group_id, image_url, name, group_name, description, location, color } = req.body
 
-                    const newActivity = {
-                        group_id,
-                        image_id,
-                        name,
-                        group_name,
-                        description,
-                        location,
-                        color
-                    }
-                
-                    newActivity.activity_id = objectid()
-                    newActivity.creator_id = userId
-                    newActivity.status = false
+            const newActivity = {
+                group_id,
+                image_url,
+                name,
+                group_name,
+                description,
+                location,
+                color
+            }
+        
+            newActivity.activity_id = objectid()
+            newActivity.creator_id = userId
+            newActivity.status = false
 
-                    if(req.body.type != 'daily' && req.body.type != 'weekly' && req.body.type != 'monthly') return res.status(400).send('Incorrect type')
+            if(req.body.type != 'daily' && req.body.type != 'weekly' && req.body.type != 'monthly') return res.status(400).send('Incorrect type')
 
-                    const newRecurrence = {
-                        type: req.body.type,
-                        start_date: new Date(req.body.start_date),
-                        end_date: new Date(req.body.end_date)
-                    }
+            let start_dateSplitted = req.body.start_date.substring(1,req.body.start_date.length-1).replace(/\s+/g, '')
+            start_dateSplitted = start_dateSplitted.split(',')
+            let start_date = []
+            for(i = 0; i < start_dateSplitted.length; i++){
+                start_date.push(new Date(start_dateSplitted[i]))
+            }
 
-                    newRecurrence.recurrence_id = objectid()
-                    newRecurrence.activity_id = newActivity.activity_id
-                
-                    try{
-                        RecurringActivity.create(newActivity).then((a) => {
-                            Recurrence.create(newRecurrence).then(() => {
-                                res.status(200).send('Activity created')
-                            }).catch((error) => {
-                                console.log(error);
-                                a.remove()
-                                res.status(400).send('Impossible to create activity')
-                            })
-                        })
-                    }
-                    catch(error){
-                        next(error)
-                    }
-                }
-                else{
-                    res.status(400).send('Image not found')
-                }
-            })
+            let end_dateSplitted = req.body.end_date.substring(1,req.body.end_date.length-1).replace(/\s+/g, '')
+            end_dateSplitted = end_dateSplitted.split(',')
+            let end_date = []
+            for(i = 0; i < end_dateSplitted.length; i++){
+                end_date.push(new Date(end_dateSplitted[i]))
+            }
+
+            const newRecurrence = {
+                type: req.body.type,
+                start_date: start_date,
+                end_date: end_date,
+                service: true
+            }
+
+            newRecurrence.recurrence_id = objectid()
+            newRecurrence.activity_id = newActivity.activity_id
+        
+            try{
+                RecurringActivity.create(newActivity).then((a) => {
+                    Recurrence.create(newRecurrence).then(() => {
+                        res.status(200).send('Activity created')
+                    }).catch((error) => {
+                        console.log(error);
+                        a.remove()
+                        res.status(400).send('Impossible to create activity')
+                    })
+                })
+            }
+            catch(error){
+                next(error)
+            }
         }
         else{
             res.status(400).send('Group not found')
