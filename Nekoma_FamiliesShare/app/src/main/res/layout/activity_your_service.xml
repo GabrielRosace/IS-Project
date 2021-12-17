@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".YourService">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_servizi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/abc_vector_test"
+            app:title="Archivio Servizi"
+            app:titleTextColor="?attr/colorOnPrimary" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/service_tab"
+            android:layout_width="match_parent"
+            android:layout_height="63dp">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/your_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tuoi servizi" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/active_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Partecipo" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/closed_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Servizi passati" />
+        </com.google.android.material.tabs.TabLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/servizi_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/recycler_view_item_2" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

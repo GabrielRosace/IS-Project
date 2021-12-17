@@ -24,6 +24,48 @@
             app:titleTextAppearance="@style/TextAppearance.AppCompat.Body2"
             app:titleTextColor="#FFFFFF" />
 
+        <HorizontalScrollView
+            android:layout_width="445dp"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="445dp"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/your_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tuoi eventi" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/active_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Partecipo" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/closed_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="scaduti" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/ricorrenti_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ricorrenti" />
+
+                </com.google.android.material.tabs.TabLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/eventi_progress"
             android:layout_width="match_parent"
@@ -43,31 +85,6 @@
                     android:layout_height="wrap_content" />
             </RelativeLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/your_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tuoi eventi" />
-
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/active_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Partecipo" />
-
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/closed_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="scaduti" />
-
-        </com.google.android.material.tabs.TabLayout>
 
         <ScrollView
             android:layout_width="match_parent"
