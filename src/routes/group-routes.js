@@ -103,10 +103,11 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
-// const Service = require('../models/service')
+const Service = require('../models/service')
 // const RecurringActivity = require('../models/recurring-activity')
 const Recurrence = require('../models/recurrence')
 const Partecipant = require('../models/partecipant')
+const { create } = require('../models/service')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -2712,4 +2713,250 @@ router.patch('/:id/service/:servizioId', async (req, res, next) => {
   }
 })
 */
+
+router.delete('/:id/service/:serviceId', async (req, res, next) => {
+  let group_id = req.params.id
+  let service_id = req.params.serviceId
+  let user_id = req.user_id
+
+  const group = Group.findOne({ group_id: group_id })
+  const member = await Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+
+  if (!user_id) return res.status(401).send('Not authenticated')
+  if (!service_id) return res.status(400).send('Bad Request')
+  if (!group) return res.status(400).send('Bad Request')
+  if (!member) return res.status(401).send('Unauthorized')
+  if (!member.admin) return res.status(401).send('Unauthorized')
+
+  try {
+    const service_id = req.params.serviceId
+    const service = await Service.findOne({ service_id: service_id })
+    if (!service) {
+      return res.status(404).send('Service dont exist')
+    }
+    // delete recurrance
+    await Service.findOneAndDelete({ service_id: service_id })
+
+    res.status(200).send('Service deleted')
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/service', async (req, res, next) => {
+  let group_id = req.params.id
+  let user_id = req.user_id
+
+  const group = Group.findOne({ group_id: group_id })
+  const member = await Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+
+  if (!user_id) return res.status(401).send('Not authenticated')
+  if (!group) return res.status(400).send('Bad Request')
+  if (!member) return res.status(401).send('Unauthorized')
+  if (!member.admin) return res.status(401).send('Unauthorized')
+
+  const { name, description, location, pattern, car_space, lend_obj, lend_time, pickuplocation, img, recurrence } = req.body
+  console.log(name)
+  const newService = {
+    group_id,
+    name,
+    img,
+    description,
+    location,
+    pattern,
+    recurrence: JSON.parse(JSON.stringify(recurrence))
+  }
+  newService.service_id = objectid()
+  newService.owner_id = user_id
+  switch (pattern) {
+    case 'car':
+      newService.car_space = car_space
+      break
+    case 'lend':
+      newService.lend_obj = lend_obj
+      newService.lend_time = lend_time
+      break
+    case 'pickup':
+      newService.pickuplocation = pickuplocation
+      break
+  }
+  //  MANCA RECURRING DATE
+  try {
+    Service.create(newService).then(() => {
+      res.status(200).send({ service_id: newService.service_id })
+    }).catch((error) => {
+      console.log(error)
+      res.status(400).send('Impossible to create service')
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/:id/service/:serviceId', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  let resService = {
+    service_id: service.serviceId,
+    owner_id: service.owner_id,
+    name: service.name,
+    description: service.description,
+    location: service.location,
+    pattern: service.pattern,
+    car_space: service.car_space,
+    lend_obj: service.lend_obj,
+    lend_time: service.lend_time,
+    pickuplocation: service.pickuplocation,
+    img: service.img,
+    nPart: 4,
+    recurrence: service.recurrence
+  }
+  return res.status(200).send(resService)
+})
+
+router.get('/:id/service', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+  let partecipant = req.query.partecipant
+  let creator = req.query.creator
+  let time = req.query.time
+
+  let resList = []
+
+  if (!userId) return res.status(401).send('Not authenticated')
+  // controllare il merde delle varie liste ritornate
+  if (!partecipant && !creator && !time) {
+    await (await Service.find({ group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      resList.push(resService)
+    })
+  }
+  if (creator === 'me') {
+    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      resList.push(resService)
+    })
+  }
+  if (partecipant === 'me') {
+    // ancora da implementare
+    let partecipantList = []
+    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      if (resList.find(x => x.service_id === resService.service_id))partecipantList.push(resService)
+    })
+    resList = partecipantList
+  }
+  if (time === 'expired') {
+    // ancora da implementare
+    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      resList.push(resService)
+    })
+  }
+  if (time === 'next') {
+    // ancora da implementare
+    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      resList.push(resService)
+    })
+  }
+
+  const group = await Group.findOne({ group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+
+  return res.status(200).send(resList)
+})
 module.exports = router
