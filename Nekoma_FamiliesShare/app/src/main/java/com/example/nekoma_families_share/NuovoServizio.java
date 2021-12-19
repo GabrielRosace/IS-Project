@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.DatePickerDialog;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,9 +19,20 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class NuovoServizio extends AppCompatActivity {
 
@@ -45,6 +57,14 @@ public class NuovoServizio extends AppCompatActivity {
     private TextView serviceEndDateLabel;
     private TextView serviceDaysLabel;
 
+    private CheckBox checkMon;
+    private CheckBox checkTue;
+    private CheckBox checkWen;
+    private CheckBox checkThu;
+    private CheckBox checkFri;
+    private CheckBox checkSat;
+    private CheckBox checkSun;
+
     private DatePickerDialog dataStartPicker;
     private DatePickerDialog dataEndPicker;
     private DatePickerDialog dataLendPicker;
@@ -61,7 +81,19 @@ public class NuovoServizio extends AppCompatActivity {
                 finish();
             }
         });
-
+        //Edit Text da inizializzare
+        serviceImageUrl = findViewById(R.id.serviceImageUrl);
+        serviceName = findViewById(R.id.serviceName);
+        serviceDescription = findViewById(R.id.serviceDescription);
+        serviceLocation = findViewById(R.id.serviceLocation);
+        //CheckBox da inizializzare
+        checkMon = findViewById(R.id.checkMon);
+        checkTue = findViewById(R.id.checkTue);
+        checkWen = findViewById(R.id.checkWen);
+        checkThu = findViewById(R.id.checkThu);
+        checkFri = findViewById(R.id.checkFri);
+        checkSat = findViewById(R.id.checkSat2);
+        checkSun = findViewById(R.id.checkSun);
         //Nascondo le labels che riguardano il pattern del servizio
         serviceCarLabel = findViewById(R.id.carspaceServiceLabel);
         serviceCarLabel.setVisibility(View.INVISIBLE);
@@ -84,8 +116,6 @@ public class NuovoServizio extends AppCompatActivity {
         serviceRecurrence = findViewById(R.id.serviceCheck);
         serviceType = findViewById(R.id.serviceType);
         serviceType.setEnabled(false);
-        serviceDays = findViewById(R.id.daysSelect);
-        serviceDays.setVisibility(View.GONE);
         serviceDaysLabel = findViewById(R.id.daysRecLabel);
         serviceDaysLabel.setVisibility((View.GONE));
         serviceStartDate = findViewById(R.id.serviceStartDate);
@@ -173,14 +203,10 @@ public class NuovoServizio extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch(adapterType.getItem(position).toString()){
                     case "Giornaliera":
-                        serviceDays.setVisibility(View.GONE);
-                        serviceDaysLabel.setVisibility((View.GONE));
                         serviceEndDate.setVisibility(View.GONE);
                         serviceEndDateLabel.setVisibility(View.GONE);
                         break;
                     default:
-                        serviceDays.setVisibility(View.VISIBLE);
-                        serviceDaysLabel.setVisibility((View.VISIBLE));
                         serviceEndDate.setVisibility(View.VISIBLE);
                         serviceEndDateLabel.setVisibility(View.VISIBLE);
                         break;
@@ -256,5 +282,56 @@ public class NuovoServizio extends AppCompatActivity {
     }
     public void openDateLendPicker(View v){
         dataLendPicker.show();
+    }
+
+    public void newService(View v) throws ParseException {
+        Map<String,String> params = new HashMap<>();
+        params.put("group_id",Utilities.getGroupId(this));
+        params.put("owner_id",Utilities.getUserID(this));
+        params.put("name",serviceName.getText().toString());
+        params.put("description",serviceDescription.getText().toString());
+        params.put("location",serviceLocation.getText().toString());
+        params.put("pattern",servicePattern.getSelectedItem().toString());
+        //controlli in base al pattern
+        if(servicePattern.getSelectedItem().toString()=="Carsharing"){
+            params.put("car_space",serviceCarSpace.getText().toString());
+        }else if(servicePattern.getSelectedItem().toString()=="Prestito oggetti"){
+            params.put("lend_obj",serviceLendObj.getText().toString());
+            params.put("lend_time",serviceLendTime.getText().toString());
+        }else{
+            params.put("pickupLocation",servicePickup.getText().toString());
+        }
+        params.put("img",serviceImageUrl.getText().toString());
+        params.put("recurrence","true");
+        params.put("nPart","0");
+
+        //Generazione delle date
+        //Servizio giornaliero (senza enddate)
+        if(!serviceRecurrence.isChecked()){
+            params.put("type","daily");
+            params.put("start_date","["+serviceStartDate.getText().toString()+"]");
+            params.put("end_date","["+serviceStartDate.getText().toString()+"]");
+        }else if(serviceRecurrence.isChecked() && serviceType.getSelectedItem().toString().equals("Giornaliera")){
+            params.put("type","daily");
+            params.put("start_date","["+serviceStartDate.getText().toString()+"]");
+            params.put("end_date","["+serviceEndDate.getText().toString()+"]");
+        }
+        /*else if(serviceRecurrence.isChecked() && serviceType.getSelectedItem().toString().equals("Settimanale")){
+            params.put("type","weekly");
+        }else if(serviceRecurrence.isChecked() && serviceType.getSelectedItem().toString().equals("Mensilmente")){
+            params.put("type","monthly");
+        }*/
+
+        Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
+            Toolbar t = (Toolbar) findViewById(R.id.nsToolbar);
+            t.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        },error -> {
+
+        },params);
     }
 }

@@ -131,11 +131,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="19dp"
+                    android:layout_marginTop="17dp"
                     android:text="@string/serviceStartDate"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/daysSelect" />
+                    app:layout_constraintTop_toBottomOf="@+id/checkSat2" />
 
                 <TextView
                     android:id="@+id/endDateLabel"
@@ -153,13 +153,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="55dp"
                     android:layout_marginEnd="51dp"
                     android:onClick="openDateStartPicker"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.125"
+                    app:layout_constraintHorizontal_bias="0.342"
                     app:layout_constraintStart_toEndOf="@+id/startdateLabel"
-                    app:layout_constraintTop_toBottomOf="@+id/daysSelect"
+                    app:layout_constraintTop_toBottomOf="@+id/checkWen"
                     tools:ignore="SpeakableTextPresentCheck" />
 
                 <Button
@@ -229,7 +229,8 @@
                     android:onClick="openDateEndPicker"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/endDateLabel"
-                    app:layout_constraintTop_toBottomOf="@+id/serviceStartDate" />
+                    app:layout_constraintTop_toBottomOf="@+id/serviceStartDate"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <CheckBox
                     android:id="@+id/serviceCheck"
@@ -348,99 +349,82 @@
                     android:layout_marginStart="287dp"
                     android:layout_marginTop="30dp"
                     android:layout_marginEnd="16dp"
+                    android:onClick="newService"
                     android:text="@string/serviceSave"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/serviceEndDate" />
 
-                <RadioGroup
-                    android:id="@+id/daysSelect"
-                    android:layout_width="373dp"
-                    android:layout_height="103dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginTop="3dp"
-                    app:layout_constraintEnd_toEndOf="parent"
+                <CheckBox
+                    android:id="@+id/checkMon"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioMon"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel">
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                <CheckBox
+                    android:id="@+id/checkSat2"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="60dp"
+                    android:hint="@string/radioSat"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
-                        <RadioButton
-                            android:id="@+id/serviceMon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="5dp"
-                            android:checked="false"
-                            android:hint="@string/radioMon"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                <CheckBox
+                    android:id="@+id/checkSun"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/radioSun"
+                    app:layout_constraintStart_toEndOf="@+id/checkSat2"
+                    app:layout_constraintTop_toBottomOf="@+id/checkTue" />
 
-                        <RadioButton
-                            android:id="@+id/serviceTue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:checked="false"
-                            android:hint="@string/radioTue"
-                            app:layout_constraintStart_toEndOf="@+id/serviceMon"
-                            app:layout_constraintTop_toTopOf="parent" />
+                <CheckBox
+                    android:id="@+id/checkTue"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioTue"
+                    app:layout_constraintStart_toEndOf="@+id/checkMon"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
-                        <RadioButton
-                            android:id="@+id/serviceWen"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:checked="false"
-                            android:hint="@string/radioWen"
-                            app:layout_constraintStart_toEndOf="@+id/serviceTue"
-                            app:layout_constraintTop_toTopOf="parent" />
+                <CheckBox
+                    android:id="@+id/checkWen"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioWen"
+                    app:layout_constraintStart_toEndOf="@+id/checkTue"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
-                        <RadioButton
-                            android:id="@+id/serviceThu"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:checked="false"
-                            android:hint="@string/radioThu"
-                            app:layout_constraintStart_toEndOf="@+id/serviceWen"
-                            app:layout_constraintTop_toTopOf="parent" />
+                <CheckBox
+                    android:id="@+id/checkThu"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioThu"
+                    app:layout_constraintStart_toEndOf="@+id/checkWen"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
-                        <RadioButton
-                            android:id="@+id/serviceFri"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:checked="false"
-                            android:hint="@string/radioFri"
-                            app:layout_constraintStart_toEndOf="@+id/serviceThu"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <RadioButton
-                            android:id="@+id/serviceSat"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="1dp"
-                            android:layout_marginTop="5dp"
-                            android:checked="false"
-                            android:hint="@string/radioSun"
-                            app:layout_constraintStart_toEndOf="@+id/serviceFri"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <RadioButton
-                            android:id="@+id/serviceSun"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:checked="false"
-                            android:hint="@string/radioSun"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/serviceMon" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </RadioGroup>
+                <CheckBox
+                    android:id="@+id/checkFri"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioFri"
+                    app:layout_constraintStart_toEndOf="@+id/checkThu"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
