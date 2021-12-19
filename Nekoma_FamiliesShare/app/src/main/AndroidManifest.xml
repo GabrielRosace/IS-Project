@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Creazione_evento_ricorrente"
+            android:exported="false" />
+        <activity
             android:name=".DettagliEventoRicorrente"
             android:exported="false" />
         <activity
