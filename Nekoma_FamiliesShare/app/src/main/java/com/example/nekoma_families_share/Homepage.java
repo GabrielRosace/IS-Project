@@ -101,8 +101,6 @@ public class Homepage extends AppCompatActivity {
         startActivity(group);
     }
 
-
-
     public void getActivities(View v){
         Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);
         startActivity(activities);
