@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -133,6 +134,12 @@ public class Utilities {
         public final String nPart;
         public final String recurrence;
 
+//        TODO
+//        public final String recType;
+//        public final String start_date;
+//        public final String end_date;
+
+
         public myService(String service_id, String owner_id, String nome, String descrizione, String location, String pattern, String car_space, String lend_obj, String lend_time, String pickuplocation, String img, String nPart, String recurrence) {
             this.service_id = service_id;
             this.owner_id = owner_id;
@@ -150,7 +157,7 @@ public class Utilities {
         }
 
         public myService(JSONObject obj) throws JSONException {
-            this("service_id"/*TODO*/, "owner_id"/*TODO*/, obj.getString("name"), obj.getString("description"), obj.getString("location"), obj.getString("pattern"),obj.getString("car_space"),obj.getString("lend_obj"), obj.getString("lend_time"), obj.getString("pickuplocation"), obj.getString("image_url"), "nPart"/*TODO*/, "Recurrence"/*TODO*/ );
+            this("service_id"/*TODO*/, "owner_id"/*TODO*/, obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), "nPart"/*TODO*/, "Recurrence"/*TODO*/);
         }
 
         @Override
@@ -185,6 +192,11 @@ public class Utilities {
         public final String owner_id;
         public final String recurrence;
 
+//        TODO
+//        public final String recType;
+//        public final String start_date;
+//        public final String end_date;
+
         public myRecEvent(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id, String recurrence) {
             this.nome = nome;
             this.img = img;
@@ -199,22 +211,43 @@ public class Utilities {
 
         public myRecEvent(JSONObject obj) throws JSONException {
             JSONObject recAct = null;
-            recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
-            this.nome = recAct.getString("name");
-            this.img = recAct.getString("image_url");
+            if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
+                recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
+                this.nome = recAct.getString("name");
+                this.img = recAct.getString("image_url");
+                this.descrizione = recAct.getString("description");
+                this.owner_id = recAct.getString("creator_id");
+            } else {
+                this.nome = "";
+                this.img = "";
+                this.descrizione = "";
+                this.owner_id = "";
+            }
             this.event_id = obj.getString("activity_id");
             this.nPart = 10/*TODO*/;
-            this.descrizione = recAct.getString("description");
             this.enddate = "" /*TODO*/;
             this.labels = ""/*TODO*/;
-            this.owner_id = recAct.getString("creator_id");
             this.recurrence = ""/*TODO*/;
+        }
+
+        public myRecEvent(String s){
+            String[] parsed = s.split("\\$");
+            this.nome = parsed[0];
+            this.event_id = parsed[1];
+            this.img = parsed[2];
+            this.nPart = Integer.parseInt(parsed[3]);
+            this.descrizione = parsed[4];
+            this.enddate = parsed[5];
+            this.labels = parsed[6];
+            this.owner_id = parsed[7];
+            this.recurrence = ""; //TODO
         }
 
         @Override
         public String toString() {
-            return nome + '/' + event_id + '/' + img + '/' + nPart + '/' + descrizione + '/' + enddate + '/' + labels + '/' + owner_id;
+            return nome + '$' + event_id + '$' + img + '$' + nPart + '$' + descrizione + '$' + enddate + '$' + labels + '$' + owner_id;
         }
+
 
         @Override
         public String getName() {
