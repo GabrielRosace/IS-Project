@@ -1,5 +1,9 @@
 const mongoose = require('mongoose')
 
+// // TODO color mettere un colore di default
+// // TODO sostituire image_id con image_url
+// TODO aggiungere label
+// // TODO aggiungere id creatore
 const activitySchema = new mongoose.Schema({
   activity_id: {
     type: String,
@@ -10,7 +14,7 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  image_id: {
+  image_url: {
     type: String,
     required: true
   },
@@ -18,21 +22,21 @@ const activitySchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  group_name: {
-    type: String,
-    required: true
-  },
   description: String,
   location: String,
   color: {
     type: String,
-    required: true
+    required: true,
+    default: 'black'
   },
-  creator_id: String,
   labels: {
     type: [String]
   },
   status: {
+    type: String,
+    required: true
+  },
+  creator_id: {
     type: String,
     required: true
   }

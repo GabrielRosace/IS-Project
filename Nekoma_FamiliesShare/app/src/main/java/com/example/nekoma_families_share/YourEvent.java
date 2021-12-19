@@ -47,6 +47,7 @@ public class YourEvent extends AppCompatActivity {
     private List<myEventi> tuoi_eventi = new ArrayList<>();
     private List<myEventi> partecipi_eventi = new ArrayList<>();
     private List<myEventi> scaduti_eventi = new ArrayList<>();
+    private List<Utilities.myRecEvent> recurrent_event = new ArrayList<>();
     private String id_group;
     private String user_id;
 
@@ -58,6 +59,8 @@ public class YourEvent extends AppCompatActivity {
         tuoi_eventi = new ArrayList<>();
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
+        recurrent_event = new ArrayList<>();
+        recurrent_event.add(new Utilities.myRecEvent("prova","prova","prova",3,"prova","prova","prova","prova", "prova"));
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -88,13 +91,15 @@ public class YourEvent extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition()==0){
                     // caso 1 - eventi che sono tuoi
-                    addRecyclerView(tuoi_eventi);
+                    addRecyclerView(tuoi_eventi, new ArrayList<>());
                 }else if(tab.getPosition()==1){
                     // caso 2 - eventi a cui hai partecipato
-                    addRecyclerView(partecipi_eventi);
-                }else{
+                    addRecyclerView(partecipi_eventi, new ArrayList<>());
+                }else if(tab.getPosition()==2){
                     // caso 3 - eventi che sono scaduti
-                    addRecyclerView(scaduti_eventi);
+                    addRecyclerView(scaduti_eventi, new ArrayList<>());
+                }else{
+                    addRecyclerView(new ArrayList<>(), recurrent_event);
                 }
             }
 
@@ -109,6 +114,7 @@ public class YourEvent extends AppCompatActivity {
             }
         });
         this.getEvents();
+        this.getRec();
     }
 
     @Override
@@ -116,6 +122,16 @@ public class YourEvent extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_your_event);
     }
+
+    // popola la ricorrenza
+/*    public Utilities.myRecEvent addRec(JSONObject response) throws JSONException{
+
+    }*/
+
+    public void getRec(){
+        // prendi rec events
+    }
+
 
     // questo metodo mi permette di popolare le 3 liste che riguardano
     // gli eventi con possibilità di definizione di etichette dei bambini
@@ -373,7 +389,7 @@ public class YourEvent extends AppCompatActivity {
                                     pr.setVisibility(View.GONE);
                                     if(tuoi_eventi.size()>0){
 
-                                        addRecyclerView(tuoi_eventi);
+                                        addRecyclerView(tuoi_eventi, new ArrayList<>());
                                     }
                                 } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
@@ -403,28 +419,31 @@ public class YourEvent extends AppCompatActivity {
     }
 
     // metodo che popola la recycle view
-    private void addRecyclerView(List<myEventi> list){
+    private void addRecyclerView(List<myEventi> list, List<Utilities.myRecEvent> reclist){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.lista_eventi);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
+        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list, reclist);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
     }
 
+    // recycle view per gli eventi ricorrenti
+
+    //Recyle view
 
 
-
-    // recycle view
+    // recycle view per gli eventi normali
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
+        private List<Utilities.myRecEvent> recEve;
         private List<myEventi> mData;
-
         private LayoutInflater mInflater;
 
 
-        MyRecyclerViewAdapter(Context context, List<myEventi> data) {
+        MyRecyclerViewAdapter(Context context, List<myEventi> data, List<Utilities.myRecEvent> recEve) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
+            this.recEve = recEve;
         }
 
 
@@ -437,25 +456,41 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
-            myEventi event = mData.get(position);
-            // System.out.println(" ************************* questo è event: "+event.toString());
-            holder.btn.setText(event.nome);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
-                    // System.out.println("intent: "+event.toString());
-                    evento.putExtra("evento", event.toString());
-                    startActivity(evento);
-                }
-            });
+            if(this.mData.size()>0){
+                myEventi event = mData.get(position);
+                // System.out.println(" ************************* questo è event: "+event.toString());
+                holder.btn.setText(event.nome);
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
+                        // System.out.println("intent: "+event.toString());
+                        evento.putExtra("evento", event.toString());
+                        startActivity(evento);
+                    }
+                });
+            }else {
+                Utilities.myRecEvent event = recEve.get(position);
+                // System.out.println(" ************************* questo è event: "+event.toString());
+                holder.btn.setText(event.nome);
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
+                        // System.out.println("intent: "+event.toString());
+                        evento.putExtra("evento", event.toString());
+                        startActivity(evento);
+                    }
+                });
+            }
+
 
         }
 
 
         @Override
         public int getItemCount() {
-            return mData.size();
+            return mData.size() + recEve.size();
         }
 
 
@@ -474,6 +509,9 @@ public class YourEvent extends AppCompatActivity {
 
         myEventi getItem(int id) {
             return mData.get(id);
+        }
+        Utilities.myRecEvent getItemRec(int id){
+            return recEve.get(id);
         }
 
     }

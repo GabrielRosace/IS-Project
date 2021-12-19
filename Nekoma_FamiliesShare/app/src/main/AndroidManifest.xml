@@ -13,6 +13,12 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".DettagliEventoRicorrente"
+            android:exported="false" />
+        <activity
+            android:name=".YourService"
+            android:exported="true" />
+        <activity
             android:name=".NuovoServizio"
             android:exported="false" />
         <activity

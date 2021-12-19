@@ -103,7 +103,10 @@ const Profile = require('../models/profile')
 const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
-const Servizio = require('../models/service')
+const Service = require('../models/service')
+// const RecurringActivity = require('../models/recurring-activity')
+const Recurrence = require('../models/recurrence')
+const Partecipant = require('../models/partecipant')
 
 router.get('/', (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
@@ -1290,12 +1293,10 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     activity.group_name = group.name
     activity.image_id = image_id
 
-
-    let labels = activity.labels.substring(1, activity.labels.length - 1).split(",")
-    if (activity.labels == "[]") {
+    let labels = activity.labels.substring(1, activity.labels.length - 1).split(',')
+    if (activity.labels == '[]') {
       labels = []
     }
-
 
     activity.labels = labels
     await Image.create(image)
@@ -1636,6 +1637,149 @@ router.get('/:id/activities', async (req, res, next) => {
   }
 
   return res.json(activities)
+})
+
+router.get('/:id/services', async (req, res, next) => {
+  if (!req.user_id) return res.status(401).send('Not authenticated')
+
+  let filterBy = req.query.filterBy
+
+  switch (filterBy) {
+    case 'none':
+      let activities = await Recurrence.aggregate([
+        {
+          '$lookup': {
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Service',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'Service'
+          }
+        }
+      ])
+      return res.status(200).json(activities)
+      break
+    case 'expired':
+      let expiredActivities = await Recurrence.aggregate([
+        {
+          '$lookup': {
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Service',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'Service'
+          }
+        }, {
+          '$match': {
+            'end_date': {
+              '$elemMatch': {
+                '$lt': new Date(Date.now())
+              }
+            }
+          }
+        }
+      ])
+      return res.status(200).json(expiredActivities)
+      break
+    case 'not-expired':
+      let noExpiredActivities = await Recurrence.aggregate([
+        {
+          '$lookup': {
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Service',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'Service'
+          }
+        }, {
+          '$match': {
+            'end_date': {
+              '$elemMatch': {
+                '$gte': new Date(Date.now())
+              }
+            }
+          }
+        }
+      ])
+      return res.status(200).json(noExpiredActivities)
+      break
+    case 'recurrent':
+      Recurrence.aggregate([
+        {
+          '$lookup': {
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$match': {
+            'service': false
+          }
+        }
+      ]).then(a => {
+        return res.status(200).json(a)
+      })
+      break
+    case 'service':
+      // TODO controllare se funziona
+      Recurrence.aggregate([
+        {
+          '$lookup': {
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$match': {
+            'service': true
+          }
+        }
+      ]).then(s => {
+        return res.status(200).json(s)
+      })
+      break
+    default:
+      return res.status(400).send('Bad request')
+      break
+  }
+})
+
+router.get('/:id/partecipations', (req, res, next) => {
+  if (!req.user_id) return res.status(401).send('Not authenticated')
+
+  let filterBy = req.query.filterBy
+
+  switch (filterBy) {
+    case 'none':
+
+      break
+    case 'expired':
+      break
+    case 'not-expired':
+      break
+    default:
+      break
+  }
 })
 
 router.patch('/:id/activities/:activityId', async (req, res, next) => {
@@ -2362,7 +2506,7 @@ router.delete(
     }
   }
 )
-
+/*
 router.post('/:id/service', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')
@@ -2401,7 +2545,6 @@ router.post('/:id/service', async (req, res, next) => {
     const group = await Group.findOne({ group_id })
     servizio.group_name = group.name
     servizio.image_id = image_id
-    /*
     UNCOMMENT WHEN USE FRONT-END
     events.forEach(event => { event.extendedProperties.shared.servizio_id = servizio_id })
     await Promise.all(
@@ -2411,7 +2554,7 @@ router.post('/:id/service', async (req, res, next) => {
           resource: event
         })
       )
-    ) */
+    )
     await Image.create(image)
     await Servizio.create(servizio)
     if (member.admin) {
@@ -2445,7 +2588,6 @@ router.delete('/:groupId/service/:servizioId', async (req, res, next) => {
     // eslint-disable-next-line no-unused-vars
     const group = await Group.findOne({ group_id })
     const servizio_id = req.params.servizioId
-    /*
     UNCOMMENT WHEN USE FRONT-END
     const resp = await calendar.events.list({
       calendarId: group.calendar_id,
@@ -2459,12 +2601,12 @@ router.delete('/:groupId/service/:servizioId', async (req, res, next) => {
         calendarId: group.calendar_id
       })
     }, Promise.resolve())
-    */
+
     const servizio = await Servizio.findOneAndDelete({ servizio_id })
-    /*
+
     TO UNDERSTAND
     await nh.deleteActivityNotification(user_id, activity.name, activityTimeslots)
-    */
+
     console.log(servizio)
     res.status(200).send('Servizio deleted')
   } catch (error) {
@@ -2577,5 +2719,483 @@ router.patch('/:id/service/:servizioId', async (req, res, next) => {
     next(error)
   }
 })
+*/
+
+router.delete('/:id/service/:serviceId', async (req, res, next) => {
+  let group_id = req.params.id
+  let service_id = req.params.serviceId
+  let user_id = req.user_id
+
+  const group = Group.findOne({ group_id: group_id })
+  const member = await Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+
+  if (!user_id) return res.status(401).send('Not authenticated')
+  if (!service_id) return res.status(400).send('Bad Request')
+  if (!group) return res.status(400).send('Bad Request')
+  if (!member) return res.status(401).send('Unauthorized')
+  if (!member.admin) return res.status(401).send('Unauthorized')
+
+  try {
+    const service_id = req.params.serviceId
+    const service = await Service.findOne({ service_id: service_id })
+    if (!service) {
+      return res.status(404).send('Service dont exist')
+    }
+    await Partecipant.deleteMany({ activity_id: service_id, service: true }).catch(() => { console.log('Deleting error') })
+    await Recurrence.deleteMany({ activity_id: service_id, service: true }).catch(() => { console.log('Deleting error') })
+    await Service.findOneAndDelete({ service_id: service_id })
+    res.status(200).send('Service deleted')
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/service', async (req, res, next) => {
+  let group_id = req.params.id
+  let user_id = req.user_id
+  let start_date = startingDate(req.body.start_date)
+  let end_date = endingDate(req.body.end_date)
+  dateValidator(req.body.type, start_date, end_date, res)
+
+  const group = Group.findOne({ group_id: group_id })
+  const member = await Member.findOne({
+    group_id,
+    user_id,
+    group_accepted: true,
+    user_accepted: true
+  })
+
+  if (!user_id) return res.status(401).send('Not authenticated')
+  if (!group) return res.status(400).send('Bad Request')
+  if (!member) return res.status(401).send('Unauthorized')
+  if (!member.admin) return res.status(401).send('Unauthorized')
+
+  const { name, description, location, pattern, car_space, lend_obj, lend_time, pickuplocation, img, recurrence } = req.body
+
+  const newService = {
+    group_id,
+    name,
+    img,
+    description,
+    location,
+    pattern,
+    recurrence: JSON.parse(JSON.stringify(recurrence))
+  }
+  newService.service_id = objectid()
+  newService.owner_id = user_id
+  switch (pattern) {
+    case 'car':
+      newService.car_space = car_space
+      break
+    case 'lend':
+      newService.lend_obj = lend_obj
+      newService.lend_time = lend_time
+      break
+    case 'pickup':
+      newService.pickuplocation = pickuplocation
+      break
+  }
+
+  const newRecurrence = {
+    type: req.body.type,
+    start_date: start_date,
+    end_date: end_date,
+    service: true
+  }
+
+  newRecurrence.recurrence_id = objectid()
+  newRecurrence.activity_id = newService.service_id
+  try {
+    Service.create(newService).then((s) => {
+      Recurrence.create(newRecurrence).then(() => {
+        res.status(200).send({ service_id: newService.service_id })
+      }).catch((error) => {
+        console.log(error)
+        s.remove()
+        res.status(400).send('Impossible to create service')
+      })
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  let days = calculateDays(req.body.days)
+  if (days.length === 0) return res.status(400).send('Days not found')
+  Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
+    checkDates(r, days, res)
+    // manca un pezzo di commento originale
+    Partecipant.findOne({ partecipant_id: userId, activity_id: service_id, service: true }).exec().then((p) => {
+      if (!p) {
+        const newPartecipant = {
+          partecipant_id: userId,
+          activity_id: service_id,
+          days: days,
+          service: true
+        }
+        try {
+          Partecipant.create(newPartecipant).catch(error => {
+            console.log(error)
+          })
+          return res.status(200).send('Partecipant created')
+        } catch (error) {
+          next(error)
+        }
+      } else {
+        return res.status(400).send('Partecipant already exists')
+      }
+    })
+  })
+})
+router.delete('/:id/service/:serviceId/partecipate', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  Partecipant.deleteOne({ activity_id: service_id, partecipant_id: userId, service: true }).exec()
+  return res.status(200).send('Partecipation deleted')
+})
+router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  if (req.body.days) {
+    let days = calculateDays(req.body.days)
+
+    Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
+      checkDates(r, days, res)
+
+      Partecipant.updateOne({ activity_id: r.activity_id, partecipant_id: userId, service: true }, { $set: { days: days } }).exec().then(() => {
+        return res.status(200).send('Partecipation updated')
+      })
+    })
+  }
+})
+
+router.get('/:id/service/:serviceId', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+  const partecipants = await Partecipant.find({ activity_id: service_id, service: true })
+  const recurrance = await Recurrence.findOne({ activity_id: service_id, service: true })
+  console.log(recurrance)
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  let resService = {
+    service_id: service.serviceId,
+    owner_id: service.owner_id,
+    name: service.name,
+    description: service.description,
+    location: service.location,
+    pattern: service.pattern,
+    car_space: service.car_space,
+    lend_obj: service.lend_obj,
+    lend_time: service.lend_time,
+    pickuplocation: service.pickuplocation,
+    img: service.img,
+    nPart: partecipants.length,
+    start_date: recurrance.start_date,
+    end_date: recurrance.end_date,
+    recurrence: service.recurrence
+  }
+  return res.status(200).send(resService)
+})
+
+router.get('/:id/service', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+  let partecipant = req.query.partecipant
+  let creator = req.query.creator
+  let time = req.query.time
+
+  let resList = []
+  let emptyList = []
+
+  const group = await Group.findOne({ group_id: group_id })
+
+  if (!userId) return res.status(401).send('Not authenticated')
+  if (!group) return res.status(400).send('Group not found')
+
+  let tmp = await Service.find({ group_id: group_id })
+  await tmp.reduce(async (promise, service) => {
+    await promise
+    try {
+      const partecipants = await findpartecipant(service.service_id)
+      const recurrance = await findrecurring(service.service_id)
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: partecipants.length,
+        start_date: recurrance.start_date,
+        end_date: recurrance.end_date,
+        recurrence: service.recurrence
+      }
+      emptyList.push(resService)
+    } catch (error) {
+
+    }
+  },
+  Promise.resolve())
+
+  // controllare il merde delle varie liste ritornate
+  if (!partecipant && !creator && !time) {
+    resList = emptyList
+  }
+  if (creator === 'me') {
+    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
+      let resService = {
+        service_id: service.service_id,
+        owner_id: service.owner_id,
+        name: service.name,
+        description: service.description,
+        location: service.location,
+        pattern: service.pattern,
+        car_space: service.car_space,
+        lend_obj: service.lend_obj,
+        lend_time: service.lend_time,
+        pickuplocation: service.pickuplocation,
+        img: service.img,
+        nPart: 4,
+        recurrence: service.recurrence
+      }
+      resList.push(resService)
+    })
+  }
+  if (!creator) {
+    resList = emptyList
+  }
+  if (partecipant === 'me') {
+    // ancora da implementare
+    let partecipantList = []
+    let tmp = await Partecipant.find({ partecipant_id: userId, service: true })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.activity_id === service.service_id))partecipantList.push(service)
+    })
+    resList = partecipantList
+  }
+  if (time === 'expired') {
+    // ancora da implementare
+    if (partecipant === 'me' || creator === 'me') {
+      // uso resList
+    } else {
+      resList = emptyList
+      // comincio a lavorare
+    }
+    // usare la lista disponibile
+  }
+  if (time === 'next') {
+    // ancora da implementare
+    if (partecipant === 'me' || creator === 'me') {
+      // uso resList
+    } else {
+      resList = emptyList
+      // comincio a lavorare
+    }
+    // usare la lista disponibile
+  }
+
+  return res.status(200).send(resList)
+})
+
+// FUNZIONI TOMMY, DA AGGIORNARE SE MODIFICATE
+async function findpartecipant (activity_id) {
+  const partecipants = await Partecipant.find({ activity_id: activity_id, service: true })
+  return partecipants
+}
+async function findrecurring (activity_id) {
+  const recurrance = await Recurrence.findOne({ activity_id: activity_id, service: true })
+  return recurrance
+}
+
+function startingDate (dateStart) {
+  let start_dateSplitted = dateStart.substring(1, dateStart.length - 1).replace(/\s+/g, '')
+  start_dateSplitted = start_dateSplitted.split(',')
+  let start_date = []
+  for (i = 0; i < start_dateSplitted.length; i++) {
+    start_date.push(new Date(start_dateSplitted[i]))
+  }
+  return start_date
+}
+
+function endingDate (dateEnd) {
+  let end_dateSplitted = dateEnd.substring(1, dateEnd.length - 1).replace(/\s+/g, '')
+  end_dateSplitted = end_dateSplitted.split(',')
+  let end_date = []
+  for (i = 0; i < end_dateSplitted.length; i++) {
+    end_date.push(new Date(end_dateSplitted[i]))
+  }
+  return end_date
+}
+
+function dateValidator (type, start_date, end_date, res) {
+  if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
+
+  // let start_dateSplitted = dateStart.substring(1, dateStart.length-1).replace(/\s+/g, '')
+  // start_dateSplitted = start_dateSplitted.split(',')
+  // let start_date = []
+  // for(i = 0; i < start_dateSplitted.length; i++){
+  //     start_date.push(new Date(start_dateSplitted[i]))
+  // }
+
+  // let end_dateSplitted = dateEnd.substring(1, dateEnd.length-1).replace(/\s+/g, '')
+  // end_dateSplitted = end_dateSplitted.split(',')
+  // let end_date = []
+  // for(i = 0; i < end_dateSplitted.length; i++){
+  //     end_date.push(new Date(end_dateSplitted[i]))
+  // }
+
+  if (start_date.length != end_date.length) return res.status(400).send('Dates does not match')
+  switch (type) {
+    case 'daily':
+      if (start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
+      if (start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
+      break
+    case 'weekly':
+      let start_tmp = new Date(start_date[0].toString())
+      let start_nextMonday = start_tmp.getDate() + (8 - start_tmp.getDay())
+      start_nextMonday = new Date(start_tmp.setDate(start_nextMonday))
+
+      let end_tmp = new Date(end_date[0].toString())
+      let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
+      end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
+
+      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+
+      for (let i = 0; i < start_date.length; i++) {
+        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (i < start_date.length - 1) {
+          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+        } else {
+          if (start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
+          if (end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+        }
+      }
+
+      break
+
+    case 'monthly':
+      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+
+      for (let i = 0; i < end_date.length; i++) {
+        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (i < start_date.length - 1) {
+          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+        }
+      }
+      break
+  }
+}
+
+function calculateDays (reqDays) {
+  let daysSplitted = reqDays ? reqDays.split(',') : undefined
+  let days = []
+
+  for (let i = 0; i < daysSplitted.length; i++) {
+    days.push(new Date(daysSplitted[i]))
+  }
+  return days
+}
+
+function checkDates (r, days, res) {
+  let valid = false
+  switch (r.type) {
+    case 'daily':
+      for (let i = 0; i < days.length; i++) {
+        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
+          return res.status(400).send(' D Incorrect days')
+        }
+      }
+      break
+
+    case 'weekly':
+      valid = false
+      for (let i = 0; i < days.length; i++) {
+        for (let j = 0; j < r.start_date.length; j++) {
+          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) {
+            return res.status(400).send('W Incorrect days1')
+          }
+          if (days[i].getDay() == r.start_date[j].getDay()) {
+            valid = true
+          }
+        }
+        if (!valid) return res.status(400).send('W Incorrect days2')
+      }
+      break
+
+    case 'monthly':
+      valid = false
+      for (let i = 0; i < days.length; i++) {
+        for (let j = 0; j < r.start_date.length; j++) {
+          if (days[i].getDate() == r.start_date[j].getDate()) {
+            valid = true
+          }
+          if (!valid) return res.status(400).send('M Incorrect days 1')
+          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return res.status(400).send('M Incorrect days 2')
+        }
+      }
+      break
+  }
+}
 
 module.exports = router

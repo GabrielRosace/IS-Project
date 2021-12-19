@@ -68,8 +68,10 @@ app.use('/api/children', require('./routes/child-routes'))
 app.use('/api/github', require('./routes/github-routes'))
 app.use('/api/community', require('./routes/community-routes'))
 app.use('/api/label', require('./routes/label-routes'))
-app.use('/api/image', require("./routes/image-routes"))
+app.use('/api/image', require('./routes/image-routes'))
 app.use('/api/recurringActivity', require('./routes/recurring-activity-routes'))
+app.use('/api/partecipant', require('./routes/partecipant-routes'))
+app.use('/api/service', require('./routes/service-route'))
 
 if (config.util.getEnv('NODE_ENV') === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')))
