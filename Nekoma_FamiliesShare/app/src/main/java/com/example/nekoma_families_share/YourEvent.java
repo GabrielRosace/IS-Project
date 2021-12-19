@@ -129,7 +129,17 @@ public class YourEvent extends AppCompatActivity {
     }*/
 
     public void getRec(){
-        // prendi rec events
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    recurrent_event.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
     }
 
 
@@ -388,7 +398,6 @@ public class YourEvent extends AppCompatActivity {
                                     ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
                                     pr.setVisibility(View.GONE);
                                     if(tuoi_eventi.size()>0){
-
                                         addRecyclerView(tuoi_eventi, new ArrayList<>());
                                     }
                                 } catch (JSONException | ParseException e) {

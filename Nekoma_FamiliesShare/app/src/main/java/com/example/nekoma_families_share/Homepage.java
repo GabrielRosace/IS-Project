@@ -119,7 +119,9 @@ public class Homepage extends AppCompatActivity {
     }
 
     public void getService(View v){
-        Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
+        // Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
+        Intent service = new Intent(Homepage.this,YourService.class);
+        startActivity(service);
     }
 
 }
