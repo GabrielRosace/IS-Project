@@ -69,7 +69,8 @@ router.post('/', (req, res, next) => {
             const newPartecipant = {
               partecipant_id: userId,
               activity_id: a.activity_id,
-              days: days
+              days: days,
+              service: false
             }
             try {
               Partecipant.create(newPartecipant).catch(error => {

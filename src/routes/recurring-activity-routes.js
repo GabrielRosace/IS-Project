@@ -30,7 +30,7 @@ router.post('/', (req, res, next) => {
 
       const newActivity = {
         group_id,
-        image_url,
+        // image_url,
         name,
         // group_name,
         description,
@@ -41,6 +41,7 @@ router.post('/', (req, res, next) => {
       newActivity.activity_id = objectid()
       newActivity.creator_id = userId
       newActivity.status = false
+      newActivity.image_url = 'https://picsum.photos/200'
 
       let start_date = startingDate(req.body.start_date)
       let end_date = endingDate(req.body.end_date)
@@ -216,17 +217,117 @@ function dateValidator (type, start_date, end_date, res) {
   }
 }
 
-// Ritorna tutti gli eventi ricorrenti
-router.get('/:group_id', (req, res, next) => {
+// Ritorna tutti gli eventi ricorrenti a cui un utente partecipa, secondo alcune caratteristiche, ad esempio tutti, solo quelli scaduti o solo quelli futuri
+router.get('/', async (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
-  let group_id = req.params.group_id
-  if (!group_id) return res.status(400).send('Bad Request')
+  // let group_id = req.params.group_id
+  // if (!group_id) return res.status(400).send('Bad Request')
 
-  RecurringActivity.find({ group_id: group_id }).exec().then((a) => {
-    return res.status(200).send(a)
-  })
+  let expired = req.query.expired
+	if(!expired) return res.status(400).send('Bad request')
+
+	let result = []
+	switch(expired){
+		case 'none':
+			let events = Partecipant.aggregate([
+				{
+					'$match': {
+						'partecipant_id': userId,
+						'service': false
+					}
+				}, {
+					'$lookup': {
+						'from': 'RecurringActivity', 
+						'localField': 'activity_id', 
+						'foreignField': 'activity_id', 
+						'as': 'RecurringActivity'
+					}
+				}
+			])
+			return res.status(200).send(events)
+			break
+		case 'true':
+			await Partecipant.find({partecipant_id: userId}).exec().then( async p => {
+				if(p){
+					for(let i = 0; i < p.length; i++){
+						let event = await Recurrence.aggregate([
+							{
+								'$match': {
+									'activity_id': p[i].activity_id,
+									'service': false, 
+									'end_date': {
+										'$elemMatch': {
+											'$lt': new Date(Date.now())
+										}
+									}
+								}
+							}, {
+								'$lookup': {
+									'from': 'RecurringActivity', 
+									'localField': 'activity_id', 
+									'foreignField': 'activity_id', 
+									'as': 'RecurringActivity'
+								}
+							}
+						])
+						if(event[0]){
+							let partecipation = {
+								partecipant: p[i],
+								event: event[0]
+							}
+							result.push(partecipation)
+						}
+					}
+				}
+			})
+			return res.status(400).json(result)
+			break
+		case 'false':
+			await Partecipant.find({partecipant_id: userId}).exec().then( async p => {
+				if(p){
+					for(let i = 0; i < p.length; i++){
+						let event = await Recurrence.aggregate([
+							{
+								'$match': {
+									'activity_id': p[i].activity_id,
+									'service': false, 
+									'end_date': {
+										'$elemMatch': {
+											'$gt': new Date(Date.now())
+										}
+									}
+								}
+							}, {
+								'$lookup': {
+									'from': 'RecurringActivity', 
+									'localField': 'activity_id', 
+									'foreignField': 'activity_id', 
+									'as': 'RecurringActivity'
+								}
+							}
+						])
+						if(event[0]){
+							let partecipation = {
+								partecipant: p[i],
+								event: event[0]
+							}
+							result.push(partecipation)
+						}
+					}
+				}
+			})
+			return res.status(200).json(result)
+			break
+		default:
+			return res.status(400).send('Bad request')
+			break
+	}
+
+  // RecurringActivity.find({ group_id: group_id }).exec().then((a) => {
+  //   return res.status(200).send(a)
+  // })
 })
 
 // Ritorna tutte le informazioni di un evento ricorrente
