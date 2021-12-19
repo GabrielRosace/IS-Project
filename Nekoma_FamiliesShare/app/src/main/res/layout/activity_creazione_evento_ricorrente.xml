@@ -12,11 +12,12 @@
         tools:context=".Creazione_evento">
 
         <Button
-            android:id="@+id/nextButtonEvent"
+            android:id="@+id/nextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            android:onClick="onClinkButton"
             android:text="avanti"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -58,10 +59,10 @@
                     android:textColor="#000000"
                     android:textSize="20sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/inputDescEvent" />
+                    app:layout_constraintTop_toBottomOf="@+id/inputDescEventRic" />
 
                 <ScrollView
-                    android:id="@+id/scrollView4"
+                    android:id="@+id/scrollLabels"
                     android:layout_width="374dp"
                     android:layout_height="198dp"
                     android:layout_marginStart="20dp"
@@ -70,17 +71,18 @@
                     android:background="#FFFFFF"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView23">
+                    app:layout_constraintTop_toBottomOf="@+id/textView23"
+                    tools:ignore="SpeakableTextPresentCheck">
 
                     <LinearLayout
-                        android:id="@+id/linearLabels"
+                        android:id="@+id/linearLabelsRic"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
                 </ScrollView>
 
                 <EditText
-                    android:id="@+id/inputDescEvent"
+                    android:id="@+id/inputDescEventRic"
                     android:layout_width="0dp"
                     android:layout_height="60dp"
                     android:layout_marginStart="16dp"
@@ -95,7 +97,7 @@
                     tools:ignore="SpeakableTextPresentCheck" />
 
                 <EditText
-                    android:id="@+id/inputEventName"
+                    android:id="@+id/inputEventNameRic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -104,7 +106,8 @@
                     android:inputType="textPersonName"
                     android:minHeight="48dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView5"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <TextView
                     android:id="@+id/textView5"
@@ -128,10 +131,10 @@
                     android:textColor="#000000"
                     android:textSize="20sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/inputEventName" />
+                    app:layout_constraintTop_toBottomOf="@+id/inputEventNameRic" />
 
                 <EditText
-                    android:id="@+id/inputEventLcation"
+                    android:id="@+id/inputEventLcationRic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -140,7 +143,8 @@
                     android:inputType="textPersonName"
                     android:minHeight="48dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView21" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView21"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <TextView
                     android:id="@+id/textView22"
@@ -152,7 +156,7 @@
                     android:textColor="#000000"
                     android:textSize="20sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/inputEventLcation" />
+                    app:layout_constraintTop_toBottomOf="@+id/inputEventLcationRic" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
