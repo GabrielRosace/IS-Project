@@ -53,4 +53,29 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- Stringhe per l'activity del nuovo servizio -->
+    <string name="nsToolbar">Nuovo Servizio</string>
+    <string name="serviceImageUrl">Url immagine</string>
+    <string name="serviceName">Nome Servizio</string>
+    <string name="serviceDescription">Descrizione</string>
+    <string name="serviceLocation">Luogo servizio</string>
+    <string name="servicePattern">Seleziona Pattern</string>
+    <string name="serviceCarSpace">Spazio in macchina</string>
+    <string name="serviceLendObj">Oggetto da prestare</string>
+    <string name="serviceLendTime">Data fine prestito oggetto</string>
+    <string name="servicePickupLocation">Inserisci posto ritiro</string>
+    <string name="serviceCheck">Ricorrenza</string>
+    <string name="serviceType">Servizio che si ripete ogni</string>
+    <string name="serviceDaysRec">Seleziona giorni che si ripete il servizio</string>
+    <string name="serviceStartDate">Data Inizio Servizio</string>
+    <string name="serviceEndDate">Data Fine Servizio</string>
+    <string name="serviceSelectDate">Seleziona una data</string>
+    <string name="radioMon">Mon</string>
+    <string name="radioTue">Tue</string>
+    <string name="radioWen">Wen</string>
+    <string name="radioThu">Thu</string>
+    <string name="radioFri">Fri</string>
+    <string name="radioSat">Sat</string>
+    <string name="radioSun">Sun</string>
+    <string name="serviceSave">Salva</string>
 </resources>

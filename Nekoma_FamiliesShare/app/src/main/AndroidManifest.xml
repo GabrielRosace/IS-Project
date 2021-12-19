@@ -22,6 +22,9 @@
             android:name=".YourService"
             android:exported="true" />
         <activity
+            android:name=".NuovoServizio"
+            android:exported="false" />
+        <activity
             android:name=".Creazione_evento"
             android:exported="false"
             android:label="@string/title_activity_creazione_evento1"
