@@ -94,4 +94,17 @@ router.post('/', (req, res, next) => {
   })
 })
 
+router.get('/:serviceId', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let service_id = req.params.service_id
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const service = Service.findOne({ service_id: service_id })
+  if (!service) return res.status(400).send('Service not found')
+  service.partecipants = 4
+  return res.status(200).send(service)
+})
+
 module.exports = router
