@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NuovoServizio">
+
+    <ScrollView
+        android:layout_width="391dp"
+        android:layout_height="729dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nsToolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="890dp">
+
+                <TextView
+                    android:id="@+id/imageUrlLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/serviceImageUrl"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/serviceImageUrl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageUrlLabel"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/nameServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="33dp"
+                    android:text="@string/serviceName"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageUrlLabel" />
+
+                <EditText
+                    android:id="@+id/serviceName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/nameServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceImageUrl"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/serviceDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/descriptionServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceName"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/serviceLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/locationServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceDescription"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/locationServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceLocation"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/descriptionServiceLabel" />
+
+                <TextView
+                    android:id="@+id/patternServiceLabel"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/servicePattern"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/locationServiceLabel" />
+
+                <TextView
+                    android:id="@+id/startdateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="126dp"
+                    android:text="@string/serviceStartDate"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <TextView
+                    android:id="@+id/endDateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="40dp"
+                    android:text="@string/serviceEndDate"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/startdateLabel" />
+
+                <Button
+                    android:id="@+id/serviceStartDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="110dp"
+                    android:layout_marginEnd="51dp"
+                    android:text="@string/serviceSelectDate"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.125"
+                    app:layout_constraintStart_toEndOf="@+id/startdateLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <Button
+                    android:id="@+id/serviceStartDate2"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="9dp"
+                    android:layout_marginEnd="29dp"
+                    android:text="@string/serviceSelectDate"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/pickupServiceLabel2"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceCarSpace" />
+
+                <TextView
+                    android:id="@+id/descriptionServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="35dp"
+                    android:text="@string/serviceDescription"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/nameServiceLabel" />
+
+                <Spinner
+                    android:id="@+id/serviceType"
+                    android:layout_width="170dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="9dp"
+                    android:layout_marginTop="67dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/typeServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceStartDate2"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <Spinner
+                    android:id="@+id/servicePattern"
+                    android:layout_width="184dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@+id/patternServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceLocation"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/daysRecLabel"
+                    android:layout_width="260dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="11dp"
+                    android:text="@string/serviceDaysRec"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceType" />
+
+                <Button
+                    android:id="@+id/serviceEndDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="44dp"
+                    android:text="@string/serviceSelectDate"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/endDateLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceStartDate" />
+
+                <CheckBox
+                    android:id="@+id/serviceCheck"
+                    android:layout_width="135dp"
+                    android:layout_height="49dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="26dp"
+                    android:text="@string/serviceCheck"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/pickupServiceLabel2" />
+
+                <TextView
+                    android:id="@+id/typeServiceLabel"
+                    android:layout_width="180dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="25dp"
+                    android:text="@string/serviceType"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceCheck" />
+
+                <TextView
+                    android:id="@+id/carspaceServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceCarSpace"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/lendobjServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceLendObj"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/pickupServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/servicePickupLocation"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/pickupServiceLabel2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="40dp"
+                    android:text="@string/serviceLendTime"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/carspaceServiceLabel" />
+
+                <EditText
+                    android:id="@+id/serviceCarSpace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck,DuplicateClickableBoundsCheck" />
+
+                <EditText
+                    android:id="@+id/serviceLendObj"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/servicePickup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <Button
+                    android:id="@+id/serviceSave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="287dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/serviceSave"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceEndDate" />
+
+                <RadioButton
+                    android:id="@+id/serviceMon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:checked="false"
+                    android:hint="@string/radioMon"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <RadioButton
+                    android:id="@+id/serviceTue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="false"
+                    android:hint="@string/radioTue"
+                    app:layout_constraintStart_toEndOf="@+id/serviceMon"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <RadioButton
+                    android:id="@+id/serviceWen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="false"
+                    android:hint="@string/radioWen"
+                    app:layout_constraintStart_toEndOf="@+id/serviceTue"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <RadioButton
+                    android:id="@+id/serviceThu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="false"
+                    android:hint="@string/radioThu"
+                    app:layout_constraintStart_toEndOf="@+id/serviceWen"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <RadioButton
+                    android:id="@+id/serviceFri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="false"
+                    android:hint="@string/radioFri"
+                    app:layout_constraintStart_toEndOf="@+id/serviceThu"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <RadioButton
+                    android:id="@+id/serviceSat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="41dp"
+                    android:checked="false"
+                    android:hint="@string/radioSun"
+                    app:layout_constraintStart_toEndOf="@+id/serviceFri"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceType" />
+
+                <RadioButton
+                    android:id="@+id/serviceSun"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="2dp"
+                    android:checked="false"
+                    android:hint="@string/radioSun"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceMon" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/nsToolbar"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:foregroundTint="?attr/colorOnPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/abc_vector_test"
+        app:title="@string/nsToolbar"
+        app:titleTextColor="?attr/colorOnPrimary" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

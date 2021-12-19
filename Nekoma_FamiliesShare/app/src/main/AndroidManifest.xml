@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.nekoma_families_share" >
+    package="com.example.nekoma_families_share">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -11,7 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Nekoma_FamiliesShare"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".NuovoServizio"
+            android:exported="false" />
         <activity
             android:name=".Creazione_evento"
             android:exported="false"
@@ -52,7 +55,7 @@
             android:exported="true" />
         <activity
             android:name=".MainActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
