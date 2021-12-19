@@ -78,4 +78,9 @@
     <string name="radioSat">Sat</string>
     <string name="radioSun">Sun</string>
     <string name="serviceSave">Salva</string>
+    <string-array name="serviceType">
+        <item>Carsharing</item>
+        <item>Prestito oggetti</item>
+        <item>Servizio alle persone</item>
+    </string-array>
 </resources>

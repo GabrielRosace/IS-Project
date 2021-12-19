@@ -60,7 +60,7 @@ public class YourEvent extends AppCompatActivity {
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
         recurrent_event = new ArrayList<>();
-        recurrent_event.add(new Utilities.myRecEvent("prova","prova","prova",3,"prova","prova","prova","prova", "prova"));
+
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -123,11 +123,8 @@ public class YourEvent extends AppCompatActivity {
         setContentView(R.layout.activity_your_event);
     }
 
-    // popola la ricorrenza
-/*    public Utilities.myRecEvent addRec(JSONObject response) throws JSONException{
 
-    }*/
-
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
     public void getRec(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
             try {
@@ -145,14 +142,11 @@ public class YourEvent extends AppCompatActivity {
 
     // questo metodo mi permette di popolare le 3 liste che riguardano
     // gli eventi con possibilità di definizione di etichette dei bambini
-    //todo parte non ancora completamente implementata manca la definizione di ricorrenza
-    //todo che sarà sviluppata nella versione 1.1 del codice sorgente
     public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
-                    //System.out.println("**********"+response);
                     JSONArray tmp = new JSONArray(response);
                     for(int i=0;i<tmp.length();++i){
                         final String tmp_activity = tmp.getString(i);
@@ -161,10 +155,9 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onResponse(String response1) {
                                 try {
-                                    //System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
                                     JSONObject tmp = new JSONObject(response1);
-                                    // caso in cui sono il creatore
 
+                                    // caso in cui sono il creatore
                                     if(new JSONObject(tmp_activity).getString("creator_id").equals(user_id)){
                                         //se io sono il creatore posso avere tre casi :
                                         //      - sono un repetition==true?  -> tuoi eventi (fatto)
@@ -184,7 +177,7 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                             int nPart = new JSONArray(tmp.getString("parents")).length();
                                             String descrizione = new JSONObject(tmp_activity).getString("description");
-                                            String end = "TODO"; //todo finire di implemetare in 1.1
+                                            String end = "";
                                             String labels = "";
                                             JSONObject tmp_ = new JSONObject(tmp_activity);
                                             if(tmp_.has("labels")){
@@ -204,7 +197,7 @@ public class YourEvent extends AppCompatActivity {
                                             tuoi_eventi.add(eve);
                                         }else if(!new JSONObject(tmp_activity).getBoolean("repetition")){
 
-                                            if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
+                                            if(tmp.getString("end").equals("")){
                                                 String name= new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                 String id_img = "nan";
@@ -213,7 +206,7 @@ public class YourEvent extends AppCompatActivity {
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
                                                 if(tmp_.has("labels")){
@@ -295,7 +288,6 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }else{
-                                        // System.out.println("secondo caso");
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
@@ -314,7 +306,7 @@ public class YourEvent extends AppCompatActivity {
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
                                                 if(tmp_.has("labels")){
@@ -422,7 +414,6 @@ public class YourEvent extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
@@ -436,12 +427,8 @@ public class YourEvent extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    // recycle view per gli eventi ricorrenti
 
-    //Recyle view
-
-
-    // recycle view per gli eventi normali
+    // recycle view per gli eventi normali e per gli eventi ricorrenti in base a cosa viene passato nella add
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Utilities.myRecEvent> recEve;
@@ -485,7 +472,7 @@ public class YourEvent extends AppCompatActivity {
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
+                        Intent evento = new Intent(YourEvent.this, DettagliEventoRicorrente.class);
                         // System.out.println("intent: "+event.toString());
                         evento.putExtra("evento", event.toString());
                         startActivity(evento);
@@ -552,17 +539,5 @@ public class YourEvent extends AppCompatActivity {
         public String toString() {
             return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
         }
-    }
-
-
-    public void getHomePage(View v){
-        Intent homepage = new Intent(YourEvent.this,Homepage.class);
-        startActivity(homepage);
-    }
-
-    public SharedPreferences getPrefs(){
-        SharedPreferences prefs;
-        prefs=YourEvent.this.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return prefs;
     }
 }

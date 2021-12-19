@@ -43,7 +43,7 @@ public class Creazione_evento extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_creazione_evento);
 
-        Toolbar t = (Toolbar) findViewById(R.id.toolbar7);
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

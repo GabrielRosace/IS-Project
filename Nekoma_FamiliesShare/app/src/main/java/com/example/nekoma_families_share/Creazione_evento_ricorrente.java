@@ -1,6 +1,7 @@
 package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -102,6 +103,15 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                 labels = labels + "]";
                 i.putExtra("lables", labels);
                 startActivity(i);
+            }
+        }
+
+        //necessario per tornare alla schermata precedente
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }
