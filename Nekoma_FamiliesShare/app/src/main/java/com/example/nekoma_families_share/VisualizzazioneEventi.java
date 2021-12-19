@@ -69,15 +69,15 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 if (checkedId == R.id.attività) {
                     addRecyclerView(activities);
                 } else if (checkedId == R.id.servPersona) {
-                    getServPerson();
+                    getServices("pickup");
                 } else if (checkedId == R.id.consigliate) {
                     addRecyclerView(getRecommendedActivities());
                 } else if (checkedId == R.id.servRicorrenti) {
                     getRecurring();
                 } else if (checkedId == R.id.prestito) {
-                    Toast.makeText(VisualizzazioneEventi.this, "Prestito, coming soon", Toast.LENGTH_SHORT).show();
+                    getServices("lend");
                 } else if (checkedId == R.id.carsharing) {
-                    Toast.makeText(VisualizzazioneEventi.this, "Carsharing, coming soon", Toast.LENGTH_SHORT).show();
+                    getServices("car");
                 }
             }
         });
@@ -153,11 +153,21 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     activities.add(new Evento(e.getString("name"), img, e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels, labels_ids, e.getString("creator_id")));
                 }
 
-                r.run();
+                Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
+                    try {
+                        JSONArray arr = new JSONArray((String) response);
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = arr.getJSONObject(i);
+                            activities.add(new Utilities.myRecEvent(obj));
+                        }
+                        r.run();
+                        progress_bar.setVisibility(View.GONE);
+                        progress_layout.setVisibility(View.GONE);
 
-                progress_bar.setVisibility(View.GONE);
-                progress_layout.setVisibility(View.GONE);
-
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },System.out::println, new HashMap<>());
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -167,12 +177,20 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         }, new HashMap<>());
     }
 
-    private void getServPerson() { //TODO not implemented yet, è parte della seconda feature
+    private void getServices(String pattern) {
         List<Utilities.Situation> activities = new ArrayList<>();
-        Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
-        addRecyclerView(activities);
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/service?pattern="+pattern, response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    activities.add(new Utilities.myService(arr.getJSONObject(i)));
+                }
+                addRecyclerView(activities);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
     }
-
 
     private void getRecurring() {
         List<Utilities.Situation> services = new ArrayList<>();
@@ -185,27 +203,23 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     services.add(new Utilities.myRecEvent(obj));
                 }
 
-                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/service", response1 -> {
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/service", response1 -> {
                     try {
-                        JSONArray arr1 = new JSONArray((String)response1);
+                        JSONArray arr1 = new JSONArray((String) response1);
                         for (int j = 0; j < arr1.length(); j++) {
                             JSONObject obj1 = arr1.getJSONObject(j);
                             services.add(new Utilities.myService(obj1));
                         }
+                        addRecyclerView(services);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }, error -> {
-                    System.out.println(error);
-                }, new HashMap<>());
+                }, System.out::println, new HashMap<>());
 
-                addRecyclerView(services);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }, error -> {
-            System.out.println(error);
-        }, new HashMap<>());
+        }, System.out::println, new HashMap<>());
     }
 
     // Ottengo le attività che possono interessare ai figli
@@ -270,18 +284,37 @@ public class VisualizzazioneEventi extends AppCompatActivity {
             final Utilities.Situation eve = eventoList.get(position);
             holder.tv.setText(eve.getName());
             holder.btn.setText("Info");
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEvento.class);
-                    evento.putExtra("evento", eve.toString());
-                    startActivity(evento);
-                }
-            });
+
+
+            if (eve instanceof Evento) {
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEvento.class);
+                        evento.putExtra("evento", eve.toString());
+                        startActivity(evento);
+                    }
+                });
+            } else if (eve instanceof Utilities.myRecEvent) {
+//                TODO
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEventoRicorrente.class);
+                        evento.putExtra("evento", eve.toString());
+                        startActivity(evento);
+                    }
+                });
+            } else if (eve instanceof Utilities.myService) {
+//                TODO
+                Toast.makeText(VisualizzazioneEventi.this, "Chiedi ad alberto di farlo", Toast.LENGTH_SHORT).show();
+            }
 
             // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
             if (eve.getImage().equals("nan")) {
                 holder.img.setImageDrawable(getDrawable(R.drawable.persone));
+            } else if (eve instanceof Utilities.myService || eve instanceof Utilities.myRecEvent) {
+                new ImageDownloader(holder.img).execute(eve.getImage());
             } else {
                 Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/" + eve.getImage(), response -> {
                     String url = "";
