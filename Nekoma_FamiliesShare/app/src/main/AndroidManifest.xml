@@ -16,6 +16,9 @@
             android:name=".SceltaCreazione"
             android:exported="true" />
         <activity
+            android:name=".Creazione_evento_ricorrente"
+            android:exported="false" />
+        <activity
             android:name=".DettagliEventoRicorrente"
             android:exported="false" />
         <activity
