@@ -22,7 +22,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar7"
+            android:id="@+id/toolbar_eve_rec"
             android:layout_width="409dp"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
@@ -42,7 +42,7 @@
             android:layout_marginStart="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar7">
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_eve_rec">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

@@ -33,8 +33,7 @@ public class SceltaCreazione extends AppCompatActivity {
         startActivity(servizio);
     }
     public void getEventoRicorrent(View v){
-        /*Intent event = new Intent(SceltaCreazione.this,Creazione_evento.class);
-        startActivity(event);*/
-        Toast.makeText(SceltaCreazione.this, "COMING SOON", Toast.LENGTH_SHORT).show();
+        Intent event = new Intent(SceltaCreazione.this,Creazione_evento_ricorrente.class);
+        startActivity(event);
     }
 }
