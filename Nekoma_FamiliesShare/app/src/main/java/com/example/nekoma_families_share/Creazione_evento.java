@@ -61,7 +61,7 @@ public class Creazione_evento extends AppCompatActivity  {
 
                     JSONArray tmp = new JSONArray(response);
                     System.out.println(tmp);
-                    LinearLayout ll = (LinearLayout) findViewById(R.id.linearLabels);
+                    LinearLayout ll = (LinearLayout) findViewById(R.id.linearLabelsRic);
                     for(int i=0;i<tmp.length();++i) {
                         Creazione_evento.MyEtichette nuovo = new Creazione_evento.MyEtichette(new JSONObject(tmp.getString(i)).getString("name"), new JSONObject(tmp.getString(i)).getString("label_id"));
                         etichette.add(nuovo);
@@ -104,9 +104,9 @@ public class Creazione_evento extends AppCompatActivity  {
     }
 
     public void onClickCreaButton(View v) throws ParseException {
-        String nome = ((EditText)findViewById(R.id.inputEventName)).getText().toString();
-        String luogo = ((EditText)findViewById(R.id.inputEventLcation)).getText().toString();
-        String desc = ((EditText)findViewById(R.id.inputDescEvent)).getText().toString();
+        String nome = ((EditText)findViewById(R.id.inputEventNameRic)).getText().toString();
+        String luogo = ((EditText)findViewById(R.id.inputEventLcationRic)).getText().toString();
+        String desc = ((EditText)findViewById(R.id.inputDescEventRic)).getText().toString();
         String dataInizio = ((EditText)findViewById(R.id.inputEventDate)).getText().toString();
         String dataFine = ((EditText)findViewById(R.id.inputEventEndEvent)).getText().toString();
         String inizio = ((EditText) findViewById(R.id.inputEventStartTime)).getText().toString();
@@ -274,7 +274,7 @@ public class Creazione_evento extends AppCompatActivity  {
 
     }
 
-    private static class MyEtichette {
+    public static class MyEtichette {
         private String name;
         private String id;
 
@@ -283,10 +283,10 @@ public class Creazione_evento extends AppCompatActivity  {
             this.name = name;
         }
 
-        private String getName(){
+        public String getName(){
             return this.name;
         }
-        private String getId(){
+        public String getId(){
             return this.id;
         }
 

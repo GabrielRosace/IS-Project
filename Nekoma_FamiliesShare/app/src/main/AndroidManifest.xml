@@ -13,6 +13,8 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Creazione_date_evetno_ricorrente"
+            android:exported="false" />
             android:name=".SceltaCreazione"
             android:exported="true" />
         <activity
