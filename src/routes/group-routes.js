@@ -1729,9 +1729,9 @@ router.get('/:id/services', async (req, res, next) => {
           }
         }, {
           '$lookup': {
-            'from': 'RecurringActivity', 
-            'localField': 'activity_id', 
-            'foreignField': 'activity_id', 
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
             'as': 'RecurringActivity'
           }
         }
@@ -1744,9 +1744,9 @@ router.get('/:id/services', async (req, res, next) => {
       Recurrence.aggregate([
         {
           '$lookup': {
-            'from': 'RecurringActivity', 
-            'localField': 'activity_id', 
-            'foreignField': 'activity_id', 
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
             'as': 'RecurringActivity'
           }
         }, {
@@ -2946,7 +2946,7 @@ router.get('/:id/service/:serviceId', async (req, res, next) => {
     pickuplocation: service.pickuplocation,
     img: service.img,
     nPart: partecipants.length,
-    type:recurrance.type,
+    type: recurrance.type,
     start_date: recurrance.start_date,
     end_date: recurrance.end_date,
     recurrence: service.recurrence
@@ -2989,7 +2989,7 @@ router.get('/:id/service', async (req, res, next) => {
         pickuplocation: service.pickuplocation,
         img: service.img,
         nPart: partecipants.length,
-        type:recurrance.type,
+        type: recurrance.type,
         start_date: recurrance.start_date,
         end_date: recurrance.end_date,
         recurrence: service.recurrence
@@ -3006,24 +3006,11 @@ router.get('/:id/service', async (req, res, next) => {
     resList = emptyList
   }
   if (creator === 'me') {
-    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
-      let resService = {
-        service_id: service.service_id,
-        owner_id: service.owner_id,
-        name: service.name,
-        description: service.description,
-        location: service.location,
-        pattern: service.pattern,
-        car_space: service.car_space,
-        lend_obj: service.lend_obj,
-        lend_time: service.lend_time,
-        pickuplocation: service.pickuplocation,
-        img: service.img,
-        nPart: 4,
-        recurrence: service.recurrence
-      }
-      resList.push(resService)
+    let creatorList = []
+    emptyList.forEach((service) => {
+      if (service.owner_id === userId) creatorList.push(service)
     })
+    resList = creatorList
   }
   if (!creator) {
     resList = emptyList
