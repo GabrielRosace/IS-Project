@@ -151,7 +151,7 @@ function dateValidator (type, start_date, end_date, res) {
 }
 
 // Ritorna tutti gli eventi ricorrenti a cui un utente partecipa, secondo alcune caratteristiche, ad esempio tutti, solo quelli scaduti o solo quelli futuri
-router.get('/', async (req, res, next) => {
+router.get('/partecipant', async (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
@@ -282,6 +282,101 @@ router.get('/', async (req, res, next) => {
   // RecurringActivity.find({ group_id: group_id }).exec().then((a) => {
   //   return res.status(200).send(a)
   // })
+})
+
+// Ritorna tutti gli eventi ricorrenti che sono stati creati da un utente: tutti, quelli scaduti o quelli futuri
+router.get('/creator', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let expired = req.query.expired
+	if(!expired) return res.status(400).send('Bad request')
+
+  let result = []
+  switch(expired){
+    case 'none':
+      RecurringActivity.aggregate([
+        {
+          '$match': {
+            'creator_id': userId
+          }
+        }, {
+          '$lookup': {
+            'from': 'Label', 
+            'localField': 'labels', 
+            'foreignField': 'label_id', 
+            'as': 'Label'
+          }
+        }
+      ]).then(a => {
+        return res.status(200).send(result)
+      })
+      break
+    case 'true':
+      RecurringActivity.aggregate([
+        {
+          '$match': {
+            'creator_id': userId
+          }
+        }, {
+          '$lookup': {
+            'from': 'Label', 
+            'localField': 'labels', 
+            'foreignField': 'label_id', 
+            'as': 'Label'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Recurrence', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'Recurrence'
+          }
+        }
+      ]).then(a => {
+        console.log(a);
+        for(let i = 0; i < a.length; i++){
+          let end_dates = a[i].Recurrence.end_date
+          if(end_dates[end_dates.length - 1] < new Date(Date.now()))
+            result.push(a)
+        }
+        return res.status(200).json(result)
+      })
+      break
+    case 'false':
+      RecurringActivity.aggregate([
+        {
+          '$match': {
+            'creator_id': userId
+          }
+        }, {
+          '$lookup': {
+            'from': 'Label', 
+            'localField': 'labels', 
+            'foreignField': 'label_id', 
+            'as': 'Label'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Recurrence', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'Recurrence'
+          }
+        }
+      ]).then(a => {
+        for(let i = 0; i < a.length; i++){
+          let end_dates = a[i].Recurrence.end_date
+          if(end_dates[end_dates.length - 1] >= new Date(Date.now()))
+            result.push(a)
+        }
+        return res.status(200).json(result)
+      })
+      break
+    default:
+      return res.status(400).send('Bad request')
+      break
+  }
 })
 
 // Ritorna tutte le informazioni di un evento ricorrente
