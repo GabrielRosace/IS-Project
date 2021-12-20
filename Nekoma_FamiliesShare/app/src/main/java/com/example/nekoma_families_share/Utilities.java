@@ -159,7 +159,7 @@ public class Utilities {
         }
 
         public myService(JSONObject obj) throws JSONException {
-            this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), "nPart"/*TODO*/, obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
+            this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), obj.getString( "nPart"), obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
         }
 
         @Override
@@ -228,7 +228,8 @@ public class Utilities {
             this.start_date = obj.getString("start_date");
             this.end_date = obj.getString("end_date");
             this.event_id = obj.getString("activity_id");
-            this.nPart = 10/*TODO*/;
+            this.nPart = 10;
+//            this.nPart = obj.getInt("nPart");
             this.enddate = ".";
             this.labels = ""/*TODO*/;
         }
@@ -240,10 +241,10 @@ public class Utilities {
             this.img = parsed[2];
             this.nPart = Integer.parseInt(parsed[3]);
             this.descrizione = parsed[4];
-            this.enddate = parsed[5]; // Non ha senso passarla
+            this.enddate = parsed[5];
             this.labels = parsed[6];
             this.owner_id = parsed[7];
-            this.recType = parsed[8]; /*TODO*/
+            this.recType = parsed[8];
             this.start_date = parsed[9];
             this.end_date = parsed[10];
         }
