@@ -212,8 +212,13 @@ public class Utilities {
 
         public myRecEvent(JSONObject obj) throws JSONException {
             JSONObject recAct = null;
-            this.nPart = obj.getJSONObject("partecipant").length();
-            obj = obj.getJSONArray("event").getJSONObject(0);
+//            System.out.println(obj);
+            if(obj.has("partecipant")){
+                this.nPart = obj.getJSONObject("partecipant").length();
+                obj = obj.getJSONArray("event").getJSONObject(0);
+            }else{
+                this.nPart = 10;
+            }
             if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
                 recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
                 this.nome = recAct.getString("name");

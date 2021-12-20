@@ -101,6 +101,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
     // Ottengo gli interessi dei figli del visualizzatore della view
     private void getMyChildPref() {
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
         String my_id = Utilities.getUserID(this);
         child_pref = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/users/" + my_id + "/children", response -> {
@@ -117,7 +119,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                         }
                     }
                 }
-
+//                progress_layout.setVisibility(View.GONE);
+//                progress_bar.setVisibility(View.GONE);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -178,6 +181,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     private void getServices(String pattern) {
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
         List<Utilities.Situation> activities = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/service?pattern="+pattern, response -> {
             try {
@@ -186,6 +191,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     activities.add(new Utilities.myService(arr.getJSONObject(i)));
                 }
                 addRecyclerView(activities);
+                progress_layout.setVisibility(View.GONE);
+                progress_bar.setVisibility(View.GONE);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -315,7 +322,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 //                evento.putExtra("servizio", eve.toString());
 //                startActivity(evento);
 
-                Toast.makeText(VisualizzazioneEventi.this, "Chiedi ad alberto di farlo", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(VisualizzazioneEventi.this, "Chiedi ad alberto di farlo", Toast.LENGTH_SHORT).show();
             }
 
             // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
