@@ -212,6 +212,8 @@ public class Utilities {
 
         public myRecEvent(JSONObject obj) throws JSONException {
             JSONObject recAct = null;
+            this.nPart = obj.getJSONObject("partecipant").length();
+            obj = obj.getJSONArray("event").getJSONObject(0);
             if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
                 recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
                 this.nome = recAct.getString("name");
@@ -228,7 +230,6 @@ public class Utilities {
             this.start_date = obj.getString("start_date");
             this.end_date = obj.getString("end_date");
             this.event_id = obj.getString("activity_id");
-            this.nPart = 10/*TODO*/;
             this.enddate = ".";
             this.labels = ""/*TODO*/;
         }
