@@ -2847,6 +2847,13 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
     checkDates(r, days, res)
     // manca un pezzo di commento originale
+    if (service.pattern === 'car') {
+      Partecipant.findOne({ activity_id: service_id, service: true }).exec().then((p) => {
+        if (p.length >= parseInt(service.car_space)) {
+          return res.status(400).send('The car is full')
+        }
+      })
+    }
     Partecipant.findOne({ partecipant_id: userId, activity_id: service_id, service: true }).exec().then((p) => {
       if (!p) {
         const newPartecipant = {
@@ -2914,6 +2921,37 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     })
   }
 })
+router.patch('/:id/service/:serviceId', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  const { name, description, location, img } = req.body
+
+  const newService = {
+    name,
+    img: (!img) ? 'https://picsum.photos/200' : img,
+    description,
+    location
+  }
+  try {
+    Service.updateOne({ service_id: service_id }, newService).exec().then(() => {
+      return res.status(200).send('Service updated')
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 router.get('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
@@ -2961,6 +2999,7 @@ router.get('/:id/service', async (req, res, next) => {
   let creator = req.query.creator
   let time = req.query.time
   let pattern = req.query.pattern
+  let recurrent = req.query.recurrent
 
   let resList = []
   let emptyList = []
@@ -3052,6 +3091,20 @@ router.get('/:id/service', async (req, res, next) => {
       if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
     })
     resList = patternList
+  }
+  if (recurrent === 'true') {
+    let recurrentList = []
+    emptyList.forEach((service) => {
+      if (service.recurrence === true) recurrentList.push(service)
+    })
+    resList = recurrentList
+  }
+  if (recurrent === 'false') {
+    let recurrentList = []
+    emptyList.forEach((service) => {
+      if (service.recurrence === false) recurrentList.push(service)
+    })
+    resList = recurrentList
   }
 
   // FILTER TIME
