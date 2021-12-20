@@ -1724,10 +1724,14 @@ router.get('/:id/services', async (req, res, next) => {
     case 'recurrent':
       Recurrence.aggregate([
         {
+          '$match': {
+            'service': false
+          }
+        }, {
           '$lookup': {
-            'from': 'RecurringActivity',
-            'localField': 'activity_id',
-            'foreignField': 'activity_id',
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
             'as': 'RecurringActivity'
           }
         }
@@ -1740,10 +1744,14 @@ router.get('/:id/services', async (req, res, next) => {
       Recurrence.aggregate([
         {
           '$lookup': {
-            'from': 'Service',
-            'localField': 'activity_id',
-            'foreignField': 'activity_id',
-            'as': 'Service'
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'RecurringActivity'
+          }
+        }, {
+          '$match': {
+            'service': true
           }
         }
       ]).then(s => {

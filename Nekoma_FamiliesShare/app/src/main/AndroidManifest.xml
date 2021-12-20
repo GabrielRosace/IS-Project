@@ -13,8 +13,22 @@
         android:theme="@style/Theme.Nekoma_FamiliesShare"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Creazione_date_evetno_ricorrente"
+            android:exported="false" />
+            android:name=".SceltaCreazione"
+            android:exported="true" />
+        <activity
+            android:name=".Creazione_evento_ricorrente"
+            android:exported="false" />
+        <activity
+            android:name=".DettagliEventoRicorrente"
+            android:exported="false" />
+        <activity
             android:name=".YourService"
             android:exported="true" />
+        <activity
+            android:name=".NuovoServizio"
+            android:exported="false" />
         <activity
             android:name=".Creazione_evento"
             android:exported="false"
