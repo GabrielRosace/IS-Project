@@ -118,7 +118,7 @@ public class YourService extends AppCompatActivity {
         String img = (response.has("img"))?response.getString("img"):"";
         String nPart = (response.has("nPart"))?response.getString("nPart"):"";
         String recurrence = (response.has("recurrence"))?response.getString("recurrence"):"";
-        return new Utilities.myService(service_id,owner_id,nome,descrizione,location,pattern,car_space,lend_obj,lend_time,pickuplocation,img,nPart,recurrence);
+        return new Utilities.myService(service_id,owner_id,nome,descrizione,location,pattern,car_space,lend_obj,lend_time,pickuplocation,img,nPart,recurrence,"","");
     }
 
     // Chiamata nel caso in cui il servizio sia tuo

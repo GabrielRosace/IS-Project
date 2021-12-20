@@ -60,7 +60,7 @@ public class YourEvent extends AppCompatActivity {
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
         recurrent_event = new ArrayList<>();
-        recurrent_event.add(new Utilities.myRecEvent("prova","prova","prova",3,"prova","prova","prova","prova", "prova"));
+        recurrent_event.add(new Utilities.myRecEvent("prova","prova","prova",3,"prova","prova","prova","prova", "prova","prova","prova"));
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];

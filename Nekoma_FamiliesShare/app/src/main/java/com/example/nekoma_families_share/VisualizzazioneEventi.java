@@ -195,6 +195,9 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     private void getRecurring() {
         List<Utilities.Situation> services = new ArrayList<>();
 
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
+
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
@@ -211,6 +214,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                             services.add(new Utilities.myService(obj1));
                         }
                         addRecyclerView(services);
+                        progress_layout.setVisibility(View.GONE);
+                        progress_bar.setVisibility(View.GONE);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -296,7 +301,6 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     }
                 });
             } else if (eve instanceof Utilities.myRecEvent) {
-//                TODO
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -307,6 +311,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 });
             } else if (eve instanceof Utilities.myService) {
 //                TODO
+//                Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEventoRicorrente.class);
+//                evento.putExtra("servizio", eve.toString());
+//                startActivity(evento);
+
                 Toast.makeText(VisualizzazioneEventi.this, "Chiedi ad alberto di farlo", Toast.LENGTH_SHORT).show();
             }
 
