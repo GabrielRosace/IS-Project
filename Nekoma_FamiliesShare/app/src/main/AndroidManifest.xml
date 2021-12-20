@@ -27,6 +27,9 @@
             android:name=".YourService"
             android:exported="true" />
         <activity
+            android:name=".SceltaCreazione"
+            android:exported="true" />
+        <activity
             android:name=".NuovoServizio"
             android:exported="false" />
         <activity

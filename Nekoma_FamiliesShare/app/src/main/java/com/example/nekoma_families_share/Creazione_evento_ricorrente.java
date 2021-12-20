@@ -104,7 +104,7 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                 i.putExtra("lables", labels);
                 startActivity(i);
             }
-        }
+        });
 
         //necessario per tornare alla schermata precedente
         Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
