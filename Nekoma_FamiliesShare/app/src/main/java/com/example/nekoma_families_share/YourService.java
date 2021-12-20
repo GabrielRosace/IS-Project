@@ -221,7 +221,7 @@ public class YourService extends AppCompatActivity {
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             Utilities.myService service = mData.get(position);
             holder.btn.setText(service.nome);
-            if(service.recurrence){
+            if(service.recurrence.equals("true")){
                 holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
