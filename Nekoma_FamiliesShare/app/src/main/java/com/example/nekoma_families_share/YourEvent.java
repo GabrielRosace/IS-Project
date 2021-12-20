@@ -44,10 +44,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class YourEvent extends AppCompatActivity {
-    private List<myEventi> tuoi_eventi = new ArrayList<>();
-    private List<myEventi> partecipi_eventi = new ArrayList<>();
-    private List<myEventi> scaduti_eventi = new ArrayList<>();
-    private List<Utilities.myRecEvent> recurrent_event = new ArrayList<>();
+    private List<Utilities.Situation> tuoi_eventi = new ArrayList<>();
+    private List<Utilities.Situation> partecipi_eventi = new ArrayList<>();
+    private List<Utilities.Situation> scaduti_eventi = new ArrayList<>();
+    private List<Utilities.Situation> recurrent_event = new ArrayList<>();
     private String id_group;
     private String user_id;
 
@@ -60,7 +60,7 @@ public class YourEvent extends AppCompatActivity {
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
         recurrent_event = new ArrayList<>();
-        recurrent_event.add(new Utilities.myRecEvent("prova","prova","prova",3,"prova","prova","prova","prova", "prova","prova","prova"));
+
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -91,15 +91,15 @@ public class YourEvent extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition()==0){
                     // caso 1 - eventi che sono tuoi
-                    addRecyclerView(tuoi_eventi, new ArrayList<>());
+                    addRecyclerView(tuoi_eventi);
                 }else if(tab.getPosition()==1){
                     // caso 2 - eventi a cui hai partecipato
-                    addRecyclerView(partecipi_eventi, new ArrayList<>());
+                    addRecyclerView(partecipi_eventi);
                 }else if(tab.getPosition()==2){
                     // caso 3 - eventi che sono scaduti
-                    addRecyclerView(scaduti_eventi, new ArrayList<>());
+                    addRecyclerView(scaduti_eventi);
                 }else{
-                    addRecyclerView(new ArrayList<>(), recurrent_event);
+                    addRecyclerView(recurrent_event);
                 }
             }
 
@@ -114,7 +114,6 @@ public class YourEvent extends AppCompatActivity {
             }
         });
         this.getEvents();
-        this.getRec();
     }
 
     @Override
@@ -123,27 +122,62 @@ public class YourEvent extends AppCompatActivity {
         setContentView(R.layout.activity_your_event);
     }
 
-    // popola la ricorrenza
-/*    public Utilities.myRecEvent addRec(JSONObject response) throws JSONException{
 
-    }*/
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    public void getRecTuoiAttuali(){
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=not-expired", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    tuoi_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
 
-    public void getRec(){
-        // prendi rec events
+    public void getRecTuoiScaduti(){
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=expired", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    scaduti_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+
+    public void getRecTuoiPartecipa(){
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=not-expired", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    partecipi_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
     }
 
 
     // questo metodo mi permette di popolare le 3 liste che riguardano
     // gli eventi con possibilità di definizione di etichette dei bambini
-    //todo parte non ancora completamente implementata manca la definizione di ricorrenza
-    //todo che sarà sviluppata nella versione 1.1 del codice sorgente
     public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
-                    //System.out.println("**********"+response);
                     JSONArray tmp = new JSONArray(response);
+                    YourEvent.this.getRecTuoiAttuali();
+                    YourEvent.this.getRecTuoiPartecipa();
+                    YourEvent.this.getRecTuoiScaduti();
                     for(int i=0;i<tmp.length();++i){
                         final String tmp_activity = tmp.getString(i);
                         String id_activity= new JSONObject(tmp.getString(i)).getString("activity_id");
@@ -151,10 +185,9 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onResponse(String response1) {
                                 try {
-                                    //System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
                                     JSONObject tmp = new JSONObject(response1);
-                                    // caso in cui sono il creatore
 
+                                    // caso in cui sono il creatore
                                     if(new JSONObject(tmp_activity).getString("creator_id").equals(user_id)){
                                         //se io sono il creatore posso avere tre casi :
                                         //      - sono un repetition==true?  -> tuoi eventi (fatto)
@@ -174,7 +207,7 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                             int nPart = new JSONArray(tmp.getString("parents")).length();
                                             String descrizione = new JSONObject(tmp_activity).getString("description");
-                                            String end = "TODO"; //todo finire di implemetare in 1.1
+                                            String end = "";
                                             String labels = "";
                                             JSONObject tmp_ = new JSONObject(tmp_activity);
                                             if(tmp_.has("labels")){
@@ -194,7 +227,7 @@ public class YourEvent extends AppCompatActivity {
                                             tuoi_eventi.add(eve);
                                         }else if(!new JSONObject(tmp_activity).getBoolean("repetition")){
 
-                                            if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
+                                            if(tmp.getString("end").equals("")){
                                                 String name= new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                 String id_img = "nan";
@@ -203,7 +236,7 @@ public class YourEvent extends AppCompatActivity {
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
                                                 if(tmp_.has("labels")){
@@ -285,7 +318,6 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }else{
-                                        // System.out.println("secondo caso");
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
@@ -304,7 +336,7 @@ public class YourEvent extends AppCompatActivity {
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
                                                 if(tmp_.has("labels")){
@@ -385,11 +417,11 @@ public class YourEvent extends AppCompatActivity {
                                             }
                                         }
                                     }
+
                                     ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
                                     pr.setVisibility(View.GONE);
                                     if(tuoi_eventi.size()>0){
-
-                                        addRecyclerView(tuoi_eventi, new ArrayList<>());
+                                        addRecyclerView(tuoi_eventi);
                                     }
                                 } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
@@ -413,37 +445,30 @@ public class YourEvent extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
 
     // metodo che popola la recycle view
-    private void addRecyclerView(List<myEventi> list, List<Utilities.myRecEvent> reclist){
+    private void addRecyclerView(List<Utilities.Situation> list){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.lista_eventi);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list, reclist);
+        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
     }
 
-    // recycle view per gli eventi ricorrenti
 
-    //Recyle view
-
-
-    // recycle view per gli eventi normali
+    // recycle view per gli eventi normali e per gli eventi ricorrenti in base a cosa viene passato nella add
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<Utilities.myRecEvent> recEve;
-        private List<myEventi> mData;
+        private List<Utilities.Situation> mData;
         private LayoutInflater mInflater;
 
 
-        MyRecyclerViewAdapter(Context context, List<myEventi> data, List<Utilities.myRecEvent> recEve) {
+        MyRecyclerViewAdapter(Context context, List<Utilities.Situation> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
-            this.recEve = recEve;
         }
 
 
@@ -456,28 +481,30 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
-            if(this.mData.size()>0){
-                myEventi event = mData.get(position);
+
+                Utilities.Situation event = mData.get(position);
                 // System.out.println(" ************************* questo è event: "+event.toString());
-                holder.btn.setText(event.nome);
+                holder.btn.setText(event.getName());
+
+            if(event instanceof Utilities.myRecEvent){
+                System.out.println(event.getClass());
+                System.out.println(event.getName());
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
+                        Intent evento = new Intent(YourEvent.this, DettagliEventoRicorrente.class);
                         // System.out.println("intent: "+event.toString());
                         evento.putExtra("evento", event.toString());
                         startActivity(evento);
                     }
                 });
             }else {
-                Utilities.myRecEvent event = recEve.get(position);
-                // System.out.println(" ************************* questo è event: "+event.toString());
-                holder.btn.setText(event.nome);
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.purple_500,getTheme()));
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
-                        // System.out.println("intent: "+event.toString());
                         evento.putExtra("evento", event.toString());
                         startActivity(evento);
                     }
@@ -490,7 +517,7 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return mData.size() + recEve.size();
+            return mData.size();
         }
 
 
@@ -507,18 +534,15 @@ public class YourEvent extends AppCompatActivity {
         }
 
 
-        myEventi getItem(int id) {
+        Utilities.Situation getItem(int id) {
             return mData.get(id);
-        }
-        Utilities.myRecEvent getItemRec(int id){
-            return recEve.get(id);
         }
 
     }
     // recycle view
 
     // permette di usare gli eventi in modo più semplice
-    private class  myEventi{
+    private class  myEventi implements Utilities.Situation{
         public final String nome;
         public final String event_id;
         public final String img;
@@ -543,17 +567,20 @@ public class YourEvent extends AppCompatActivity {
         public String toString() {
             return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
         }
-    }
 
+        @Override
+        public String getName() {
+            return this.nome;
+        }
 
-    public void getHomePage(View v){
-        Intent homepage = new Intent(YourEvent.this,Homepage.class);
-        startActivity(homepage);
-    }
+        @Override
+        public String getImage() {
+            return this.img;
+        }
 
-    public SharedPreferences getPrefs(){
-        SharedPreferences prefs;
-        prefs=YourEvent.this.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return prefs;
+        @Override
+        public String getLabels_id() {
+            return this.labels;
+        }
     }
 }

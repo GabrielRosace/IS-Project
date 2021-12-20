@@ -2,6 +2,7 @@ package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -98,32 +99,17 @@ public class YourService extends AppCompatActivity {
 
         // chiamata per popolare le liste
         this.setmyService();
-        this.setPartecipi_servizi();
-        this.setScaduti_servizi();
     }
 
     // necessario per creare l'oggetto che poi verrà passato tramite le shared preference
     // a dettagli servizio
     public Utilities.myService populateService (JSONObject response) throws JSONException{
-        String service_id = response.getString("service_id");
-        String owner_id = response.getString("owner_id");
-        String nome = response.getString("name");
-        String descrizione = response.getString("descrizione");
-        String location = (response.has("location"))?response.getString("location"):"";
-        String pattern = (response.has("pattern"))?response.getString("pattern"):"";
-        String car_space = (response.has("car_space"))?response.getString("carspace"):"";
-        String lend_obj = (response.has("lend_obj"))?response.getString("lend_obj"):"";
-        String lend_time = (response.has("lend_time"))?response.getString("lend_time"):"";
-        String pickuplocation = (response.has("pickuplocation"))?response.getString("pickuplocation"):"";
-        String img = (response.has("img"))?response.getString("img"):"";
-        String nPart = (response.has("nPart"))?response.getString("nPart"):"";
-        String recurrence = (response.has("recurrence"))?response.getString("recurrence"):"";
-        return new Utilities.myService(service_id,owner_id,nome,descrizione,location,pattern,car_space,lend_obj,lend_time,pickuplocation,img,nPart,recurrence,"","");
+        return new Utilities.myService(response);
     }
 
     // Chiamata nel caso in cui il servizio sia tuo
     public void setmyService(){
-        Utilities.httpRequest(this, Request.Method.GET, "/service?creator=me&time=next", new Response.Listener<String>() {
+        Utilities.httpRequest(this, Request.Method.GET,"/groups/"+this.id_group+ "/service?creator=me&time=next", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
@@ -131,6 +117,8 @@ public class YourService extends AppCompatActivity {
                     for (int i=0;i<tmp.length();++i){
                         tuoi_servizi.add(populateService(tmp.getJSONObject(i)));
                     }
+                    addRecyclerView(tuoi_servizi);
+                    YourService.this.setPartecipi_servizi();
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
@@ -143,9 +131,10 @@ public class YourService extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+
     // Chiamata nel caso in cui il servizio in cui partecipi
     public void setPartecipi_servizi(){
-        Utilities.httpRequest(this, Request.Method.GET, "/service?partecipant=me&time=next", new Response.Listener<String>() {
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?partecipant=me&time=next", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
@@ -153,6 +142,7 @@ public class YourService extends AppCompatActivity {
                     for (int i=0;i<tmp.length();++i){
                         partecipi_servizi.add(populateService(tmp.getJSONObject(i)));
                     }
+                    YourService.this.setScaduti_servizi();
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
@@ -167,7 +157,7 @@ public class YourService extends AppCompatActivity {
 
     // Chiamata nel caso in cui il servizio sia scaduto
     public void setScaduti_servizi(){
-        Utilities.httpRequest(this, Request.Method.GET, "/service?creator=me&partecipant=me&time=expired", new Response.Listener<String>() {
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?creator=me&partecipant=me&time=expired", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try{
@@ -175,6 +165,8 @@ public class YourService extends AppCompatActivity {
                     for (int i=0;i<tmp.length();++i){
                         scaduti_servizi.add(populateService(tmp.getJSONObject(i)));
                     }
+                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.progress_service);
+                    pr.setVisibility(View.GONE);
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
@@ -185,6 +177,9 @@ public class YourService extends AppCompatActivity {
                 Toast.makeText(YourService.this, "Non ci sono servizi", Toast.LENGTH_SHORT).show();
             }
         }, new HashMap<>());
+    }
+    public void setRicorrentiServizi(){
+
     }
 
     @Override
@@ -226,16 +221,30 @@ public class YourService extends AppCompatActivity {
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             Utilities.myService service = mData.get(position);
             holder.btn.setText(service.nome);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //todo mettere dettaglio servizio
-                    Intent servizio = new Intent(YourService.this, DettagliEvento.class);
-                    // System.out.println("intent: "+event.toString());
-                    servizio.putExtra("servizio", service.toString());
-                    startActivity(servizio);
-                }
-            });
+            if(service.recurrence){
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio ricorrente
+                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }else{
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.purple_500,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio
+                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }
+
 
         }
 
