@@ -1724,15 +1724,15 @@ router.get('/:id/services', async (req, res, next) => {
     case 'recurrent':
       Recurrence.aggregate([
         {
-          '$lookup': {
-            'from': 'RecurringActivity', 
-            'localField': 'activity_id', 
-            'foreignField': 'activity_id', 
-            'as': 'RecurringActivity'
-          }
-        }, {
           '$match': {
             'service': false
+          }
+        }, {
+          '$lookup': {
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
+            'as': 'RecurringActivity'
           }
         }
       ]).then(a => {
@@ -1744,9 +1744,9 @@ router.get('/:id/services', async (req, res, next) => {
       Recurrence.aggregate([
         {
           '$lookup': {
-            'from': 'RecurringActivity', 
-            'localField': 'activity_id', 
-            'foreignField': 'activity_id', 
+            'from': 'RecurringActivity',
+            'localField': 'activity_id',
+            'foreignField': 'activity_id',
             'as': 'RecurringActivity'
           }
         }, {
@@ -2780,7 +2780,7 @@ router.post('/:id/service', async (req, res, next) => {
   const newService = {
     group_id,
     name,
-    img,
+    img: (!img) ? 'https://picsum.photos/200' : img,
     description,
     location,
     pattern,
@@ -2799,6 +2799,8 @@ router.post('/:id/service', async (req, res, next) => {
     case 'pickup':
       newService.pickuplocation = pickuplocation
       break
+    default:
+      return res.status(400).send('Bad Request')
   }
 
   const newRecurrence = {
@@ -2845,6 +2847,13 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
     checkDates(r, days, res)
     // manca un pezzo di commento originale
+    if (service.pattern === 'car') {
+      Partecipant.findOne({ activity_id: service_id, service: true }).exec().then((p) => {
+        if (p.length >= parseInt(service.car_space)) {
+          return res.status(400).send('The car is full')
+        }
+      })
+    }
     Partecipant.findOne({ partecipant_id: userId, activity_id: service_id, service: true }).exec().then((p) => {
       if (!p) {
         const newPartecipant = {
@@ -2912,6 +2921,37 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     })
   }
 })
+router.patch('/:id/service/:serviceId', async (req, res, next) => {
+  let userId = req.user_id
+  let group_id = req.params.id
+
+  if (!userId) return res.status(401).send('Not authenticated')
+
+  let service_id = req.params.serviceId
+  if (!service_id) return res.status(400).send('Bad Request')
+
+  const group = await Group.findOne({ group_id: group_id })
+  const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+
+  if (!group) return res.status(400).send('Group not found')
+  if (!service) return res.status(400).send('Service not found')
+
+  const { name, description, location, img } = req.body
+
+  const newService = {
+    name,
+    img: (!img) ? 'https://picsum.photos/200' : img,
+    description,
+    location
+  }
+  try {
+    Service.updateOne({ service_id: service_id }, newService).exec().then(() => {
+      return res.status(200).send('Service updated')
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 router.get('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
@@ -2944,6 +2984,7 @@ router.get('/:id/service/:serviceId', async (req, res, next) => {
     pickuplocation: service.pickuplocation,
     img: service.img,
     nPart: partecipants.length,
+    type: recurrance.type,
     start_date: recurrance.start_date,
     end_date: recurrance.end_date,
     recurrence: service.recurrence
@@ -2957,6 +2998,8 @@ router.get('/:id/service', async (req, res, next) => {
   let partecipant = req.query.partecipant
   let creator = req.query.creator
   let time = req.query.time
+  let pattern = req.query.pattern
+  let recurrent = req.query.recurrent
 
   let resList = []
   let emptyList = []
@@ -2985,6 +3028,7 @@ router.get('/:id/service', async (req, res, next) => {
         pickuplocation: service.pickuplocation,
         img: service.img,
         nPart: partecipants.length,
+        type: recurrance.type,
         start_date: recurrance.start_date,
         end_date: recurrance.end_date,
         recurrence: service.recurrence
@@ -2997,28 +3041,15 @@ router.get('/:id/service', async (req, res, next) => {
   Promise.resolve())
 
   // controllare il merde delle varie liste ritornate
-  if (!partecipant && !creator && !time) {
+  if (!partecipant && !creator && !time && !pattern) {
     resList = emptyList
   }
   if (creator === 'me') {
-    await (await Service.find({ owner_id: userId, group_id: group_id }).exec()).forEach((service) => {
-      let resService = {
-        service_id: service.service_id,
-        owner_id: service.owner_id,
-        name: service.name,
-        description: service.description,
-        location: service.location,
-        pattern: service.pattern,
-        car_space: service.car_space,
-        lend_obj: service.lend_obj,
-        lend_time: service.lend_time,
-        pickuplocation: service.pickuplocation,
-        img: service.img,
-        nPart: 4,
-        recurrence: service.recurrence
-      }
-      resList.push(resService)
+    let creatorList = []
+    emptyList.forEach((service) => {
+      if (service.owner_id === userId) creatorList.push(service)
     })
+    resList = creatorList
   }
   if (!creator) {
     resList = emptyList
@@ -3032,27 +3063,87 @@ router.get('/:id/service', async (req, res, next) => {
     })
     resList = partecipantList
   }
-  if (time === 'expired') {
+
+  // PATTERN FILTER
+  if (pattern === 'car') {
     // ancora da implementare
-    if (partecipant === 'me' || creator === 'me') {
-      // uso resList
-    } else {
-      resList = emptyList
-      // comincio a lavorare
-    }
-    // usare la lista disponibile
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'car' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
   }
-  if (time === 'next') {
+  if (pattern === 'lend') {
     // ancora da implementare
-    if (partecipant === 'me' || creator === 'me') {
-      // uso resList
-    } else {
-      resList = emptyList
-      // comincio a lavorare
-    }
-    // usare la lista disponibile
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'lend' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
+  }
+  if (pattern === 'pickup') {
+    // ancora da implementare
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'pickup' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
+  }
+  if (recurrent === 'true') {
+    let recurrentList = []
+    emptyList.forEach((service) => {
+      if (service.recurrence === true) recurrentList.push(service)
+    })
+    resList = recurrentList
+  }
+  if (recurrent === 'false') {
+    let recurrentList = []
+    emptyList.forEach((service) => {
+      if (service.recurrence === false) recurrentList.push(service)
+    })
+    resList = recurrentList
   }
 
+  // FILTER TIME
+  // CHECK THIS PART
+
+  if (time === 'expired') {
+    // ancora da implementare
+
+    let myList = []
+    resList.forEach((service) => {
+      let over = false
+      service.end_date.forEach((getDate) => {
+        const myDate = new Date(Date.now())
+        if ((new Date(getDate)) < myDate) {
+          over = true
+        }
+      })
+      if (over) {
+        myList.push(service)
+      }
+    })
+    resList = myList
+  }
+  if (time === 'next') {
+    let myList = []
+    resList.forEach((service) => {
+      let over = false
+      service.start_date.forEach((getDate) => {
+        const myDate = new Date(Date.now())
+        if ((new Date(getDate)) >= myDate) {
+          over = true
+        }
+      })
+      if (over) {
+        myList.push(service)
+      }
+    })
+    resList = myList
+  }
   return res.status(200).send(resList)
 })
 

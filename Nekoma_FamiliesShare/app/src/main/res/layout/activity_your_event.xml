@@ -28,7 +28,7 @@
             android:id="@+id/eventi_progress"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/eventi_pr"
@@ -76,13 +76,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="scaduti" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:id="@+id/ricorrenti_id"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scrollbarSize="200dp"
-                        android:text="ricorrenti" />
 
                 </com.google.android.material.tabs.TabLayout>
             </LinearLayout>

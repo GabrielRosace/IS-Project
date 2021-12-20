@@ -33,6 +33,16 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_creazione_evento_ricorrente);
+
+        //necessario per tornare alla schermata precedente
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         labelSelect = new ArrayList<>();
         String id_group = Utilities.getPrefs(this).getString("group", "");
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
@@ -105,15 +115,5 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                 startActivity(i);
             }
         });
-
-        //necessario per tornare alla schermata precedente
-        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
     }
-
 }
