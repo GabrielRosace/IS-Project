@@ -2772,7 +2772,7 @@ router.post('/:id/service', async (req, res, next) => {
   const newService = {
     group_id,
     name,
-    img,
+    img: (!img) ? 'https://picsum.photos/200' : img,
     description,
     location,
     pattern,
@@ -2791,6 +2791,8 @@ router.post('/:id/service', async (req, res, next) => {
     case 'pickup':
       newService.pickuplocation = pickuplocation
       break
+    default:
+      return res.status(400).send('Bad Request')
   }
 
   const newRecurrence = {
@@ -2936,6 +2938,7 @@ router.get('/:id/service/:serviceId', async (req, res, next) => {
     pickuplocation: service.pickuplocation,
     img: service.img,
     nPart: partecipants.length,
+    type:recurrance.type,
     start_date: recurrance.start_date,
     end_date: recurrance.end_date,
     recurrence: service.recurrence
@@ -2949,6 +2952,7 @@ router.get('/:id/service', async (req, res, next) => {
   let partecipant = req.query.partecipant
   let creator = req.query.creator
   let time = req.query.time
+  let pattern = req.query.pattern
 
   let resList = []
   let emptyList = []
@@ -2977,6 +2981,7 @@ router.get('/:id/service', async (req, res, next) => {
         pickuplocation: service.pickuplocation,
         img: service.img,
         nPart: partecipants.length,
+        type:recurrance.type,
         start_date: recurrance.start_date,
         end_date: recurrance.end_date,
         recurrence: service.recurrence
@@ -2989,7 +2994,7 @@ router.get('/:id/service', async (req, res, next) => {
   Promise.resolve())
 
   // controllare il merde delle varie liste ritornate
-  if (!partecipant && !creator && !time) {
+  if (!partecipant && !creator && !time && !pattern) {
     resList = emptyList
   }
   if (creator === 'me') {
@@ -3024,27 +3029,73 @@ router.get('/:id/service', async (req, res, next) => {
     })
     resList = partecipantList
   }
-  if (time === 'expired') {
+
+  // PATTERN FILTER
+  if (pattern === 'car') {
     // ancora da implementare
-    if (partecipant === 'me' || creator === 'me') {
-      // uso resList
-    } else {
-      resList = emptyList
-      // comincio a lavorare
-    }
-    // usare la lista disponibile
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'car' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
   }
-  if (time === 'next') {
+  if (pattern === 'lend') {
     // ancora da implementare
-    if (partecipant === 'me' || creator === 'me') {
-      // uso resList
-    } else {
-      resList = emptyList
-      // comincio a lavorare
-    }
-    // usare la lista disponibile
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'lend' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
+  }
+  if (pattern === 'pickup') {
+    // ancora da implementare
+    let patternList = []
+    let tmp = await Service.find({ group_id: group_id, pattern: 'pickup' })
+    resList.forEach((service) => {
+      if (tmp.find(x => x.service_id === service.service_id))patternList.push(service)
+    })
+    resList = patternList
   }
 
+  // FILTER TIME
+  // CHECK THIS PART
+
+  if (time === 'expired') {
+    // ancora da implementare
+
+    let myList = []
+    resList.forEach((service) => {
+      let over = false
+      service.end_date.forEach((getDate) => {
+        const myDate = new Date(Date.now())
+        if ((new Date(getDate)) < myDate) {
+          over = true
+        }
+      })
+      if (over) {
+        myList.push(service)
+      }
+    })
+    resList = myList
+  }
+  if (time === 'next') {
+    let myList = []
+    resList.forEach((service) => {
+      let over = false
+      service.start_date.forEach((getDate) => {
+        const myDate = new Date(Date.now())
+        if ((new Date(getDate)) >= myDate) {
+          over = true
+        }
+      })
+      if (over) {
+        myList.push(service)
+      }
+    })
+    resList = myList
+  }
   return res.status(200).send(resList)
 })
 
