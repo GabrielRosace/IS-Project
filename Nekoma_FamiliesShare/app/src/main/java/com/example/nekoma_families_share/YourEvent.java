@@ -125,7 +125,7 @@ public class YourEvent extends AppCompatActivity {
 
     // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
     public void getRecTuoiAttuali(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=not-expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services/creator?filterBy=not-expired", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -139,7 +139,21 @@ public class YourEvent extends AppCompatActivity {
     }
 
     public void getRecTuoiScaduti(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/creator?filterBy=expired", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    scaduti_eventi.add(new Utilities.myRecEvent(obj));
+                    this.getRecPartecipaScaduti();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+    public void getRecPartecipaScaduti(){
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/partecipant?filterBy=expired", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -153,7 +167,7 @@ public class YourEvent extends AppCompatActivity {
     }
 
     public void getRecTuoiPartecipa(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=not-expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/partecipant?filterBy=not-expired", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -477,6 +491,7 @@ public class YourEvent extends AppCompatActivity {
             View view = mInflater.inflate(R.layout.recycler_view_item_2, parent, false);
             return new MyRecyclerViewAdapter.ViewHolder(view);
         }
+
 
 
         @Override
