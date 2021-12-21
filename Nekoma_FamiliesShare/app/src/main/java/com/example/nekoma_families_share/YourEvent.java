@@ -125,7 +125,7 @@ public class YourEvent extends AppCompatActivity {
 
     // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
     public void getRecTuoiAttuali(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services/creator?filterBy=not-expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/"+id_group+"?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -139,7 +139,7 @@ public class YourEvent extends AppCompatActivity {
     }
 
     public void getRecTuoiScaduti(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/creator?filterBy=expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/"+id_group+"?expired=true", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -153,7 +153,7 @@ public class YourEvent extends AppCompatActivity {
         }, System.out::println, new HashMap<>());
     }
     public void getRecPartecipaScaduti(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/partecipant?filterBy=expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=true", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
@@ -167,11 +167,12 @@ public class YourEvent extends AppCompatActivity {
     }
 
     public void getRecTuoiPartecipa(){
-        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/recurringActivity/partecipant?filterBy=not-expired", response -> {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
+                    System.out.println(obj);
                     partecipi_eventi.add(new Utilities.myRecEvent(obj));
                 }
             } catch (JSONException e) {

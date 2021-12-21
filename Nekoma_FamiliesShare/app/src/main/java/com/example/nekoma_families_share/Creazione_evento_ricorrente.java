@@ -84,6 +84,7 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                 System.err.println(error.getMessage());
             }
         },new HashMap<>());
+
         Button b = (Button) findViewById(R.id.nextButton);
         b.setOnClickListener(new View.OnClickListener() {
             @Override

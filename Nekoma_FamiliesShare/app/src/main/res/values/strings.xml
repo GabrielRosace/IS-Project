@@ -70,6 +70,8 @@
     <string name="serviceStartDate">Data Inizio Servizio</string>
     <string name="serviceEndDate">Data Fine Servizio</string>
     <string name="serviceSelectDate">Seleziona una data</string>
+    <string name="serviceNofMonths">Numero di mesi</string>
+    <string name="serviceMonths">Date occorrenze</string>
     <string name="radioMon">Mon</string>
     <string name="radioTue">Tue</string>
     <string name="radioWen">Wen</string>
