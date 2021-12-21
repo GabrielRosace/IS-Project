@@ -16,10 +16,10 @@ const { newExportEmail } = require('../helper-functions/export-activity-data')
 
 // // TODO endpoint per avere eventi con lo le stesse label (stessi interessi)
 // // TODO modifica le query per la ricerca degli oggetti
-// TODO aggiunta e eliminazione label da evento
-// TODO endpoint per nPart
-// TODO modificare get eventi filter by label
-// TODO endpoint per dire se un utente partecipa o meno ad un evento -> bool
+// // TODO aggiunta e eliminazione label da evento
+// // TODO endpoint per nPart
+// // TODO modificare get eventi filter by label
+// // TODO endpoint per dire se un utente partecipa o meno ad un evento -> bool
 
 // Crea una nuova attività ricorrente
 // // TODO verificare che in caso di weekly e monthly i giorni siano rispettati
@@ -604,6 +604,77 @@ router.put('/:activity_id', (req, res, next) => {
   })
 })
 
+// Aggiunge un etichetta esistente ad un'attività esistente
+// ? Controllare se l'etichetta appartiene al gruppo dell'evento
+router.patch('/label/:activity_id', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let activity_id = req.params.activity_id
+  if(!activity_id) return res.status(400).send('Bad Request')
+
+  let label_id = req.body.label_id
+  if(!label_id) return res.status(400).send('Bad Request')
+
+  RecurringActivity.findOne({activity_id: activity_id}).exec().then(a => {
+    if(a){
+      Label.findOne({label_id: label_id}).exec().then(l => {
+        if(l){
+          a.labels.push(l.label_id)
+          a.save().then(() => {
+            return res.status(200).send('Label added')
+          }).catch(error => {
+            console.log(error);
+            return res.status(400).send('Label not added')
+          })
+        }
+        else{
+          return res.status(400).send('Label does not exist')
+        }
+      })
+    }
+    else{
+      return res.status(400).send('Activity does not exist')
+    }
+  })
+})
+
+// Elimina un'etichetta associata ad un evento da quest'ultimo
+router.delete('/label/:activity_id/:label_id', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let activity_id = req.params.activity_id
+  if(!activity_id) return res.status(400).send('Bad Request')
+
+  let label_id = req.params.label_id
+  if(!label_id) return res.status(400).send('Bad Request')
+
+  // RecurringActivity.findOne({activity_id: activity_id}).exec().then(a => {
+  //   if(a){
+  //     console.log(a.labels);
+  //     for(let i = 0; i < a.labels.length; i++){
+  //       if(a.labels[i] == label_id)
+  //         delete a.labels[i]
+  //     }
+  //     console.log(a.labels);
+  //     a.save().then(() => {
+  //       return res.status(200).send('Label deleted')
+  //     }).catch(error => {
+  //       return res.status(400).send("Can't delete label")
+  //     })
+  //   }
+  //   else{
+  //     return res.status(400).send('Activity does not exist')
+  //   }
+  // })
+  RecurringActivity.updateOne({activity_id: activity_id}, {$pull: {labels: label_id}}).then(() => {
+    return res.status(200).send('Label deleted')
+  }).catch(error => {
+    return res.status(400).send("Can't delete label")
+  })
+})
+
 // Ritorna tutte le attività con la stessa label
 router.get('/:label_id', (req, res, next) => {
   let userId = req.user_id
@@ -612,23 +683,46 @@ router.get('/:label_id', (req, res, next) => {
   let labelId = req.params.label_id
   if (!labelId) return res.status(400).send('Bad request')
 
-  Label.aggregate([
+  RecurringActivity.aggregate([
     {
       '$match': {
-        'label_id': '61b375eed8b6a35c00000002'
+        'labels': label_id
       }
     }, {
       '$lookup': {
-        'from': 'RecurringActivity', 
-        'localField': 'label_id', 
-        'foreignField': 'labels', 
-        'as': 'RecurringActivity'
+        'from': 'Label', 
+        'localField': 'labels', 
+        'foreignField': 'label_id', 
+        'as': 'Label'
+      }
+    }, {
+      '$lookup': {
+        'from': 'Recurrence', 
+        'localField': 'activity_id', 
+        'foreignField': 'activity_id', 
+        'as': 'Recurrence'
       }
     }
-  ]).then(l => {
-    return res.status(200).json(l)
+  ]).then(a => {
+    return res.status(200).json(a)
+  }).catch(error => {
+    return res.status(400).send('Error')
   })
+})
 
+router.get('/isPartecipant/:activity_id', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let activity_id = req.params.activity_id
+  if (!activity_id) return res.status(400).send('Bad request')
+
+  Partecipant.findOne({activity_id: activity_id, partecipant_id: userId}).exec().then(p => {
+    if(p)
+      return res.status(200).send(true)
+    else
+      return res.status(200).send(false)
+  })
 })
 
 module.exports = router
