@@ -33,6 +33,16 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_creazione_evento_ricorrente);
+
+        //necessario per tornare alla schermata precedente
+        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         labelSelect = new ArrayList<>();
         String id_group = Utilities.getPrefs(this).getString("group", "");
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
@@ -77,44 +87,34 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
 
         Button b = (Button) findViewById(R.id.nextButton);
         b.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 Intent i = new Intent(Creazione_evento_ricorrente.this, Creazione_date_evetno_ricorrente.class);
-                 i.putExtra("name", ((EditText) (findViewById(R.id.inputEventNameRic))).getText().toString());
-                 i.putExtra("location", ((EditText) (findViewById(R.id.inputEventLcationRic))).getText().toString());
-                 i.putExtra("desc", ((EditText) (findViewById(R.id.inputDescEventRic))).getText().toString());
-                 Iterator it = labelSelect.iterator();
-                 String labels = "[";
-                 boolean control = true;
-                 while (it.hasNext()) {
-                     Button b = (Button) it.next();
-                     int buttonColor = ((ColorDrawable) b.getBackground()).getColor();
-                     if (buttonColor == Color.GREEN) {
-                         for (Creazione_evento.MyEtichette m : etichette) {
-                             if (m.getName().equals(b.getText().toString())) {
-                                 if (control) {
-                                     labels = labels = labels + m.getId();
-                                     control = false;
-                                 } else
-                                     labels = labels + "," + m.getId();
-                             }
-                         }
-                     }
-                 }
-
-                 labels = labels + "]";
-                 i.putExtra("lables", labels);
-                 startActivity(i);
-             }
-        });
-        //necessario per tornare alla schermata precedente
-        Toolbar t = (Toolbar) findViewById(R.id.toolbar_eve_rec);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                finish();
+            public void onClick(View view) {
+                Intent i = new Intent(Creazione_evento_ricorrente.this, Creazione_date_evetno_ricorrente.class);
+                i.putExtra("name",((EditText)(findViewById(R.id.inputEventNameRic))).getText().toString());
+                i.putExtra("location",((EditText)(findViewById(R.id.inputEventLcationRic))).getText().toString());
+                i.putExtra("desc",((EditText)(findViewById(R.id.inputDescEventRic))).getText().toString());
+                Iterator it = labelSelect.iterator();
+                String labels = "[";
+                boolean control = true;
+                while(it.hasNext()){
+                    Button b = (Button) it.next();
+                    int buttonColor = ((ColorDrawable) b.getBackground()).getColor();
+                    if(buttonColor == Color.GREEN) {
+                        for (Creazione_evento.MyEtichette m:etichette) {
+                            if(m.getName().equals(b.getText().toString())){
+                                if(control){
+                                    labels = labels = labels + m.getId();
+                                    control = false;
+                                }else
+                                    labels = labels + "," + m.getId();
+                            }
+                        }
+                    }
+                }
+                labels = labels + "]";
+                i.putExtra("lables", labels);
+                startActivity(i);
             }
         });
     }
 }
-

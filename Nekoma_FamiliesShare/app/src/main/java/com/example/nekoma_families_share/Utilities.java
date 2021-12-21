@@ -119,6 +119,7 @@ public class Utilities {
         return Utilities.getPrefs(context).getString("group", "");
     }
 
+
     public static class myService implements Situation {
         public final String service_id;
         public final String owner_id;
@@ -132,15 +133,13 @@ public class Utilities {
         public final String pickuplocation;
         public final String img;
         public final String nPart;
+        public final String recType;
+        public final String start_date;
+        public final String end_date;
         public final String recurrence;
 
-//        TODO
-//        public final String recType;
-//        public final String start_date;
-//        public final String end_date;
 
-
-        public myService(String service_id, String owner_id, String nome, String descrizione, String location, String pattern, String car_space, String lend_obj, String lend_time, String pickuplocation, String img, String nPart, String recurrence) {
+        public myService(String service_id, String owner_id, String nome, String descrizione, String location, String pattern, String car_space, String lend_obj, String lend_time, String pickuplocation, String img, String nPart, String recType, String start_date, String end_date, String recurrence) {
             this.service_id = service_id;
             this.owner_id = owner_id;
             this.nome = nome;
@@ -153,16 +152,19 @@ public class Utilities {
             this.pickuplocation = pickuplocation; // il posto in cui devi andare a prendere qualcosa per un terzo
             this.img = img;
             this.nPart = nPart;
+            this.recType = recType;
+            this.start_date = start_date;
+            this.end_date = end_date;
             this.recurrence = recurrence;
         }
 
         public myService(JSONObject obj) throws JSONException {
-            this("service_id"/*TODO*/, "owner_id"/*TODO*/, obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), "nPart"/*TODO*/, "Recurrence"/*TODO*/);
+            this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), obj.getString( "nPart"), obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
         }
 
         @Override
         public String toString() {
-            return service_id + '/' + owner_id + '/' + nome + '/' + descrizione + '/' + location + '/' + pattern + '/' + car_space + '/' + lend_obj + '/' + lend_time + '/' + pickuplocation + '/' + img + '/' + nPart + '/' + recurrence;
+            return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;
         }
 
         @Override
@@ -190,14 +192,11 @@ public class Utilities {
         public final String enddate;
         public final String labels;
         public final String owner_id;
-        public final String recurrence;
+        public final String recType;
+        public final String start_date;
+        public final String end_date;
 
-//        TODO
-//        public final String recType;
-//        public final String start_date;
-//        public final String end_date;
-
-        public myRecEvent(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id, String recurrence) {
+        public myRecEvent(String nome, String img, String event_id, int nPart, String descrizione, String enddate, String labels, String owner_id, String recType, String start_date, String end_date) {
             this.nome = nome;
             this.img = img;
             this.event_id = event_id;
@@ -206,11 +205,20 @@ public class Utilities {
             this.enddate = enddate;
             this.labels = labels;
             this.owner_id = owner_id;
-            this.recurrence = recurrence;
+            this.recType = recType;
+            this.start_date = start_date;
+            this.end_date = end_date;
         }
 
         public myRecEvent(JSONObject obj) throws JSONException {
             JSONObject recAct = null;
+//            System.out.println(obj);
+            if(obj.has("partecipant")){
+                this.nPart = obj.getJSONObject("partecipant").length();
+                obj = obj.getJSONArray("event").getJSONObject(0);
+            }else{
+                this.nPart = 10;
+            }
             if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
                 recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
                 this.nome = recAct.getString("name");
@@ -223,14 +231,15 @@ public class Utilities {
                 this.descrizione = "";
                 this.owner_id = "";
             }
+            this.recType = obj.getString("type");
+            this.start_date = obj.getString("start_date");
+            this.end_date = obj.getString("end_date");
             this.event_id = obj.getString("activity_id");
-            this.nPart = 10/*TODO*/;
-            this.enddate = "" /*TODO*/;
+            this.enddate = ".";
             this.labels = ""/*TODO*/;
-            this.recurrence = ""/*TODO*/;
         }
 
-        public myRecEvent(String s){
+        public myRecEvent(String s) {
             String[] parsed = s.split("\\$");
             this.nome = parsed[0];
             this.event_id = parsed[1];
@@ -240,14 +249,15 @@ public class Utilities {
             this.enddate = parsed[5];
             this.labels = parsed[6];
             this.owner_id = parsed[7];
-            this.recurrence = ""; //TODO
+            this.recType = parsed[8];
+            this.start_date = parsed[9];
+            this.end_date = parsed[10];
         }
 
         @Override
         public String toString() {
-            return nome + '$' + event_id + '$' + img + '$' + nPart + '$' + descrizione + '$' + enddate + '$' + labels + '$' + owner_id;
+            return nome + '$' + event_id + '$' + img + '$' + nPart + '$' + descrizione + '$' + enddate + '$' + labels + '$' + owner_id + '$' + recType + '$' + start_date + '$' + end_date;
         }
-
 
         @Override
         public String getName() {

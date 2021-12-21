@@ -131,6 +131,7 @@ public class YourService extends AppCompatActivity {
         }, new HashMap<>());
     }
 
+
     // Chiamata nel caso in cui il servizio in cui partecipi
     public void setPartecipi_servizi(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?partecipant=me&time=next", new Response.Listener<String>() {
@@ -220,16 +221,30 @@ public class YourService extends AppCompatActivity {
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             Utilities.myService service = mData.get(position);
             holder.btn.setText(service.nome);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //todo mettere dettaglio servizio
-                    Intent servizio = new Intent(YourService.this, DettagliEvento.class);
-                    // System.out.println("intent: "+event.toString());
-                    servizio.putExtra("servizio", service.toString());
-                    startActivity(servizio);
-                }
-            });
+            if(service.recurrence.equals("true")){
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio ricorrente
+                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }else{
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.purple_500,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio
+                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }
+
 
         }
 
