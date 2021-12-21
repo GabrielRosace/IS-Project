@@ -7,6 +7,7 @@ const Recurrence = require('../models/recurrence')
 const objectid = require('objectid')
 
 // TODO modificare come vengono passati i giorni dal client (con le [])
+// TODO aggiungere il campo nPart per dire quanti partecipanti partecipano ad un evento
 router.post('/', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }

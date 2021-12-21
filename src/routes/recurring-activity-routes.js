@@ -14,7 +14,12 @@ const Recurrence = require('../models/recurrence')
 const objectid = require('objectid')
 const { newExportEmail } = require('../helper-functions/export-activity-data')
 
-// TODO endpoint per avere eventi con lo le stesse label (stessi interessi)
+// // TODO endpoint per avere eventi con lo le stesse label (stessi interessi)
+// // TODO modifica le query per la ricerca degli oggetti
+// TODO aggiunta e eliminazione label da evento
+// TODO endpoint per nPart
+// TODO modificare get eventi filter by label
+// TODO endpoint per dire se un utente partecipa o meno ad un evento -> bool
 
 // Crea una nuova attività ricorrente
 // // TODO verificare che in caso di weekly e monthly i giorni siano rispettati
@@ -151,17 +156,20 @@ function dateValidator (type, start_date, end_date, res) {
 }
 
 // Ritorna tutti gli eventi ricorrenti a cui un utente partecipa, secondo alcune caratteristiche, ad esempio tutti, solo quelli scaduti o solo quelli futuri
-router.get('/partecipant', async (req, res, next) => {
+router.get('/partecipant/:group_id', async (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
   let expired = req.query.expired
 	if(!expired) return res.status(400).send('Bad request')
 
+  let group_id = req.params.group_id
+  if(!group_id) return res.status(400).send('Bad request')
+
 	let result = []
 	switch(expired){
 		case 'none':
-			let events = await Partecipant.aggregate([
+      Partecipant.aggregate([
         {
           '$match': {
             'service': false, 
@@ -175,104 +183,155 @@ router.get('/partecipant', async (req, res, next) => {
             'as': 'RecurringActivity'
           }
         }
-      ])      
-      for(let i = 0; i < events.length; i++){
-        let activityLabels = events[i].RecurringActivity[0].labels
-        for(let j = 0; j < activityLabels.length; j++){
-          let label = activityLabels[j]
-          await Label.findOne({label_id: label}).exec().then(l => {
-            activityLabels[j] = l
-          })
+      ]).then( async p => {
+        if(p){
+          for(let i = 0; i < p.length; i++){
+            let activityId = p[i].RecurringActivity[0].activity_id
+            await RecurringActivity.aggregate([
+              {
+                '$match': {
+                  'activity_id': activityId
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Label', 
+                  'localField': 'labels', 
+                  'foreignField': 'label_id', 
+                  'as': 'Label'
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Recurrence', 
+                  'localField': 'activity_id', 
+                  'foreignField': 'activity_id', 
+                  'as': 'Recurrence'
+                }
+              }
+            ]).then(a => {
+              let groupId = a[0].group_id
+              if(groupId == group_id){
+                p[i].RecurringActivity[0] = a
+                result.push(p[i])
+              }
+            })
+          }
         }
-        result.push(events[i])
-      }
-			return res.status(200).send(result)
+        return res.status(200).json(p)
+      }).catch(error => {
+        return res.status(400).send('Error')
+      })
 			break
 		case 'true':
-			await Partecipant.find({partecipant_id: userId}).exec().then( async p => {
-				if(p){
-					for(let i = 0; i < p.length; i++){
-						let event = await Recurrence.aggregate([
-							{
-								'$match': {
-									'activity_id': p[i].activity_id,
-									'service': false, 
-									'end_date': {
-										'$elemMatch': {
-											'$lt': new Date(Date.now())
-										}
-									}
-								}
-							}, {
-								'$lookup': {
-									'from': 'RecurringActivity', 
-									'localField': 'activity_id', 
-									'foreignField': 'activity_id', 
-									'as': 'RecurringActivity'
-								}
-							}
-						])
-            for(let j = 0; j < event.length; j++){
-              let activityLabels = event[j].RecurringActivity[0].labels
-              for(let k = 0; k < activityLabels.length; k++){
-                let label = activityLabels[k]
-                await Label.findOne({label_id: label}).exec().then(l => {
-                  activityLabels[k] = l
-                })
+      Partecipant.aggregate([
+        {
+          '$match': {
+            'service': false, 
+            'partecipant_id': userId
+          }
+        }, {
+          '$lookup': {
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'RecurringActivity'
+          }
+        }
+      ]).then(async p => {
+        if(p){
+          for(let i = 0; i < p.length; i++){
+            let activityId = p[i].RecurringActivity[0].activity_id
+            await RecurringActivity.aggregate([
+              {
+                '$match': {
+                  'activity_id': activityId
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Label', 
+                  'localField': 'labels', 
+                  'foreignField': 'label_id', 
+                  'as': 'Label'
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Recurrence', 
+                  'localField': 'activity_id', 
+                  'foreignField': 'activity_id', 
+                  'as': 'Recurrence'
+                }
               }
-              let partecipation = {
-                partecipant: p[i],
-                event: event
+            ]).then(a => {
+              let groupId = a[0].group_id
+              if(groupId == group_id){
+                let end_date = a[0].Recurrence[0].end_date
+                if(end_date[end_date.length - 1] < new Date(Date.now()))
+                  p[i].RecurringActivity[0] = a
+                  result.push(p[i])
               }
-              result.push(partecipation)
-            }
-					}
-				}
-			})
-			return res.status(400).json(result)
+            })
+          }
+        }
+        return res.status(200).json(result)
+      }).catch(error => {
+        console.log(error);
+        return res.status(400).send('Error')
+      })
 			break
 		case 'false':
-			await Partecipant.find({partecipant_id: userId}).exec().then( async p => {
-				if(p){
-					for(let i = 0; i < p.length; i++){
-						let event = await Recurrence.aggregate([
-							{
-								'$match': {
-									'activity_id': p[i].activity_id,
-									'service': false, 
-									'end_date': {
-										'$elemMatch': {
-											'$gt': new Date(Date.now())
-										}
-									}
-								}
-							}, {
-								'$lookup': {
-									'from': 'RecurringActivity', 
-									'localField': 'activity_id', 
-									'foreignField': 'activity_id', 
-									'as': 'RecurringActivity'
-								}
-							}
-						])
-            for(let j = 0; j < event.length; j++){
-              let activityLabels = event[j].RecurringActivity[0].labels
-              for(let k = 0; k < activityLabels.length; k++){
-                let label = activityLabels[k]
-                await Label.findOne({label_id: label}).exec().then(l => {
-                  activityLabels[k] = l
-                })
+      Partecipant.aggregate([
+        {
+          '$match': {
+            'service': false, 
+            'partecipant_id': userId
+          }
+        }, {
+          '$lookup': {
+            'from': 'RecurringActivity', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'RecurringActivity'
+          }
+        }
+      ]).then(async p => {
+        if(p){
+          for(let i = 0; i < p.length; i++){
+            let activityId = p[i].RecurringActivity[0].activity_id
+            await RecurringActivity.aggregate([
+              {
+                '$match': {
+                  'activity_id': activityId
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Label', 
+                  'localField': 'labels', 
+                  'foreignField': 'label_id', 
+                  'as': 'Label'
+                }
+              }, {
+                '$lookup': {
+                  'from': 'Recurrence', 
+                  'localField': 'activity_id', 
+                  'foreignField': 'activity_id', 
+                  'as': 'Recurrence'
+                }
               }
-              let partecipation = {
-                partecipant: p[i],
-                event: event
+            ]).then(a => {
+              let groupId = a[0].group_id
+              if(groupId == group_id){
+                let end_date = a[0].Recurrence[0].end_date
+                if(end_date[end_date.length - 1] > new Date(Date.now()))
+                  p[i].RecurringActivity[0] = a
+                  result.push(p[i])
               }
-              result.push(partecipation)
-            }
-					}
-				}
-			})
-			return res.status(200).json(result)
+            })
+          }
+        }
+        return res.status(200).json(result)
+      }).catch(error => {
+        console.log(error);
+        return res.status(400).send('Error')
+      })
 			break
 		default:
 			return res.status(400).send('Bad request')
@@ -285,12 +344,15 @@ router.get('/partecipant', async (req, res, next) => {
 })
 
 // Ritorna tutti gli eventi ricorrenti che sono stati creati da un utente: tutti, quelli scaduti o quelli futuri
-router.get('/creator', (req, res, next) => {
+router.get('/creator/:group_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
   let expired = req.query.expired
 	if(!expired) return res.status(400).send('Bad request')
+
+  let group_id = req.params.group_id
+  if(!group_id) return res.status(400).send('Bad request')
 
   let result = []
   switch(expired){
@@ -298,25 +360,8 @@ router.get('/creator', (req, res, next) => {
       RecurringActivity.aggregate([
         {
           '$match': {
-            'creator_id': userId
-          }
-        }, {
-          '$lookup': {
-            'from': 'Label', 
-            'localField': 'labels', 
-            'foreignField': 'label_id', 
-            'as': 'Label'
-          }
-        }
-      ]).then(a => {
-        return res.status(200).send(result)
-      })
-      break
-    case 'true':
-      RecurringActivity.aggregate([
-        {
-          '$match': {
-            'creator_id': userId
+            'creator_id': userId,
+            'group_id': group_id
           }
         }, {
           '$lookup': {
@@ -334,20 +379,50 @@ router.get('/creator', (req, res, next) => {
           }
         }
       ]).then(a => {
-        console.log(a);
+        return res.status(200).json(a)
+      }).catch(error => {
+        return res.status(400).send('Error')
+      })
+      break
+    case 'true':
+      RecurringActivity.aggregate([
+        {
+          '$match': {
+            'creator_id': userId,
+            'group_id': group_id
+          }
+        }, {
+          '$lookup': {
+            'from': 'Label', 
+            'localField': 'labels', 
+            'foreignField': 'label_id', 
+            'as': 'Label'
+          }
+        }, {
+          '$lookup': {
+            'from': 'Recurrence', 
+            'localField': 'activity_id', 
+            'foreignField': 'activity_id', 
+            'as': 'Recurrence'
+          }
+        }
+      ]).then(a => {
         for(let i = 0; i < a.length; i++){
           let end_dates = a[i].Recurrence.end_date
           if(end_dates[end_dates.length - 1] < new Date(Date.now()))
             result.push(a)
         }
         return res.status(200).json(result)
+      }).catch(error => {
+        return res.status(400).send('Error')
       })
       break
     case 'false':
       RecurringActivity.aggregate([
         {
           '$match': {
-            'creator_id': userId
+            'creator_id': userId,
+            'group_id': group_id
           }
         }, {
           '$lookup': {
@@ -371,11 +446,12 @@ router.get('/creator', (req, res, next) => {
             result.push(a)
         }
         return res.status(200).json(result)
+      }).catch(error => {
+        return res.status(400).send('Error')
       })
       break
     default:
       return res.status(400).send('Bad request')
-      break
   }
 })
 
