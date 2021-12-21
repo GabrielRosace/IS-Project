@@ -20,7 +20,7 @@ const { newExportEmail } = require('../helper-functions/export-activity-data')
 // // TODO verificare che in caso di weekly e monthly i giorni siano rispettati
 // // TODO group_name non serve
 // // TODO controllare che con una ricorrenza daily ci sia solo una start_date e una sola end_date
-router.post('/', (req, res, next) => {
+router.post('/api/recurringActivity', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
