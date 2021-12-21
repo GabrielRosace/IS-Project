@@ -72,7 +72,7 @@ router.post('/', (req, res, next) => {
       try {
         RecurringActivity.create(newActivity).then((a) => {
           Recurrence.create(newRecurrence).then(() => {
-            res.status(200).send('Activity created')
+            res.status(200).send(a.activity_id)
           }).catch((error) => {
             console.log(error)
             a.remove()
