@@ -76,7 +76,6 @@ public class Homepage extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Homepage.this, error.toString(), Toast.LENGTH_LONG).show();
-                    // System.err.println(error.getMessage());
                 }
             },new HashMap<>());
         }catch(JSONException e){
@@ -89,7 +88,7 @@ public class Homepage extends AppCompatActivity {
         return  prefs.getString("token","");
     }
 
-    // tutti i seguenti metodi sono necessari per spostarsi attraverso le interfacce
+    // tutti i seguenti metodi sono necessari per spostarsi attraverso le activity
 
     public void getBambini(View v){
         Intent bambino = new Intent(Homepage.this,ListaBambiniAmici.class);

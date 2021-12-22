@@ -197,7 +197,7 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
                   'from': 'Label', 
                   'localField': 'labels', 
                   'foreignField': 'label_id', 
-                  'as': 'Label'
+                  'as': 'labels'
                 }
               }, {
                 '$lookup': {
@@ -250,7 +250,7 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
                   'from': 'Label', 
                   'localField': 'labels', 
                   'foreignField': 'label_id', 
-                  'as': 'Label'
+                  'as': 'labels'
                 }
               }, {
                 '$lookup': {
@@ -264,9 +264,10 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
               let groupId = a[0].group_id
               if(groupId == group_id){
                 let end_date = a[0].Recurrence[0].end_date
-                if(end_date[end_date.length - 1] < new Date(Date.now()))
+                if(end_date[end_date.length - 1] < new Date(Date.now())){
                   p[i].RecurringActivity[0] = a
                   result.push(p[i])
+                }
               }
             })
           }
@@ -306,7 +307,7 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
                   'from': 'Label', 
                   'localField': 'labels', 
                   'foreignField': 'label_id', 
-                  'as': 'Label'
+                  'as': 'labels'
                 }
               }, {
                 '$lookup': {
@@ -368,7 +369,7 @@ router.get('/creator/:group_id', (req, res, next) => {
             'from': 'Label', 
             'localField': 'labels', 
             'foreignField': 'label_id', 
-            'as': 'Label'
+            'as': 'labels'
           }
         }, {
           '$lookup': {
@@ -396,7 +397,7 @@ router.get('/creator/:group_id', (req, res, next) => {
             'from': 'Label', 
             'localField': 'labels', 
             'foreignField': 'label_id', 
-            'as': 'Label'
+            'as': 'labels'
           }
         }, {
           '$lookup': {
@@ -408,12 +409,13 @@ router.get('/creator/:group_id', (req, res, next) => {
         }
       ]).then(a => {
         for(let i = 0; i < a.length; i++){
-          let end_dates = a[i].Recurrence.end_date
+          let end_dates = a[i].Recurrence[0].end_date
           if(end_dates[end_dates.length - 1] < new Date(Date.now()))
-            result.push(a)
+            result.push(a[i])
         }
         return res.status(200).json(result)
       }).catch(error => {
+        console.log(error);
         return res.status(400).send('Error')
       })
       break
@@ -429,7 +431,7 @@ router.get('/creator/:group_id', (req, res, next) => {
             'from': 'Label', 
             'localField': 'labels', 
             'foreignField': 'label_id', 
-            'as': 'Label'
+            'as': 'labels'
           }
         }, {
           '$lookup': {
@@ -441,12 +443,15 @@ router.get('/creator/:group_id', (req, res, next) => {
         }
       ]).then(a => {
         for(let i = 0; i < a.length; i++){
-          let end_dates = a[i].Recurrence.end_date
+          console.log(i);
+          let end_dates = a[i].Recurrence[0].end_date
           if(end_dates[end_dates.length - 1] >= new Date(Date.now()))
-            result.push(a)
+            result.push(a[i])
         }
+        // console.log(result);
         return res.status(200).json(result)
       }).catch(error => {
+        console.log();
         return res.status(400).send('Error')
       })
       break
