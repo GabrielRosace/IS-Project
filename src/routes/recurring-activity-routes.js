@@ -442,7 +442,7 @@ router.get('/creator/:group_id', (req, res, next) => {
         }
       ]).then(a => {
         for(let i = 0; i < a.length; i++){
-          let end_dates = a[i].Recurrence.end_date
+          let end_dates = a[i].Recurrence[0].end_date
           if(end_dates[end_dates.length - 1] >= new Date(Date.now()))
             result.push(a)
         }
