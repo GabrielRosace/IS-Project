@@ -264,9 +264,10 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
               let groupId = a[0].group_id
               if(groupId == group_id){
                 let end_date = a[0].Recurrence[0].end_date
-                if(end_date[end_date.length - 1] < new Date(Date.now()))
+                if(end_date[end_date.length - 1] < new Date(Date.now())){
                   p[i].RecurringActivity[0] = a
                   result.push(p[i])
+                }
               }
             })
           }
@@ -410,7 +411,7 @@ router.get('/creator/:group_id', (req, res, next) => {
         for(let i = 0; i < a.length; i++){
           let end_dates = a[i].Recurrence[0].end_date
           if(end_dates[end_dates.length - 1] < new Date(Date.now()))
-            result.push(a)
+            result.push(a[i])
         }
         return res.status(200).json(result)
       }).catch(error => {
