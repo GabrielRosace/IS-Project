@@ -447,6 +447,7 @@ router.get('/creator/:group_id', (req, res, next) => {
         }
         return res.status(200).json(result)
       }).catch(error => {
+        console.log(error)
         return res.status(400).send('Error')
       })
       break

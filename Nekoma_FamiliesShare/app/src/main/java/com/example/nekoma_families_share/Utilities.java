@@ -220,21 +220,30 @@ public class Utilities {
                 this.nPart = 10;
             }
             if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
-                recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
-                this.nome = recAct.getString("name");
-                this.img = recAct.getString("image_url");
-                this.descrizione = recAct.getString("description");
-                this.owner_id = recAct.getString("creator_id");
+                try{
+                    recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
+                }catch(JSONException e){
+                    recAct = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0);
+                }finally {
+                    this.nome = recAct.getString("name");
+                    this.img = recAct.getString("image_url");
+                    this.descrizione = recAct.getString("description");
+                    this.owner_id = recAct.getString("creator_id");
+                }
             } else {
                 this.nome = "";
                 this.img = "";
                 this.descrizione = "";
                 this.owner_id = "";
             }
+            this.event_id = obj.getString("activity_id");
+            if(obj.has("Recurrent")){
+                obj = obj.getJSONArray("Recurrent").getJSONObject(0);
+            }
             this.recType = obj.getString("type");
             this.start_date = obj.getString("start_date");
             this.end_date = obj.getString("end_date");
-            this.event_id = obj.getString("activity_id");
+
             this.enddate = ".";
             this.labels = ""/*TODO*/;
         }
