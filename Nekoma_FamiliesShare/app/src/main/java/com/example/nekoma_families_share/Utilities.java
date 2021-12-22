@@ -216,10 +216,10 @@ public class Utilities {
             if(obj.has("partecipant")){
                 this.nPart = obj.getJSONObject("partecipant").length();
                 obj = obj.getJSONArray("event").getJSONObject(0);
-            }else{
+            }else {
                 this.nPart = 10;
             }
-            if (!obj.getJSONArray("RecurringActivity").isNull(0)) {
+            if (obj.has("RecurringActivity") && !obj.getJSONArray("RecurringActivity").isNull(0)) {
                 try{
                     recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
                 }catch(JSONException e){
@@ -237,12 +237,23 @@ public class Utilities {
                 this.owner_id = "";
             }
             this.event_id = obj.getString("activity_id");
-            if(obj.has("Recurrent")){
-                obj = obj.getJSONArray("Recurrent").getJSONObject(0);
+            if(obj.has("RecurringActivity") && recAct.has("Recurrence")){
+                recAct = recAct.getJSONArray("Recurrence").getJSONObject(0);
+                this.recType = recAct.getString("type");
+                this.start_date = recAct.getString("start_date");
+                this.end_date = recAct.getString("end_date");
+            }else{
+                if(obj.has("type")){
+                    this.recType = obj.getString("type");
+                    this.start_date = obj.getString("start_date");
+                    this.end_date = obj.getString("end_date");
+                }else{
+                    this.recType = "";
+                    this.start_date = "";
+                    this.end_date = "";
+                }
+
             }
-            this.recType = obj.getString("type");
-            this.start_date = obj.getString("start_date");
-            this.end_date = obj.getString("end_date");
 
             this.enddate = ".";
             this.labels = ""/*TODO*/;
