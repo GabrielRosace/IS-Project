@@ -95,11 +95,9 @@ public class YourEvent extends AppCompatActivity {
                 }else if(tab.getPosition()==1){
                     // caso 2 - eventi a cui hai partecipato
                     addRecyclerView(partecipi_eventi);
-                }else if(tab.getPosition()==2){
+                }else{
                     // caso 3 - eventi che sono scaduti
                     addRecyclerView(scaduti_eventi);
-                }else{
-                    addRecyclerView(recurrent_event);
                 }
             }
 
@@ -205,8 +203,9 @@ public class YourEvent extends AppCompatActivity {
                 try{
                     JSONArray tmp = new JSONArray(response);
                     YourEvent.this.getRecTuoiAttuali();
-                    YourEvent.this.getRecTuoiPartecipa();
-                    YourEvent.this.getRecTuoiScaduti();
+                    //YourEvent.this.getRecTuoiPartecipa();
+                    //YourEvent.this.getRecTuoiScaduti();
+                    //YourEvent.this.getRecPartecipaScaduti();
                     for(int i=0;i<tmp.length();++i){
                         final String tmp_activity = tmp.getString(i);
                         String id_activity= new JSONObject(tmp.getString(i)).getString("activity_id");
