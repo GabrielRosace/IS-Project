@@ -91,7 +91,7 @@
                     android:text="Crea" />
 
                 <TextView
-                    android:id="@+id/textView29"
+                    android:id="@+id/titleDay"
                     android:layout_width="150dp"
                     android:layout_height="41dp"
                     android:text="Crea Evento ricorrente" />
@@ -128,7 +128,7 @@
                     android:text="CREA" />
 
                 <TextView
-                    android:id="@+id/textView30"
+                    android:id="@+id/titleStartDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Crea servizio, normale o ricorrente" />
