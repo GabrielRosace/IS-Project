@@ -96,7 +96,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                     JSONObject tmp = new JSONObject(response);
                     System.out.print(tmp.toString());
                   //  map.put("activityId", tmp.getString("id"));
-                    Ut
+
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }

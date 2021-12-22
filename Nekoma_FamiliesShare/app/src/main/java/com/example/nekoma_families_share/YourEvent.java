@@ -128,8 +128,14 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/"+id_group+"?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
+                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = arr.getJSONObject(i);
+                    JSONObject obj;
+                    try{
+                        obj = arr.getJSONObject(i);
+                    }catch (JSONException e){
+                        obj = arr.getJSONArray(0).getJSONObject(i);
+                    }
                     tuoi_eventi.add(new Utilities.myRecEvent(obj));
                 }
             } catch (JSONException e) {
@@ -143,6 +149,7 @@ public class YourEvent extends AppCompatActivity {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
+                    System.out.println(response);
                     JSONObject obj = arr.getJSONObject(i);
                     scaduti_eventi.add(new Utilities.myRecEvent(obj));
                     this.getRecPartecipaScaduti();
@@ -156,8 +163,14 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=true", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
+                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = arr.getJSONObject(i);
+                    JSONObject obj;
+                    try{
+                        obj = arr.getJSONObject(i);
+                    }catch (JSONException e){
+                        obj = arr.getJSONArray(0).getJSONObject(i);
+                    }
                     scaduti_eventi.add(new Utilities.myRecEvent(obj));
                 }
             } catch (JSONException e) {
@@ -170,6 +183,7 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
+                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
                     System.out.println(obj);

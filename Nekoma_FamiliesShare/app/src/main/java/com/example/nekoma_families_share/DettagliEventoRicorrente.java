@@ -1,54 +1,72 @@
 package com.example.nekoma_families_share;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 public class DettagliEventoRicorrente extends AppCompatActivity {
 
-    private String extraData;
     private Utilities.myRecEvent evento;
 
-    private TextView name;
     private EditText descrizione;
-    private TextView nPart;
-    private Button btn;
-    private ImageView img;
-
-    private TextView recurr;
-
-    private boolean isCreator;
 
     public DatePickerDialog datePicker;
+    private boolean isCreator;
+
+    private Map<String, String> labels_in_a_group;
+
+    private ArrayList<String> eventLabels;
+    private Spinner spinner;
+    private ArrayAdapter dataSpinner;
+//    private List<String> labelsId = new ArrayList<>();
+    private List<String> selectedLabel;
+    private ArrayList<String> labelName;
+
+    private List<String> spinner_labelID = new ArrayList<>();
+    private List<String> spinner_labelName = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,16 +74,16 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         setContentView(R.layout.activity_dettagli_evento_ricorrente);
 
 
-        name = (TextView) findViewById(R.id.eventName);
-        descrizione = (EditText) findViewById(R.id.description);
-        nPart = (TextView) findViewById(R.id.nPart);
-        btn = (Button) findViewById(R.id.button);
-        img = (ImageView) findViewById(R.id.eventImage);
-        recurr = (TextView) findViewById(R.id.textView31);
+        labels_in_a_group = new HashMap<>();
+        eventLabels = new ArrayList<>();
 
-//        ricorrenza = (TextView)findViewById(R.id.ricorrenza);
-//        start_date = (TextView)findViewById(R.id.start_date);
-//        end_date = (TextView)findViewById(R.id.end_date);
+        TextView name = (TextView) findViewById(R.id.eventName);
+        descrizione = (EditText) findViewById(R.id.description);
+        TextView nPart = (TextView) findViewById(R.id.nPart);
+        Button btn = (Button) findViewById(R.id.button);
+        ImageView img = (ImageView) findViewById(R.id.eventImage);
+        TextView recurr = (TextView) findViewById(R.id.textView31);
+        spinner = (Spinner) findViewById(R.id.spinner);
 
 
         // Aggiunta dell'evento torna indietro nella toolbar
@@ -74,18 +92,30 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         Intent intent = getIntent();
         // Ottengo informazioni dall'activity precedente
-        extraData = intent.getStringExtra("evento");
+        String extraData = intent.getStringExtra("evento");
 
+        selectedLabel = new ArrayList<>();
 
         evento = new Utilities.myRecEvent(extraData);
 
         name.setText(evento.nome);
         descrizione.setText(evento.descrizione);
-        nPart.append(String.valueOf(evento.nPart));
 
-//        System.out.println(evento);
+        // Parsing delle etichette
+        String[] strings = evento.labels.substring(1, evento.labels.length() - 1).split(",");
+        for (String s : strings) {
+            eventLabels.add(s.substring(1, s.length() - 1));
+        }
+//        System.out.println("]]]]]] -> "+eventLabels);
 
 
+        // TODO Aggiunta della query per ottenere il numero di partecipanti
+        Utilities.httpRequest(this,Request.Method.GET, "/partecipant/"+evento.event_id, response -> {
+            nPart.append((String)response);
+        }, System.err::println, new HashMap<>());
+
+
+        // Aggiunta della descrizione riguardante la ricorrenza
         if (evento.recType.equals("daily")) {
             String start = evento.start_date.substring(2, 12);
             String end = evento.end_date.substring(2, 12);
@@ -179,6 +209,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         if (isCreator) {
             descrizione.setEnabled(true);
             btn.setText("Modifica");
+            findViewById(R.id.add_label).setVisibility(View.VISIBLE);
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -189,28 +220,108 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                     }, System.out::println, m);
                 }
             });
-        }else{
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openDatePicker(v);
+        } else {
+            Utilities.httpRequest(this,Request.Method.GET, "/recurringActivity/isPartecipant/"+evento.event_id, response -> {
+                if(response.equals("true")){
+                    btn.setText("Cancella part.");
+                    btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/partecipant/"+evento.event_id, response1 -> {
+                                Toast.makeText(DettagliEventoRicorrente.this, "Cancellata", Toast.LENGTH_SHORT).show();
+                                recreate();
+                            }, System.err::println, new HashMap<>());
+                        }
+                    });
+                }else{
+                    btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            openDatePicker(v);
+                        }
+                    });
                 }
-            });
+            }, System.err::println, new HashMap<>());
         }
 
 
-
         new ImageDownloader(img).execute(evento.img);
+
+        getLabelsInGroups();
+
+
+
+        // Aggiungi labels alla recycle view
+
     }
 
 
-    public void initDatePicker(){
+    // Aggiunta delle etichette all'evento
+    public void newLabel(View v) {
+        String id = spinner_labelID.get(spinner.getSelectedItemPosition());
+        selectedLabel.add(spinner_labelID.get(spinner.getSelectedItemPosition()));
+        String sel = (String) spinner.getSelectedItem();
+        dataSpinner.remove(spinner.getSelectedItem());
+        spinner_labelID.remove(spinner.getSelectedItemPosition());
+
+        Map<String, String> data = new HashMap<>();
+        data.put("label_id", id);
+        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/recurringActivity/label/"+ evento.event_id, r -> {}, e -> {}, data);
+        labelName.add(sel);
+        addRecyclerView(labelName);
+    }
+
+    // Questo metodo prende tutte le etichette che sono disponibili in un gruppo e le salva in una mappa, inoltre aggiunge alla recycle view le etichette già assegnate
+    private void getLabelsInGroups() {
+//        labelsId = new ArrayList<>();
+        Utilities.httpRequest(this, Request.Method.GET, "/label/" + Utilities.getGroupId(this), response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                labelName = new ArrayList<>();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    labels_in_a_group.put(obj.getString("label_id"), obj.getString("name"));
+//                    labelsId.add(obj.getString("label_id"));
+                    if(eventLabels.contains(obj.getString("label_id"))){
+                        labelName.add(obj.getString("name"));
+                    }else{
+                        spinner_labelID.add(obj.getString("label_id"));
+                        spinner_labelName.add(obj.getString("name"));
+                    }
+                }
+                addRecyclerView(labelName);
+
+
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                dataSpinner = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item);
+                dataSpinner.addAll(spinner_labelName);
+                dataSpinner.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                spinner.setAdapter(dataSpinner);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.err::println, new HashMap<>());
+    }
+
+
+    public void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                month = month+1;
-                String date = year+"-"+month+"-"+dayOfMonth;
-                Map<String,String> m = new HashMap<>();
+                month = month + 1;
+                String date = year + "-" + month + "-" + dayOfMonth;
+                Map<String, String> m = new HashMap<>();
                 m.put("activity_id", evento.event_id);
                 m.put("days", date);
                 Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.POST, "/partecipant", response -> {
@@ -229,11 +340,11 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        datePicker = new DatePickerDialog(this,dateListener,year,month,day);
+        datePicker = new DatePickerDialog(this, dateListener, year, month, day);
     }
 
 
-    public void openDatePicker(View v){
+    public void openDatePicker(View v) {
         datePicker.show();
     }
 
@@ -309,5 +420,79 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         return firstMonth;
     }
 
+
+    // Aggiunta dei dati nella recycle view
+    private void addRecyclerView(List<String> list) {
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_label);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DettagliEventoRicorrente.this);
+        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(DettagliEventoRicorrente.this, list);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(adapter);
+    }
+
+    // Classe per la gestione del recycle view, permette la visualizzazione delle etichette
+    private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
+
+        private List<String> label_list;
+        private LayoutInflater mInflater;
+
+        public MyRecyclerViewAdapter(Context context, List<String> label_list) {
+            this.label_list = label_list;
+            this.mInflater = LayoutInflater.from(context);
+        }
+
+        @NonNull
+        @Override
+        public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = mInflater.inflate(R.layout.recycler_view_item_event_labels, parent, false);
+            return new MyRecyclerViewAdapter.ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
+            final String item = label_list.get(position);
+
+            holder.label.setText(item);
+            if (isCreator) {
+                holder.btn.setVisibility(View.VISIBLE);
+            }
+            holder.btn.setText("Elimina");
+            holder.btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String label_id = labels_in_a_group.get(item);
+                    Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/label/" + evento.event_id + "/" + label_id, response -> {
+                        labelName.remove(item);
+                        addRecyclerView(labelName);
+                        spinner_labelID.add(label_id);
+                        spinner_labelName.add(item);
+                        dataSpinner.add(item);
+//                        dataSpinner.addAll(spinner_labelName);
+                        spinner.setAdapter(dataSpinner);
+                    }, error -> {
+                        Toast.makeText(DettagliEventoRicorrente.this, error.toString(), Toast.LENGTH_SHORT).show();
+                    }, new HashMap<>());
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return label_list.size();
+        }
+
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView label;
+            Button btn;
+
+            public ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                this.label = itemView.findViewById(R.id.label);
+                this.btn = itemView.findViewById(R.id.edit_label);
+            }
+        }
+
+    }
 
 }
