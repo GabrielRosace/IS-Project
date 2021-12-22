@@ -229,12 +229,15 @@ public class Utilities {
                     this.img = recAct.getString("image_url");
                     this.descrizione = recAct.getString("description");
                     this.owner_id = recAct.getString("creator_id");
+                    this.labels = recAct.getString("labels");
                 }
+            
             } else {
                 this.nome = "";
                 this.img = "";
                 this.descrizione = "";
                 this.owner_id = "";
+                this.labels = "";
             }
             this.event_id = obj.getString("activity_id");
             if(obj.has("RecurringActivity") && recAct.has("Recurrence")){
@@ -256,11 +259,26 @@ public class Utilities {
             }
 
             this.enddate = ".";
-            this.labels = ""/*TODO*/;
         }
 
         public myRecEvent(String s) {
+//            System.out.println("Eve:  " + s);
+
             String[] parsed = s.split("\\$");
+
+//            System.out.println("name " + parsed[0]);
+//            System.out.println("id " + parsed[1]);
+//            System.out.println("img " + parsed[2]);
+//            System.out.println("nPart " + parsed[3]);
+//            System.out.println("descrizione " + parsed[4]);
+//            System.out.println("enddate " + parsed[5]);
+//            System.out.println("labels " + parsed[6]);
+//            System.out.println("own_id " + parsed[7]);
+//            System.out.println("recType " + parsed[8]);
+//            System.out.println("start_date " + parsed[9]);
+//            System.out.println("end_date " + parsed[10]);
+
+
             this.nome = parsed[0];
             this.event_id = parsed[1];
             this.img = parsed[2];
