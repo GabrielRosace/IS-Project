@@ -274,7 +274,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 //    }
 
     // Classe per la gestione della recycle view
-    private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
+    public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Utilities.Situation> eventoList;
         private LayoutInflater mInflater;
