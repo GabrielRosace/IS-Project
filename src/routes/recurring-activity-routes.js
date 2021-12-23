@@ -44,7 +44,7 @@ router.post('/', (req, res, next) => {
       newActivity.activity_id = objectid()
       newActivity.creator_id = userId
       newActivity.status = false
-      newActivity.image_url = 'https://picsum.photos/200'
+      newActivity.image_url = req.body.image_url ? req.body.image_url : 'https://picsum.photos/200'
 
       let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
       let labels = []
