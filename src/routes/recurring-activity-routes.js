@@ -681,7 +681,7 @@ router.delete('/label/:activity_id/:label_id', (req, res, next) => {
 })
 
 // Ritorna tutte le attività con la stessa label
-router.get('/:label_id', (req, res, next) => {
+router.get('/label/:label_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
@@ -691,7 +691,7 @@ router.get('/:label_id', (req, res, next) => {
   RecurringActivity.aggregate([
     {
       '$match': {
-        'labels': label_id
+        'labels': labelId
       }
     }, {
       '$lookup': {

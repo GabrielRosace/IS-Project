@@ -38,6 +38,7 @@ public class YourService extends AppCompatActivity {
     private String id_group;
     private String user_id;
 
+
     // le operazioni vengono effettuate nella onPostResume e non nella
     // onCreate in quanto , nel caso in cui l'utente acceda alla view successiva,
     // quando si ritorna nell'activity corrente,
@@ -47,7 +48,8 @@ public class YourService extends AppCompatActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
-
+        ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.progress_service);
+        pr.setVisibility(View.VISIBLE);
         tuoi_servizi = new ArrayList<>();
         partecipi_servizi = new ArrayList<>();
         scaduti_servizi = new ArrayList<>();
@@ -215,7 +217,6 @@ public class YourService extends AppCompatActivity {
 
     // recycle view, al momento dell'onClick sono stati distinti
     // servizi con ricorrenza oppure servizi senza ricorrenza
-    //todo x Alice RICORDARSI DI CAMBIARE L'INTENT AL SERVIZIO
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Utilities.myService> mData;
