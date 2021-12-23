@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -164,8 +165,7 @@ public class Utilities {
 
         @Override
         public String toString() {
-            return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;
-        }
+            return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;        }
 
         @Override
         public String getName() {
@@ -188,6 +188,17 @@ public class Utilities {
         public final String event_id;
         public final String img;
         public final int nPart;
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if(obj instanceof myRecEvent){
+                myRecEvent o = (myRecEvent) obj;
+                return this.event_id.equals(o.event_id);
+            }else{
+                return false;
+            }
+        }
+
         public final String descrizione;
         public final String enddate;
         public final String labels;
@@ -211,7 +222,7 @@ public class Utilities {
         }
 
         public myRecEvent(JSONObject obj) throws JSONException {
-            JSONObject recAct = null;
+/*            JSONObject recAct = null;
 //            System.out.println(obj);
             if(obj.has("partecipant")){
                 this.nPart = obj.getJSONObject("partecipant").length();
@@ -233,24 +244,28 @@ public class Utilities {
                 }
             
             } else {
-                this.nome = "";
-                this.img = "";
-                this.descrizione = "";
-                this.owner_id = "";
-                this.labels = "";
+                this.nome = obj.getString("name");
+                this.img = obj.getString("image_url");
+                this.descrizione = obj.getString("description");
+                this.owner_id = obj.getString("creator_id");
+                this.labels = obj.getString("labels");
             }
             this.event_id = obj.getString("activity_id");
             if(obj.has("RecurringActivity") && recAct.has("Recurrence")){
+                System.out.println("*********************lololololo");
                 recAct = recAct.getJSONArray("Recurrence").getJSONObject(0);
                 this.recType = recAct.getString("type");
                 this.start_date = recAct.getString("start_date");
                 this.end_date = recAct.getString("end_date");
             }else{
-                if(obj.has("type")){
-                    this.recType = obj.getString("type");
-                    this.start_date = obj.getString("start_date");
-                    this.end_date = obj.getString("end_date");
+                System.out.println("*********************lilililililiili");
+                if(recAct.has("type")){
+                    System.out.println("*********************hihihihihihihih");
+                    this.recType = recAct.getString("type");
+                    this.start_date = recAct.getString("start_date");
+                    this.end_date = recAct.getString("end_date");
                 }else{
+                    System.out.println("*********************aahhahahahhhahahahahahaah");
                     this.recType = "";
                     this.start_date = "";
                     this.end_date = "";
@@ -258,7 +273,48 @@ public class Utilities {
 
             }
 
-            this.enddate = ".";
+            this.enddate = ".";*/
+            JSONObject recAct = null;
+//            System.out.println(obj);
+            if(obj.has("partecipant")){
+                this.nPart = obj.getJSONObject("partecipant").length();
+                obj = obj.getJSONArray("event").getJSONObject(0);
+            }else{
+                this.nPart = 10;
+            }
+            if (obj.has("RecurringActivity") && !obj.getJSONArray("RecurringActivity").isNull(0)) {
+                recAct = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0);
+                this.nome = recAct.getString("name");
+                this.img = recAct.getString("image_url");
+                this.descrizione = recAct.getString("description");
+                this.owner_id = recAct.getString("creator_id");
+                this.labels = recAct.getString("labels");
+            } else {
+                this.nome = obj.getString("name");
+                this.img = obj.getString("image_url");
+                this.descrizione = obj.getString("description");
+                this.owner_id = obj.getString("creator_id");
+                this.labels = obj.getString("labels");
+            }
+            if(obj.has("Recurrence")){
+                this.recType = obj.getJSONArray("Recurrence").getJSONObject(0).getString("type");
+                this.start_date = obj.getJSONArray("Recurrence").getJSONObject(0).getString("start_date");
+                this.end_date = obj.getJSONArray("Recurrence").getJSONObject(0).getString("end_date");
+                this.event_id = obj.getJSONArray("Recurrence").getJSONObject(0).getString("activity_id");
+                this.enddate = ".";
+            }else if(obj.has("RecurringActivity")){
+                this.recType = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("type");
+                this.start_date = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("start_date");
+                this.end_date = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("end_date");
+                this.event_id = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("activity_id");
+                this.enddate = ".";
+            }else{
+                this.recType = obj.getString("type");
+                this.start_date = obj.getString("start_date");
+                this.end_date = obj.getString("end_date");
+                this.event_id = obj.getString("activity_id");
+                this.enddate = ".";
+            }
         }
 
         public myRecEvent(String s) {

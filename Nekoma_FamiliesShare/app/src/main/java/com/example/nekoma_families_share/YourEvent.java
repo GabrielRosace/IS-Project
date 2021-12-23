@@ -56,6 +56,10 @@ public class YourEvent extends AppCompatActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
+
+        ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
+        pr.setVisibility(View.VISIBLE);
+
         tuoi_eventi = new ArrayList<>();
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
@@ -95,11 +99,9 @@ public class YourEvent extends AppCompatActivity {
                 }else if(tab.getPosition()==1){
                     // caso 2 - eventi a cui hai partecipato
                     addRecyclerView(partecipi_eventi);
-                }else if(tab.getPosition()==2){
+                }else{
                     // caso 3 - eventi che sono scaduti
                     addRecyclerView(scaduti_eventi);
-                }else{
-                    addRecyclerView(recurrent_event);
                 }
             }
 
@@ -124,6 +126,7 @@ public class YourEvent extends AppCompatActivity {
 
 
     // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi creati dall'utente ma che non sono scaduti
     public void getRecTuoiAttuali(){
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/"+id_group+"?expired=false", response -> {
             try {
@@ -144,6 +147,8 @@ public class YourEvent extends AppCompatActivity {
         }, System.out::println, new HashMap<>());
     }
 
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi a cui l'utente partecipa ma che non sono scaduti
     public void getRecTuoiScaduti(){
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/"+id_group+"?expired=true", response -> {
             try {
@@ -159,6 +164,9 @@ public class YourEvent extends AppCompatActivity {
             }
         }, System.out::println, new HashMap<>());
     }
+
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi a cui l'utente partecipa ma che sono scaduti
     public void getRecPartecipaScaduti(){
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=true", response -> {
             try {
@@ -179,6 +187,8 @@ public class YourEvent extends AppCompatActivity {
         }, System.out::println, new HashMap<>());
     }
 
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi creati dall'utente ma che non sono scaduti
     public void getRecTuoiPartecipa(){
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/"+id_group+"?expired=false", response -> {
             try {
@@ -198,6 +208,16 @@ public class YourEvent extends AppCompatActivity {
 
     // questo metodo mi permette di popolare le 3 liste che riguardano
     // gli eventi con possibilità di definizione di etichette dei bambini
+    // i seguenti controlli sono stati eseguiti lato front-end per rispettare la retrcompatibilità con il database
+    // dell'applicazione originale
+    // se io sono il creatore posso avere tre casi :
+    //      - sono un repetition==true?  -> tuoi eventi
+    //      - altrimenti
+    //      - è un evento passato?
+    //          - controllo se la data è una stringa vuota da information oppure è prima della data di fine -> tuoi eventi
+    //          - altrimenti -> scaduti eventi
+    // altrimenti sono un partecipante?
+    //      - si, è finito ? -> si -> partecipi eventi -> altrimenti scaduti eventi
     public void getEvents(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
@@ -207,6 +227,7 @@ public class YourEvent extends AppCompatActivity {
                     YourEvent.this.getRecTuoiAttuali();
                     YourEvent.this.getRecTuoiPartecipa();
                     YourEvent.this.getRecTuoiScaduti();
+                    YourEvent.this.getRecPartecipaScaduti();
                     for(int i=0;i<tmp.length();++i){
                         final String tmp_activity = tmp.getString(i);
                         String id_activity= new JSONObject(tmp.getString(i)).getString("activity_id");
@@ -218,16 +239,8 @@ public class YourEvent extends AppCompatActivity {
 
                                     // caso in cui sono il creatore
                                     if(new JSONObject(tmp_activity).getString("creator_id").equals(user_id)){
-                                        //se io sono il creatore posso avere tre casi :
-                                        //      - sono un repetition==true?  -> tuoi eventi (fatto)
-                                        //      - altrimenti
-                                        //      - è un evento passato?
-                                        //          - controllo se la data è una stringa vuota da information oppure è prima della data di fine -> tuoi eventi (fatto)
-                                        //          - altrimenti -> scaduti eventi (fatto)
-                                        // altrimenti sono un partecipante?
-                                        //      - si, è finito ? -> si -> partecipi eventi -> altrimenti scaduti eventi
-                                        // System.out.println("primo caso");
                                         if(new JSONObject(tmp_activity).getBoolean("repetition")){
+
                                             String name= new JSONObject(tmp_activity).getString("name");
                                             String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                             String id_img = "nan";
@@ -252,8 +265,10 @@ public class YourEvent extends AppCompatActivity {
                                                 labels=",";
                                             }
                                             String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
                                             myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                             tuoi_eventi.add(eve);
+
                                         }else if(!new JSONObject(tmp_activity).getBoolean("repetition")){
 
                                             if(tmp.getString("end").equals("")){
@@ -281,14 +296,20 @@ public class YourEvent extends AppCompatActivity {
                                                     labels=",";
                                                 }
                                                 String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
                                                 myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                 tuoi_eventi.add(eve);
+
                                             }else{
+
+                                                //controllo le date
                                                 String date =tmp.getString("end");
                                                 Calendar cal = Calendar.getInstance();
                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
                                                 cal.setTime(sdf.parse(date));
+
                                                 if(Calendar.getInstance().before(cal)){
+
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
@@ -297,7 +318,7 @@ public class YourEvent extends AppCompatActivity {
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
 
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
@@ -314,9 +335,12 @@ public class YourEvent extends AppCompatActivity {
                                                         labels=",";
                                                     }
                                                     String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                     tuoi_eventi.add(eve);
+
                                                 }else{
+
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
@@ -325,7 +349,7 @@ public class YourEvent extends AppCompatActivity {
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
                                                     if(tmp_.has("labels")){
@@ -341,12 +365,14 @@ public class YourEvent extends AppCompatActivity {
                                                         labels=",";
                                                     }
                                                     String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                     scaduti_eventi.add(eve);
                                                 }
                                             }
                                         }
                                     }else{
+
                                         JSONArray  Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i=0;i<Part.length();++i){
@@ -355,8 +381,11 @@ public class YourEvent extends AppCompatActivity {
                                                 find = true;
                                             }
                                         }
+
                                         if(find==true){
-                                            if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
+
+                                            if(tmp.getString("end").equals("")){
+
                                                 String name= new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                 String id_img = "nan";
@@ -381,14 +410,19 @@ public class YourEvent extends AppCompatActivity {
                                                     labels=",";
                                                 }
                                                 String ownerid= new JSONObject(tmp_activity).getString("creator_id");
+
                                                 myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                 tuoi_eventi.add(eve);
+
                                             }else{
+
                                                 String date =tmp.getString("end");
                                                 Calendar cal = Calendar.getInstance();
                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
                                                 cal.setTime(sdf.parse(date));
+
                                                 if(Calendar.getInstance().before(cal)){
+
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
@@ -397,7 +431,7 @@ public class YourEvent extends AppCompatActivity {
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
                                                     if(tmp_.has("labels")){
@@ -413,9 +447,11 @@ public class YourEvent extends AppCompatActivity {
                                                         labels=",";
                                                     }
                                                     String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
                                                     partecipi_eventi.add(eve);
                                                 }else{
+
                                                     String name= new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
@@ -424,7 +460,7 @@ public class YourEvent extends AppCompatActivity {
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
                                                     if(tmp_.has("labels")){
@@ -440,18 +476,19 @@ public class YourEvent extends AppCompatActivity {
                                                         labels=",";
                                                     }
                                                     String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
                                                     myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
                                                     scaduti_eventi.add(eve);
+
                                                 }
                                             }
                                         }
                                     }
-
-                                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
-                                    pr.setVisibility(View.GONE);
                                     if(tuoi_eventi.size()>0){
                                         addRecyclerView(tuoi_eventi);
                                     }
+                                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
+                                    pr.setVisibility(View.GONE);
                                 } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
                                 }
@@ -461,7 +498,6 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                                // System.err.println(error.toString());
                             }
                         }, new HashMap<>());
                     }
@@ -488,7 +524,10 @@ public class YourEvent extends AppCompatActivity {
     }
 
 
-    // recycle view per gli eventi normali e per gli eventi ricorrenti in base a cosa viene passato nella add
+    // recycle view per gli eventi con etichette e per gli eventi ricorrenti
+    // grazie al principio di ereditarietà, i due oggetti: myEventi e Utilities.myRecEve estendendo
+    // entrambe Utilities.Situation, possono usare la stessa RecyclerView
+    // ciò non sarebbe stato possibile altrimenti
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Utilities.Situation> mData;
@@ -569,9 +608,9 @@ public class YourEvent extends AppCompatActivity {
         }
 
     }
-    // recycle view
 
-    // permette di usare gli eventi in modo più semplice
+    // La classe myEventi implementa Utilities.Situation
+    // è necessaria per fornire un codice scalabile
     private class  myEventi implements Utilities.Situation{
         public final String nome;
         public final String event_id;

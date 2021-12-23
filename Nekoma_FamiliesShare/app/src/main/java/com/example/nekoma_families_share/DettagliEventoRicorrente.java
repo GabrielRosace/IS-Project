@@ -460,7 +460,9 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String label_id = labels_in_a_group.get(item);
+                    List<String> ids = new ArrayList<String>(labels_in_a_group.values());
+                    String label_id = ids.get(ids.indexOf(item));
+//                    System.out.println(item);
                     Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/label/" + evento.event_id + "/" + label_id, response -> {
                         labelName.remove(item);
                         addRecyclerView(labelName);

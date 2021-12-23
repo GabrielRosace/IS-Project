@@ -38,6 +38,12 @@ public class YourService extends AppCompatActivity {
     private String id_group;
     private String user_id;
 
+    // le operazioni vengono effettuate nella onPostResume e non nella
+    // onCreate in quanto , nel caso in cui l'utente acceda alla view successiva,
+    // quando si ritorna nell'activity corrente,
+    // i componenti ri riaggiornano con le nuove informazioni nel caso ci siano
+    // quindi per esempio nel caso in cui l'utente aggiorni la sua partecipazione
+    // quando si ritornerà alla medesima schermata la sua visualizzazione sarà aggiornata
     @Override
     protected void onPostResume() {
         super.onPostResume();
@@ -107,7 +113,10 @@ public class YourService extends AppCompatActivity {
         return new Utilities.myService(response);
     }
 
-    // Chiamata nel caso in cui il servizio sia tuo
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi dell'utente che
+    // che non sono scaduti, quindi ancora validi.
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setmyService(){
         Utilities.httpRequest(this, Request.Method.GET,"/groups/"+this.id_group+ "/service?creator=me&time=next", new Response.Listener<String>() {
             @Override
@@ -132,7 +141,10 @@ public class YourService extends AppCompatActivity {
     }
 
 
-    // Chiamata nel caso in cui il servizio in cui partecipi
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi a cui l'utente partecipa l'utente che
+    // che non sono scaduti, quindi ancora validi
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setPartecipi_servizi(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?partecipant=me&time=next", new Response.Listener<String>() {
             @Override
@@ -155,7 +167,10 @@ public class YourService extends AppCompatActivity {
         }, new HashMap<>());
     }
 
-    // Chiamata nel caso in cui il servizio sia scaduto
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi a cui l'utente partecipa l'utente, e che ha creato che
+    // che non sono scaduti, quindi ancora validi
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setScaduti_servizi(){
         Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?creator=me&partecipant=me&time=expired", new Response.Listener<String>() {
             @Override
@@ -197,7 +212,10 @@ public class YourService extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    // recycle view
+
+    // recycle view, al momento dell'onClick sono stati distinti
+    // servizi con ricorrenza oppure servizi senza ricorrenza
+    //todo x Alice RICORDARSI DI CAMBIARE L'INTENT AL SERVIZIO
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
         private List<Utilities.myService> mData;
@@ -227,7 +245,7 @@ public class YourService extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         //todo mettere dettaglio servizio ricorrente
-                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        Intent servizio = new Intent(YourService.this, DettagliServizzio.class);
                         servizio.putExtra("servizio", service.toString());
                         startActivity(servizio);
                     }
@@ -238,7 +256,7 @@ public class YourService extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         //todo mettere dettaglio servizio
-                        Intent servizio = new Intent(YourService.this, DettagliEvento.class);
+                        Intent servizio = new Intent(YourService.this, DettagliServizzio.class);
                         servizio.putExtra("servizio", service.toString());
                         startActivity(servizio);
                     }
@@ -273,7 +291,5 @@ public class YourService extends AppCompatActivity {
         }
 
     }
-
-
 
 }
