@@ -59,7 +59,7 @@ router.post('/', (req, res, next) => {
 
       let start_date = startingDate(req.body.start_date)
       let end_date = endingDate(req.body.end_date)
-      if(!dateValidator(req.body.type, start_date, end_date, res)) return res.status(400).send('Incorrect days')
+      if(!dateValidator(req.body.type, start_date, end_date)) return res.status(400).send('Incorrect days')
 
       const newRecurrence = {
         type: req.body.type,
@@ -110,14 +110,14 @@ function endingDate (dateEnd) {
   return end_date
 }
 
-function dateValidator (type, start_date, end_date, res) {
-  if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
+function dateValidator (type, start_date, end_date) {
+  if (type != 'daily' && type != 'weekly' && type != 'monthly') return false
 
-  if (start_date.length != end_date.length) return false //res.status(400).send('Dates does not match')
+  if (start_date.length != end_date.length) return false
   switch (type) {
     case 'daily':
-      if (start_date.length > 1 || end_date.length > 1) return false //res.status(400).send('Incorrect dates')
-      if (start_date[0] > end_date[0]) return false //res.status(400).send('Dates does not match')
+      if (start_date.length > 1 || end_date.length > 1) return false
+      if (start_date[0] > end_date[0]) return false
       break
     case 'weekly':
       let start_tmp = new Date(start_date[0].toString())
@@ -128,29 +128,29 @@ function dateValidator (type, start_date, end_date, res) {
       let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
       end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
 
-      if (start_date[start_date.length - 1] > end_date[0]) return false //res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false 
 
       for (let i = 0; i < start_date.length; i++) {
-        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return false //res.status(400).send('Dates does not match')
+        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return false
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return false // res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return false //res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return false
+          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return false
         } else {
-          if (start_date[i] >= start_nextMonday) return false //res.status(400).send('Dates does not match')
-          if (end_date[i] >= end_nextMonday) return false //res.status(400).send('Dates does not match')
+          if (start_date[i] >= start_nextMonday) return false
+          if (end_date[i] >= end_nextMonday) return false
         }
       }
 
       break
 
     case 'monthly':
-      if (start_date[start_date.length - 1] > end_date[0]) return false //res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false
 
       for (let i = 0; i < end_date.length; i++) {
-        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false // res.status(400).send('Dates does not match')
+        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return false //res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return false // res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return false
+          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return false
         }
       }
       break
@@ -526,7 +526,7 @@ router.put('/:activity_id', (req, res, next) => {
 
         let end_date = endingDate(req.body.end_date)
 
-        if(!dateValidator(req.body.date_type, start_date, end_date, res)) return res.status(400).send('Incorrect days')
+        if(!dateValidator(req.body.date_type, start_date, end_date)) return res.status(400).send('Incorrect days')
 
         const newRecurrence = {
           type: req.body.date_type,
