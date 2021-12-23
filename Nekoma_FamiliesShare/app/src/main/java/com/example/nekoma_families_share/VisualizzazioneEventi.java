@@ -71,7 +71,24 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 } else if (checkedId == R.id.servPersona) {
                     getServices("pickup");
                 } else if (checkedId == R.id.consigliate) {
-                    addRecyclerView(getRecommendedActivities());
+                    List<Utilities.Situation> rec = getRecommendedActivities();
+                    for (String label:child_pref) {
+                        Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/recurringActivity/"+label, response -> {
+                            try{
+                                JSONArray arr = new JSONArray((String) response);
+                                for (int i = 0; i < arr.length(); i++) {
+                                    System.out.println(arr.getJSONObject(i)); //TODO non so se funzia
+                                    Utilities.myRecEvent eve = new Utilities.myRecEvent(arr.getJSONObject(i));
+                                    if(!rec.contains(eve)){
+                                        rec.add(eve);
+                                    }
+                                }
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }, System.err::println, new HashMap<>());
+                    }
+                    addRecyclerView(rec);
                 } else if (checkedId == R.id.servRicorrenti) {
                     getRecurring();
                 } else if (checkedId == R.id.prestito) {
