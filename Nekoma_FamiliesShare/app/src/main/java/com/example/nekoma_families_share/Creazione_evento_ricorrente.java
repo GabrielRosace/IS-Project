@@ -112,7 +112,7 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                     }
                 }
                 labels = labels + "]";
-                i.putExtra("lables", labels);
+                i.putExtra("labels", labels);
                 startActivity(i);
             }
         });
