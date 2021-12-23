@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 // // TODO color mettere un colore di default
 // // TODO sostituire image_id con image_url
-// TODO aggiungere label
+// // TODO aggiungere label
 // // TODO aggiungere id creatore
 const activitySchema = new mongoose.Schema({
   activity_id: {
