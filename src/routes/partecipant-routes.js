@@ -19,7 +19,7 @@ router.post('/', (req, res, next) => {
   RecurringActivity.findOne({ activity_id: req.body.activity_id }).exec().then((a) => {
     if (a) {
       Recurrence.findOne({ activity_id: a.activity_id }).exec().then((r) => {
-        if(!checkDates(r, days, res)) return res.status(400).send('Incorrect days')
+        if(!checkDates(r, days)) return res.status(400).send('Incorrect days')
         Partecipant.findOne({ partecipant_id: userId, activity_id: a.activity_id }).exec().then((p) => {
           if (!p) {
             const newPartecipant = {
@@ -57,13 +57,12 @@ function calculateDays (reqDays) {
   return days
 }
 
-function checkDates (r, days, res) {
+function checkDates (r, days) {
   let valid = false
   switch (r.type) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
         if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
-          // return res.status(400).send('Incorrect days')
           return false
         }
       }
@@ -118,7 +117,7 @@ router.patch('/:activity_id', (req, res, next) => {
     let days = calculateDays(req.body.days)
 
     Recurrence.findOne({ activity_id: req.params.activity_id }).exec().then((r) => {
-      if(!checkDates(r, days, res)) return res.status(400).send('Incorrect days')
+      if(!checkDates(r, days)) return res.status(400).send('Incorrect days')
       Partecipant.updateOne({ activity_id: r.activity_id, partecipant_id: userId }, { $set: { days: days } }).exec().then(() => {
         return res.status(200).send('Partecipation updated')
       })
