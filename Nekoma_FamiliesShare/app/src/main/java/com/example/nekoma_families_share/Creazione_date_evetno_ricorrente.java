@@ -56,7 +56,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+               finish();
             }
         });
         days = new ArrayList<>();
@@ -165,6 +165,10 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         map.put("type",arr[0]);
         map.put("start_date",arr[1]);
         map.put("end_date",arr[2]);
+        for (String s:
+             map.keySet()) {
+            System.out.println(map.get(s));
+        }
 
 
         Utilities.httpRequest(Creazione_date_evetno_ricorrente.this, Request.Method.POST, "/recurringActivity", new Response.Listener<String>() {
