@@ -691,7 +691,7 @@ router.get('/label/:label_id', (req, res, next) => {
   RecurringActivity.aggregate([
     {
       '$match': {
-        'labels': label_id
+        'labels': labelId
       }
     }, {
       '$lookup': {
