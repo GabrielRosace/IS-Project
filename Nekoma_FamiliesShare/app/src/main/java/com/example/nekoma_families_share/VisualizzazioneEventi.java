@@ -23,7 +23,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import org.json.JSONArray;
@@ -390,7 +389,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 super(itemView);
                 this.tv = itemView.findViewById(R.id.recycle_view_text);
                 this.btn = itemView.findViewById(R.id.recycle_view_btn);
-                this.img = itemView.findViewById(R.id.recycle_view_img);
+                this.img = itemView.findViewById(R.id.myrecycle_view_img);
             }
         }
     }
