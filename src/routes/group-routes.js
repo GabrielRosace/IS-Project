@@ -2892,7 +2892,7 @@ router.get('/:id/service', async (req, res, next) => {
     let myList = []
     resList.forEach((service) => {
       let over = false
-      service.end_date.forEach((getDate) => {
+      service.start_date.forEach((getDate) => {
         const myDate = new Date(Date.now())
         if ((new Date(getDate)) < myDate) {
           over = true
@@ -2908,7 +2908,7 @@ router.get('/:id/service', async (req, res, next) => {
     let myList = []
     resList.forEach((service) => {
       let over = false
-      service.start_date.forEach((getDate) => {
+      service.end_date.forEach((getDate) => {
         const myDate = new Date(Date.now())
         if ((new Date(getDate)) >= myDate) {
           over = true
