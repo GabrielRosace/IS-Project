@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -187,6 +188,17 @@ public class Utilities {
         public final String event_id;
         public final String img;
         public final int nPart;
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if(obj instanceof myRecEvent){
+                myRecEvent o = (myRecEvent) obj;
+                return this.event_id.equals(o.event_id);
+            }else{
+                return false;
+            }
+        }
+
         public final String descrizione;
         public final String enddate;
         public final String labels;
