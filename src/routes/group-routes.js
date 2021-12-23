@@ -2527,7 +2527,7 @@ router.post('/:id/service', async (req, res, next) => {
   let user_id = req.user_id
   let start_date = startingDate(req.body.start_date)
   let end_date = endingDate(req.body.end_date)
-  dateValidator(req.body.type, start_date, end_date, res)
+  if (!dateValidator(req.body.type, start_date, end_date)) return res.status(400).send('Incorrect days')
 
   const group = Group.findOne({ group_id: group_id })
   const member = await Member.findOne({
@@ -2614,7 +2614,7 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 
   // verify that the partecipantion is correct
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
-    checkDates(r, days, res)
+    if (!checkDates(r, days)) return res.status(400).send('Incorrect days')
     if (service.pattern === 'car') {
       Partecipant.findOne({ activity_id: service_id, service: true }).exec().then((p) => {
         if (p.length >= parseInt(service.car_space)) {
@@ -2686,8 +2686,7 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     let days = calculateDays(req.body.days)
 
     Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
-      checkDates(r, days, res)
-
+      if(!checkDates(r, days)) return res.status(400).send('Incorrect days')
       Partecipant.updateOne({ activity_id: r.activity_id, partecipant_id: userId, service: true }, { $set: { days: days } }).exec().then(() => {
         return res.status(200).send('Partecipation updated')
       })
@@ -2957,28 +2956,14 @@ function endingDate (dateEnd) {
 }
 
 // validate if the dates respect the daily-weekly-monthly pattern
-function dateValidator (type, start_date, end_date, res) {
-  if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
+function dateValidator (type, start_date, end_date) {
+  if (type != 'daily' && type != 'weekly' && type != 'monthly') return false // res.status(400).send('Incorrect type')
 
-  // let start_dateSplitted = dateStart.substring(1, dateStart.length-1).replace(/\s+/g, '')
-  // start_dateSplitted = start_dateSplitted.split(',')
-  // let start_date = []
-  // for(i = 0; i < start_dateSplitted.length; i++){
-  //     start_date.push(new Date(start_dateSplitted[i]))
-  // }
-
-  // let end_dateSplitted = dateEnd.substring(1, dateEnd.length-1).replace(/\s+/g, '')
-  // end_dateSplitted = end_dateSplitted.split(',')
-  // let end_date = []
-  // for(i = 0; i < end_dateSplitted.length; i++){
-  //     end_date.push(new Date(end_dateSplitted[i]))
-  // }
-
-  if (start_date.length != end_date.length) return res.status(400).send('Dates does not match')
+  if (start_date.length != end_date.length) return false // res.status(400).send('Dates does not match')
   switch (type) {
     case 'daily':
-      if (start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
-      if (start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
+      if (start_date.length > 1 || end_date.length > 1) return false // res.status(400).send('Incorrect dates')
+      if (start_date[0] > end_date[0]) return false // res.status(400).send('Dates does not match')
       break
     case 'weekly':
       let start_tmp = new Date(start_date[0].toString())
@@ -2989,33 +2974,34 @@ function dateValidator (type, start_date, end_date, res) {
       let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
       end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
 
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false // res.status(400).send('Incorrect dates')
 
       for (let i = 0; i < start_date.length; i++) {
-        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return false // res.status(400).send('Dates does not match')
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return false // res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return false // res.status(400).send('Dates does not match')
         } else {
-          if (start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] >= start_nextMonday) return false // res.status(400).send('Dates does not match')
+          if (end_date[i] >= end_nextMonday) return false // res.status(400).send('Dates does not match')
         }
       }
 
       break
 
     case 'monthly':
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false // res.status(400).send('Incorrect dates')
 
       for (let i = 0; i < end_date.length; i++) {
-        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false // res.status(400).send('Dates does not match')
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return false // res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return false // res.status(400).send('Dates does not match')
         }
       }
       break
   }
+  return true
 }
 
 // parse a input list in string format, and return a object list
@@ -3030,13 +3016,14 @@ function calculateDays (reqDays) {
 }
 
 // compare if daily-weekly-montly is correct
-function checkDates (r, days, res) {
+function checkDates (r, days) {
   let valid = false
   switch (r.type) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
         if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
-          return res.status(400).send(' D Incorrect days')
+          // return res.status(400).send('Incorrect days')
+          return false
         }
       }
       break
@@ -3046,13 +3033,13 @@ function checkDates (r, days, res) {
       for (let i = 0; i < days.length; i++) {
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) {
-            return res.status(400).send('W Incorrect days1')
+            return false
           }
           if (days[i].getDay() == r.start_date[j].getDay()) {
             valid = true
           }
         }
-        if (!valid) return res.status(400).send('W Incorrect days2')
+        if (!valid) return false
       }
       break
 
@@ -3063,12 +3050,13 @@ function checkDates (r, days, res) {
           if (days[i].getDate() == r.start_date[j].getDate()) {
             valid = true
           }
-          if (!valid) return res.status(400).send('M Incorrect days 1')
-          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return res.status(400).send('M Incorrect days 2')
+          if (!valid) return false
+          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return false
         }
       }
       break
   }
+  return true
 }
 
 module.exports = router
