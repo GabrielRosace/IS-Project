@@ -48,7 +48,7 @@ router.post('/', (req, res, next) => {
 })
 
 function calculateDays (reqDays) {
-  let daysSplitted = reqDays.substring(1, req.body.labels.length - 1).split(',')
+  let daysSplitted = reqDays.substring(1, reqDays.length - 1).split(',')
   let days = []
 
   for (let i = 0; i < daysSplitted.length; i++) {
