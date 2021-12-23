@@ -7,6 +7,8 @@ import android.app.DatePickerDialog;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.AdapterView;
@@ -152,6 +154,7 @@ public class NuovoServizio extends AppCompatActivity {
         serviceEndDate = findViewById(R.id.serviceEndDate);
         serviceEndDate.setVisibility(View.GONE);
         serviceMonthDate = findViewById(R.id.serviceMonthPicker);
+        serviceMonthDate.setEnabled(false);
         serviceMonthLabel = findViewById(R.id.monthPickerLabel);
         serviceMonthLabel.setVisibility(View.GONE);
         serviceMonthDate.setVisibility(View.GONE);
@@ -311,6 +314,27 @@ public class NuovoServizio extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        serviceNOfMonths.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(serviceNOfMonths.length()==0){
+                    serviceMonthDate.setEnabled(false);
+                }else{
+                    serviceMonthDate.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
 
             }
         });
