@@ -40,6 +40,7 @@ public class DettagliServizzio extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dettagli_servizzio);
+
         Toolbar t = (Toolbar) findViewById(R.id.toolbarService);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +48,7 @@ public class DettagliServizzio extends AppCompatActivity {
                 finish();
             }
         });
+
         String groupId = Utilities.getGroupId(DettagliServizzio.this);
         String extras = getIntent().getStringExtra("servizio");
         String[] data  = extras.split("\\$");
@@ -80,12 +82,15 @@ public class DettagliServizzio extends AppCompatActivity {
             lendTime.setVisibility(View.GONE);
             lendTimeT.setVisibility(View.GONE);
         }else if(data[5].equals("lend")){
+            if(data[15].equals("true")){
+                lendTime.setVisibility(View.VISIBLE);
+                lendTimeT.setVisibility(View.VISIBLE);
+                lendTime.setText(data[8]);
+            }
             forType.setText(data[7]);
             type.setText("lend");
             forTypeTitle.setText("Ogetto in prestito:");
-            lendTime.setVisibility(View.VISIBLE);
-            lendTimeT.setVisibility(View.VISIBLE);
-            lendTime.setText(data[8]);
+
         }else if(data[5].equals("pickup")){
             forType.setText(data[9]);
             forTypeTitle.setText("luogo di ritrovo:");
