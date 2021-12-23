@@ -126,7 +126,8 @@ router.patch('/:activity_id', (req, res, next) => {
 })
 
 // Ritorna il numero di partecipanti ad un evento
-router.get('/:activity_id', (req, res, next) => {
+// ! modificata
+router.get('/nPart/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
 
@@ -137,6 +138,19 @@ router.get('/:activity_id', (req, res, next) => {
     return res.status(200).send(p.length.toString())
   }).catch(error => {
     return res.status(400).send('Error')
+  })
+})
+
+router.get('/days/:activity_id', (req, res, next) => {
+  let userId = req.user_id
+  if (!userId) { return res.status(401).send('Not authenticated') }
+
+  let activity_id = req.params.activity_id
+  if (!activity_id) return res.status(400).send('Bad request')
+
+  Partecipant.findOne({activity_id: activity_id}).exec().then((p) => {
+    if(p) return res.status(200).send(p.days)
+    else return res.status(400).send('Activity does not exist')
   })
 })
 
