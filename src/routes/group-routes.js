@@ -1764,24 +1764,6 @@ router.get('/:id/services', async (req, res, next) => {
   }
 })
 
-router.get('/:id/partecipations', (req, res, next) => {
-  if (!req.user_id) return res.status(401).send('Not authenticated')
-
-  let filterBy = req.query.filterBy
-
-  switch (filterBy) {
-    case 'none':
-
-      break
-    case 'expired':
-      break
-    case 'not-expired':
-      break
-    default:
-      break
-  }
-})
-
 router.patch('/:id/activities/:activityId', async (req, res, next) => {
   if (!req.user_id) {
     return res.status(401).send('Not authenticated')

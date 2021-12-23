@@ -321,7 +321,7 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
               let groupId = a[0].group_id
               if(groupId == group_id){
                 let end_date = a[0].Recurrence[0].end_date
-                if(end_date[end_date.length - 1] > new Date(Date.now()))
+                if(end_date[end_date.length - 1] >= new Date(Date.now()))
                   p[i].RecurringActivity[0] = a
                   result.push(p[i])
               }
