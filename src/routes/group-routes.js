@@ -2523,7 +2523,6 @@ router.delete('/:id/service/:serviceId', async (req, res, next) => {
   if (!service_id) return res.status(400).send('Bad Request')
   if (!group) return res.status(400).send('Bad Request')
   if (!member) return res.status(401).send('Unauthorized')
-  if (!member.admin) return res.status(401).send('Unauthorized')
 
   try {
     const service_id = req.params.serviceId
@@ -2559,7 +2558,6 @@ router.post('/:id/service', async (req, res, next) => {
   if (!user_id) return res.status(401).send('Not authenticated')
   if (!group) return res.status(400).send('Bad Request')
   if (!member) return res.status(401).send('Unauthorized')
-  if (!member.admin) return res.status(401).send('Unauthorized')
 
   const { name, description, location, pattern, car_space, lend_obj, lend_time, pickuplocation, img, recurrence } = req.body
 
