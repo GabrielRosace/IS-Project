@@ -103,13 +103,12 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         // Parsing delle etichette
         String[] strings = evento.labels.substring(1, evento.labels.length() - 1).split(",");
-        for (String s : strings) {
-            eventLabels.add(s.substring(1, s.length() - 1));
+        if(!evento.labels.equals("[]")){
+            for (String s : strings) {
+                eventLabels.add(s.substring(1, s.length() - 1));
+            }
         }
-//        System.out.println("]]]]]] -> "+eventLabels);
-
-
-        // TODO Aggiunta della query per ottenere il numero di partecipanti
+        
         Utilities.httpRequest(this,Request.Method.GET, "/partecipant/"+evento.event_id, response -> {
             nPart.append((String)response);
         }, System.err::println, new HashMap<>());
