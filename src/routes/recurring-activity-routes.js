@@ -59,7 +59,7 @@ router.post('/', (req, res, next) => {
 
       let start_date = startingDate(req.body.start_date)
       let end_date = endingDate(req.body.end_date)
-      dateValidator(req.body.type, start_date, end_date, res)
+      if(!dateValidator(req.body.type, start_date, end_date, res)) return res.status(400).send('Incorrect days')
 
       const newRecurrence = {
         type: req.body.type,
@@ -144,17 +144,18 @@ function dateValidator (type, start_date, end_date, res) {
       break
 
     case 'monthly':
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false //res.status(400).send('Incorrect dates')
 
       for (let i = 0; i < end_date.length; i++) {
-        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false // res.status(400).send('Dates does not match')
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return false //res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return false // res.status(400).send('Dates does not match')
         }
       }
       break
   }
+  return true
 }
 
 // Ritorna tutti gli eventi ricorrenti a cui un utente partecipa, secondo alcune caratteristiche, ad esempio tutti, solo quelli scaduti o solo quelli futuri
