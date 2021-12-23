@@ -46,14 +46,16 @@ router.post('/', (req, res, next) => {
       newActivity.status = false
       newActivity.image_url = req.body.image_url ? req.body.image_url : 'https://picsum.photos/200'
 
-      let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
-      let labels = []
-      for(let i = 0; i < idLabels.length; i++){
-        await Label.findOne({label_id: idLabels[i]}).exec().then(l => {
-          labels.push(l.label_id)
-        })
+      if(req.body.labels){
+        let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
+        let labels = []
+        for(let i = 0; i < idLabels.length; i++){
+          await Label.findOne({label_id: idLabels[i]}).exec().then(l => {
+            labels.push(l.label_id)
+          })
+        }
+        newActivity.labels = labels
       }
-      newActivity.labels = labels
 
       let start_date = startingDate(req.body.start_date)
       let end_date = endingDate(req.body.end_date)
