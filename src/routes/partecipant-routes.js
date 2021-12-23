@@ -7,7 +7,7 @@ const Recurrence = require('../models/recurrence')
 const objectid = require('objectid')
 
 // TODO modificare come vengono passati i giorni dal client (con le [])
-// TODO aggiungere il campo nPart per dire quanti partecipanti partecipano ad un evento
+// // TODO aggiungere il campo nPart per dire quanti partecipanti partecipano ad un evento
 router.post('/', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -74,14 +74,13 @@ function checkDates (r, days, res) {
       for (let i = 0; i < days.length; i++) {
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) {
-            // return res.status(400).send('Incorrect days')
             return false
           }
           if (days[i].getDay() == r.start_date[j].getDay()) {
             valid = true
           }
         }
-        if (!valid) return false// res.status(400).send('Incorrect days')
+        if (!valid) return false
       }
       break
 
@@ -92,8 +91,8 @@ function checkDates (r, days, res) {
           if (days[i].getDate() == r.start_date[j].getDate()) {
             valid = true
           }
-          if (!valid) return false// res.status(400).send('Incorrect days')
-          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return false //res.status(400).send('Incorrect days')
+          if (!valid) return false
+          if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return false
         }
       }
       break

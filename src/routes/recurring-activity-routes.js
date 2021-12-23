@@ -46,7 +46,7 @@ router.post('/', (req, res, next) => {
       newActivity.status = false
       newActivity.image_url = req.body.image_url ? req.body.image_url : 'https://picsum.photos/200'
 
-      if(req.body.labels){
+      if(req.body.labels && req.body.labels != ''){
         let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
         let labels = []
         for(let i = 0; i < idLabels.length; i++){
@@ -113,11 +113,11 @@ function endingDate (dateEnd) {
 function dateValidator (type, start_date, end_date, res) {
   if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
 
-  if (start_date.length != end_date.length) return res.status(400).send('Dates does not match')
+  if (start_date.length != end_date.length) return false //res.status(400).send('Dates does not match')
   switch (type) {
     case 'daily':
-      if (start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
-      if (start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
+      if (start_date.length > 1 || end_date.length > 1) return false //res.status(400).send('Incorrect dates')
+      if (start_date[0] > end_date[0]) return false //res.status(400).send('Dates does not match')
       break
     case 'weekly':
       let start_tmp = new Date(start_date[0].toString())
@@ -128,16 +128,16 @@ function dateValidator (type, start_date, end_date, res) {
       let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
       end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
 
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false //res.status(400).send('Incorrect dates')
 
       for (let i = 0; i < start_date.length; i++) {
-        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return false //res.status(400).send('Dates does not match')
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return false // res.status(400).send('Dates does not match')
+          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return false //res.status(400).send('Dates does not match')
         } else {
-          if (start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] >= start_nextMonday) return false //res.status(400).send('Dates does not match')
+          if (end_date[i] >= end_nextMonday) return false //res.status(400).send('Dates does not match')
         }
       }
 
