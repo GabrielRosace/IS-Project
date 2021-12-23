@@ -135,7 +135,7 @@ public class DettagliServizzio extends AppCompatActivity {
                     HashMap<String,String> map = new HashMap();
                     map.put("activity_id", data[0]);
                     map.put("user_id",Utilities.getUserID(DettagliServizzio.this));
-                    Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE," /groups/"+groupId+"/service/"+data[0]+"/partecipate", response -> {
+                    Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+data[0]+"/partecipate", response -> {
                         finish();
                     }, System.err::println,map);
                 }

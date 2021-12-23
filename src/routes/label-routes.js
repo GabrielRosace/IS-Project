@@ -137,9 +137,6 @@ router.delete('/:label_id', async (req, res, next) => {
 			RecurringActivity.updateMany({group_id: g.group_id}, {$pull: {labels: {$in : [l.label_id]}}}).then((data) => {
 				console.log('Label deleted from recurring events');
 			})
-			Service.updateMany({group_id: g.group_id}, {$pull: {labels: {$in : [l.label_id]}}}).then((data) => {
-				console.log('Label deleted from services');
-			})
 		})
 	})
 

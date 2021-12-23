@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import org.json.JSONArray;
@@ -62,6 +63,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
         // Inizializzo i filtri per quanto riguarda la visualizzazione degli eventi
         ChipGroup chipGroup = (ChipGroup) findViewById(R.id.chipgroup);
+        chipGroup.check(R.id.attività);
 
         chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
@@ -73,11 +75,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 } else if (checkedId == R.id.consigliate) {
                     List<Utilities.Situation> rec = getRecommendedActivities();
                     for (String label:child_pref) {
-                        Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/recurringActivity/"+label, response -> {
+                        Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/recurringActivity/label/"+label, response -> {
                             try{
                                 JSONArray arr = new JSONArray((String) response);
                                 for (int i = 0; i < arr.length(); i++) {
-                                    System.out.println(arr.getJSONObject(i)); //TODO non so se funzia
                                     Utilities.myRecEvent eve = new Utilities.myRecEvent(arr.getJSONObject(i));
                                     if(!rec.contains(eve)){
                                         rec.add(eve);
@@ -136,8 +137,6 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                         }
                     }
                 }
-//                progress_layout.setVisibility(View.GONE);
-//                progress_bar.setVisibility(View.GONE);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -170,7 +169,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                         img = e.getString("image_id");
                     }
 
-                    activities.add(new Evento(e.getString("name"), img, e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels, labels_ids, e.getString("creator_id")));
+                    activities.add(new Evento(e.getString("name"), img, e.getString("activity_id"), 10, e.getString("description"), ".", labels, labels_ids, e.getString("creator_id")));
                 }
 
                 Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
@@ -334,12 +333,14 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                     }
                 });
             } else if (eve instanceof Utilities.myService) {
-//                TODO
-//                Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEventoRicorrente.class);
-//                evento.putExtra("servizio", eve.toString());
-//                startActivity(evento);
-
-//                Toast.makeText(VisualizzazioneEventi.this, "Chiedi ad alberto di farlo", Toast.LENGTH_SHORT).show();
+                holder.btn.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        Intent evento = new Intent(VisualizzazioneEventi.this, DettagliServizzio.class);
+                        evento.putExtra("servizio", eve.toString());
+                        startActivity(evento);
+                    }
+                });
             }
 
             // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
