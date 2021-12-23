@@ -77,7 +77,6 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                             try{
                                 JSONArray arr = new JSONArray((String) response);
                                 for (int i = 0; i < arr.length(); i++) {
-                                    System.out.println(arr.getJSONObject(i)); //TODO non so se funzia
                                     Utilities.myRecEvent eve = new Utilities.myRecEvent(arr.getJSONObject(i));
                                     if(!rec.contains(eve)){
                                         rec.add(eve);
