@@ -1171,9 +1171,9 @@ router.delete('/:id/activities/:activityId/label/:labelId', async (req, res, nex
   let groupId = req.params.id
   let activityId = req.params.activityId
   if (!groupId || !activityId) { return res.status(400).send('Bad Request') }
-  // console.log(userId);
+
   const group = await Group.findOne({ group_id: groupId }).exec()
-  // console.log(group)
+
   if (group) {
     const flabel = await Label.findOne({ label_id: label_id, group_id: groupId }).exec()
     if (!flabel) {
@@ -2280,8 +2280,6 @@ router.delete(
         calendarId: group.calendar_id,
         eventId: req.params.timeslotId
       })
-      console.log(summary)
-      console.log(parents)
       nh.deleteTimeslotNotification(user_id, { summary, parents: JSON.parse(parents) })
       res.status(200).send('Timeslot was deleted')
     } catch (error) {
@@ -2506,221 +2504,8 @@ router.delete(
     }
   }
 )
-/*
-router.post('/:id/service', async (req, res, next) => {
-  if (!req.user_id) {
-    return res.status(401).send('Not authenticated')
-  }
-  const user_id = req.user_id
-  const group_id = req.params.id
-  console.log(JSON.stringify(req.body))
-  try {
-    // eslint-disable-next-line no-unused-vars
-    const { servizio, events } = req.body
-    const member = await Member.findOne({
-      group_id,
-      user_id,
-      group_accepted: true,
-      user_accepted: true
-    })
-    if (!member) {
-      return res.status(401).send('Unauthorized')
-    }
-    if (!(servizio)) {
-      return res.status(400).send('Bad Request')
-    }
 
-    const servizio_id = objectid()
-    const image_id = objectid()
-    const image = {
-      image_id,
-      owner_type: 'user',
-      owner_id: user_id,
-      url: 'https://avatars.dicebear.com/api/adventurer/dinosauro.svg',
-      path: '/images/profiles/user_default_photo.png',
-      thumbnail_path: '/images/profiles/user_default_photo.png'
-    }
-    servizio.status = member.admin ? 'accepted' : 'pending'
-    servizio.servizio_id = servizio_id
-    const group = await Group.findOne({ group_id })
-    servizio.group_name = group.name
-    servizio.image_id = image_id
-    UNCOMMENT WHEN USE FRONT-END
-    events.forEach(event => { event.extendedProperties.shared.servizio_id = servizio_id })
-    await Promise.all(
-      events.map(event =>
-        calendar.events.insert({
-          calendarId: group.calendar_id,
-          resource: event
-        })
-      )
-    )
-    await Image.create(image)
-    await Servizio.create(servizio)
-    if (member.admin) {
-      await nh.newActivityNotification(group_id, user_id)
-    }
-    res.json({ status: servizio.status })
-  } catch (error) {
-    next(error)
-  }
-})
-
-router.delete('/:groupId/service/:servizioId', async (req, res, next) => {
-  if (!req.user_id) {
-    return res.status(401).send('Not authenticated')
-  }
-  try {
-    const group_id = req.params.groupId
-    const user_id = req.user_id
-    const member = await Member.findOne({
-      group_id,
-      user_id,
-      group_accepted: true,
-      user_accepted: true
-    })
-    if (!member) {
-      return res.status(401).send('Unauthorized')
-    }
-    if (!member.admin) {
-      return res.status(401).send('Unauthorized')
-    }
-    // eslint-disable-next-line no-unused-vars
-    const group = await Group.findOne({ group_id })
-    const servizio_id = req.params.servizioId
-    UNCOMMENT WHEN USE FRONT-END
-    const resp = await calendar.events.list({
-      calendarId: group.calendar_id,
-      sharedExtendedProperty: `servizioId=${servizio_id}`
-    })
-    const activityTimeslots = resp.data.items
-    await activityTimeslots.reduce(async (previous, event) => {
-      await previous
-      return calendar.events.delete({
-        eventId: event.id,
-        calendarId: group.calendar_id
-      })
-    }, Promise.resolve())
-
-    const servizio = await Servizio.findOneAndDelete({ servizio_id })
-
-    TO UNDERSTAND
-    await nh.deleteActivityNotification(user_id, activity.name, activityTimeslots)
-
-    console.log(servizio)
-    res.status(200).send('Servizio deleted')
-  } catch (error) {
-    next(error)
-  }
-})
-// get all the service of one group
-router.get('/:id/service', (req, res, next) => {
-  if (!req.user_id) {
-    return res.status(401).send('Not authenticated')
-  }
-  const group_id = req.params.id
-  const user_id = req.user_id
-  Member.findOne({
-    group_id,
-    user_id,
-    group_accepted: true,
-    user_accepted: true
-  })
-    .then(member => {
-      if (!member) {
-        return res.status(401).send('Unauthorized')
-      }
-      return Servizio.find({ group_id })
-        .sort({ createdAt: -1 })
-        .lean()
-        .exec()
-        .then(servizi => {
-          if (servizi.length === 0) {
-            return res.status(404).send('Group has no servizi')
-          }
-          res.json(servizi)
-        })
-    })
-    .catch(next)
-})
-
-// get one service of one group by the id of the service
-router.get('/:id/service/:servizioId', (req, res, next) => {
-  if (!req.user_id) {
-    return res.status(401).send('Not authenticated')
-  }
-  const group_id = req.params.id
-  const user_id = req.user_id
-  const servizio_id = req.params.servizioId
-  Member.findOne({
-    group_id,
-    user_id,
-    group_accepted: true,
-    user_accepted: true
-  })
-    .then(member => {
-      if (!member) {
-        return res.status(401).send('Unauthorized')
-      }
-      return Servizio.find({ group_id: group_id, servizio_id: servizio_id })
-        .sort({ createdAt: -1 })
-        .lean()
-        .exec()
-        .then(servizi => {
-          if (servizi.length === 0) {
-            return res.status(404).send('Group has no servizi')
-          }
-          res.json(servizi)
-        })
-    })
-    .catch(next)
-})
-
-// update a service by id
-router.patch('/:id/service/:servizioId', async (req, res, next) => {
-  if (!req.user_id) {
-    return res.status(401).send('Not authenticated')
-  }
-  const group_id = req.params.id
-  const user_id = req.user_id
-  try {
-    const servizio_id = req.params.servizioId
-    const servizioPatch = req.body
-    const member = await Member.findOne({
-      group_id,
-      user_id,
-      group_accepted: true,
-      user_accepted: true
-    })
-    const servizio = await Servizio.findOne({
-      servizio_id: req.params.servizioId
-    })
-    if (!member) {
-      return res.status(401).send('Unauthorized')
-    }
-    if (!(member.admin || servizio.creator_id === user_id)) {
-      return res.status(401).send('Unauthorized')
-    }
-    if (
-      !(
-        servizioPatch.name ||
-        servizioPatch.description ||
-        servizioPatch.status
-      )
-    ) {
-      return res.status(400).send('Bad Request')
-    }
-    await Servizio.updateOne({ servizio_id }, servizioPatch)
-    if (servizioPatch.status === 'accepted') {
-      await nh.newActivityNotification(group_id, servizio.creator_id)
-    }
-    res.status(200).send('Servizio was updated')
-  } catch (error) {
-    next(error)
-  }
-})
-*/
-
+// delete a service by id from a group
 router.delete('/:id/service/:serviceId', async (req, res, next) => {
   let group_id = req.params.id
   let service_id = req.params.serviceId
@@ -2755,6 +2540,7 @@ router.delete('/:id/service/:serviceId', async (req, res, next) => {
   }
 })
 
+// create a service with pattern
 router.post('/:id/service', async (req, res, next) => {
   let group_id = req.params.id
   let user_id = req.user_id
@@ -2827,6 +2613,7 @@ router.post('/:id/service', async (req, res, next) => {
   }
 })
 
+// make the user logged in partecipate to a service
 router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -2844,9 +2631,10 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 
   let days = calculateDays(req.body.days)
   if (days.length === 0) return res.status(400).send('Days not found')
+
+  // verify that the partecipantion is correct
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
     checkDates(r, days, res)
-    // manca un pezzo di commento originale
     if (service.pattern === 'car') {
       Partecipant.findOne({ activity_id: service_id, service: true }).exec().then((p) => {
         if (p.length >= parseInt(service.car_space)) {
@@ -2854,6 +2642,7 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
         }
       })
     }
+    // create the partecipation
     Partecipant.findOne({ partecipant_id: userId, activity_id: service_id, service: true }).exec().then((p) => {
       if (!p) {
         const newPartecipant = {
@@ -2876,6 +2665,8 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     })
   })
 })
+
+// delete partecipation from a service
 router.delete('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -2894,6 +2685,8 @@ router.delete('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   Partecipant.deleteOne({ activity_id: service_id, partecipant_id: userId, service: true }).exec()
   return res.status(200).send('Partecipation deleted')
 })
+
+// update the dates of a partecipation to a service
 router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -2921,6 +2714,8 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     })
   }
 })
+
+// update the service by his id
 router.patch('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -2953,6 +2748,7 @@ router.patch('/:id/service/:serviceId', async (req, res, next) => {
   }
 })
 
+// get a service by his id
 router.get('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -2966,7 +2762,6 @@ router.get('/:id/service/:serviceId', async (req, res, next) => {
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
   const partecipants = await Partecipant.find({ activity_id: service_id, service: true })
   const recurrance = await Recurrence.findOne({ activity_id: service_id, service: true })
-  console.log(recurrance)
 
   if (!group) return res.status(400).send('Group not found')
   if (!service) return res.status(400).send('Service not found')
@@ -2992,6 +2787,7 @@ router.get('/:id/service/:serviceId', async (req, res, next) => {
   return res.status(200).send(resService)
 })
 
+// get a list of service by some filter, if noone is selected, it take all the service froma group id
 router.get('/:id/service', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
@@ -3147,16 +2943,18 @@ router.get('/:id/service', async (req, res, next) => {
   return res.status(200).send(resList)
 })
 
-// FUNZIONI TOMMY, DA AGGIORNARE SE MODIFICATE
+// find all partecipant of a service
 async function findpartecipant (activity_id) {
   const partecipants = await Partecipant.find({ activity_id: activity_id, service: true })
   return partecipants
 }
+// find the dates of a service
 async function findrecurring (activity_id) {
   const recurrance = await Recurrence.findOne({ activity_id: activity_id, service: true })
   return recurrance
 }
 
+// parse the given list and return one that can be stored on DB
 function startingDate (dateStart) {
   let start_dateSplitted = dateStart.substring(1, dateStart.length - 1).replace(/\s+/g, '')
   start_dateSplitted = start_dateSplitted.split(',')
@@ -3167,6 +2965,7 @@ function startingDate (dateStart) {
   return start_date
 }
 
+// parse the given list and return one that can be stored on DB
 function endingDate (dateEnd) {
   let end_dateSplitted = dateEnd.substring(1, dateEnd.length - 1).replace(/\s+/g, '')
   end_dateSplitted = end_dateSplitted.split(',')
@@ -3177,6 +2976,7 @@ function endingDate (dateEnd) {
   return end_date
 }
 
+// validate if the dates respect the daily-weekly-monthly pattern
 function dateValidator (type, start_date, end_date, res) {
   if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
 
@@ -3238,6 +3038,7 @@ function dateValidator (type, start_date, end_date, res) {
   }
 }
 
+// parse a input list in string format, and return a object list
 function calculateDays (reqDays) {
   let daysSplitted = reqDays ? reqDays.split(',') : undefined
   let days = []
@@ -3248,6 +3049,7 @@ function calculateDays (reqDays) {
   return days
 }
 
+// compare if daily-weekly-montly is correct
 function checkDates (r, days, res) {
   let valid = false
   switch (r.type) {
