@@ -7,6 +7,8 @@ const Member = require('../models/member')
 const Child = require('../models/child')
 const Parent = require('../models/parent')
 const Activity = require('../models/activity')
+const RecurringActivity = require('../models/recurring-activity')
+const Service = require('../models/service')
 const objectid = require('objectid')
 
 // TODO quando viene eliminata un'etichetta eliminarla anche dagli eventi ricorrenti e dai servizi
@@ -131,6 +133,12 @@ router.delete('/:label_id', async (req, res, next) => {
 			})
 			Activity.updateMany({group_id : g.group_id}, { $pull : {labels : { $in : [l.label_id]}}}).then((data) => {
 				console.log('Label deleted from activities');
+			})
+			RecurringActivity.updateMany({group_id: g.group_id}, {$pull: {labels: {$in : [l.label_id]}}}).then((data) => {
+				console.log('Label deleted from recurring events');
+			})
+			Service.updateMany({group_id: g.group_id}, {$pull: {labels: {$in : [l.label_id]}}}).then((data) => {
+				console.log('Label deleted from services');
 			})
 		})
 	})
