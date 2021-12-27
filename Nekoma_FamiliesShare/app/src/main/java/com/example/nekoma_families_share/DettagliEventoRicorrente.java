@@ -22,12 +22,14 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,21 +54,25 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
     private Utilities.myRecEvent evento;
 
     private EditText descrizione;
+    private ImageView dejoin;
 
     public DatePickerDialog datePicker;
     private boolean isCreator;
+    private boolean isPartecipant;
 
     private Map<String, String> labels_in_a_group;
 
     private ArrayList<String> eventLabels;
     private Spinner spinner;
     private ArrayAdapter dataSpinner;
-//    private List<String> labelsId = new ArrayList<>();
+    private TextView yourJoin;
     private List<String> selectedLabel;
     private ArrayList<String> labelName;
 
     private List<String> spinner_labelID = new ArrayList<>();
     private List<String> spinner_labelName = new ArrayList<>();
+
+    private List<String> selectedDate = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +87,13 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         descrizione = (EditText) findViewById(R.id.description);
         TextView nPart = (TextView) findViewById(R.id.nPart);
         Button btn = (Button) findViewById(R.id.button);
+        FloatingActionButton addDate = (FloatingActionButton) findViewById(R.id.addDate);
         ImageView img = (ImageView) findViewById(R.id.eventImage);
         TextView recurr = (TextView) findViewById(R.id.textView31);
         spinner = (Spinner) findViewById(R.id.spinner);
+
+        yourJoin = (TextView) findViewById(R.id.yourJoin);
+        dejoin = (ImageView) findViewById(R.id.delete_action);
 
 
         // Aggiunta dell'evento torna indietro nella toolbar
@@ -103,14 +113,14 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         // Parsing delle etichette
         String[] strings = evento.labels.substring(1, evento.labels.length() - 1).split(",");
-        if(!evento.labels.equals("[]")){
+        if (!evento.labels.equals("[]")) {
             for (String s : strings) {
                 eventLabels.add(s.substring(1, s.length() - 1));
             }
         }
-        
-        Utilities.httpRequest(this,Request.Method.GET, "/partecipant/"+evento.event_id, response -> {
-            nPart.append((String)response);
+
+        Utilities.httpRequest(this, Request.Method.GET, "/partecipant/nPart/" + evento.event_id, response -> {
+            nPart.append((String) response);
         }, System.err::println, new HashMap<>());
 
 
@@ -207,7 +217,15 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         if (isCreator) {
             descrizione.setEnabled(true);
+            addDate.setVisibility(View.GONE);
             btn.setText("Modifica");
+            dejoin.setVisibility(View.VISIBLE);
+            dejoin.setOnClickListener(v -> {
+                Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/"+evento.event_id, response -> {
+                    Toast.makeText(DettagliEventoRicorrente.this, "Evento eliminato con successo", Toast.LENGTH_SHORT).show();
+                    recreate();
+                }, System.err::println, new HashMap<>());
+            });
             findViewById(R.id.add_label).setVisibility(View.VISIBLE);
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -220,26 +238,62 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                 }
             });
         } else {
-            Utilities.httpRequest(this,Request.Method.GET, "/recurringActivity/isPartecipant/"+evento.event_id, response -> {
-                if(response.equals("true")){
-                    btn.setText("Cancella part.");
-                    btn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/partecipant/"+evento.event_id, response1 -> {
-                                Toast.makeText(DettagliEventoRicorrente.this, "Cancellata", Toast.LENGTH_SHORT).show();
-                                recreate();
-                            }, System.err::println, new HashMap<>());
-                        }
+            Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/isPartecipant/" + evento.event_id, response -> {
+                isPartecipant = response.equals("true");
+
+                if (isPartecipant) {
+                    dejoin.setVisibility(View.VISIBLE);
+                    dejoin.setOnClickListener(v -> {
+                        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/partecipant/" + evento.event_id, response1 -> {
+                            Toast.makeText(DettagliEventoRicorrente.this, "Hai cancellato la tua partecipazione", Toast.LENGTH_SHORT).show();
+                            recreate();
+                        }, System.err::println, new HashMap<>());
                     });
+                    Utilities.httpRequest(DettagliEventoRicorrente.this,Request.Method.GET, "/partecipant/days/"+evento.event_id, success -> {
+                        String[] strings1 = ((String) success).substring(1,((String)success).length()-1).split(",");
+
+                        String date = "";
+                        for (String s:strings1) {
+                            s = s.substring(1,s.length()-1).split("T")[0];
+                            date += getDateFromEncoding(s) + ", ";
+                            selectedDate.add(s);
+                        }
+                        if(date.length()>0){
+                            yourJoin.append(" " + date.substring(0,date.length()-2));
+                        }
+                    }, System.err::println, new HashMap<>());
                 }else{
-                    btn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            openDatePicker(v);
-                        }
-                    });
+                    yourJoin.setText("Aggiungi delle date per partecipare anche tu!");
                 }
+
+                addDate.setOnClickListener(v -> openDatePicker(v));
+
+                btn.setOnClickListener(v -> {
+                    String toSend = "[";
+                    for (String s : selectedDate) {
+                        toSend += s + ",";
+                    }
+                    toSend = toSend.substring(0, toSend.length() - 1) + "]";
+
+                    Map<String, String> m = new HashMap<>();
+                    m.put("activity_id", evento.event_id);
+                    m.put("days", toSend);
+
+                    if (isPartecipant) {
+                        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/partecipant/"+evento.event_id, response1 -> {
+                            Toast.makeText(DettagliEventoRicorrente.this, "Dati aggiornati con successo", Toast.LENGTH_SHORT).show();
+                        }, error -> {
+                            Toast.makeText(DettagliEventoRicorrente.this, "Errore, aggiornamento non riuscito", Toast.LENGTH_SHORT).show();
+                        }, m);
+                    } else {
+                        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.POST, "/partecipant", response1 -> {
+                            Toast.makeText(DettagliEventoRicorrente.this, "Partipazione effettuata", Toast.LENGTH_SHORT).show();
+                            recreate();
+                        }, error -> {
+                            Toast.makeText(DettagliEventoRicorrente.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
+                        }, m);
+                    }
+                });
             }, System.err::println, new HashMap<>());
         }
 
@@ -248,9 +302,6 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         getLabelsInGroups();
 
-
-
-        // Aggiungi labels alla recycle view
 
     }
 
@@ -265,14 +316,15 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         Map<String, String> data = new HashMap<>();
         data.put("label_id", id);
-        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/recurringActivity/label/"+ evento.event_id, r -> {}, e -> {}, data);
+        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/recurringActivity/label/" + evento.event_id, r -> {
+        }, e -> {
+        }, data);
         labelName.add(sel);
         addRecyclerView(labelName);
     }
 
     // Questo metodo prende tutte le etichette che sono disponibili in un gruppo e le salva in una mappa, inoltre aggiunge alla recycle view le etichette già assegnate
     private void getLabelsInGroups() {
-//        labelsId = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/label/" + Utilities.getGroupId(this), response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
@@ -280,10 +332,9 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
                     labels_in_a_group.put(obj.getString("label_id"), obj.getString("name"));
-//                    labelsId.add(obj.getString("label_id"));
-                    if(eventLabels.contains(obj.getString("label_id"))){
+                    if (eventLabels.contains(obj.getString("label_id"))) {
                         labelName.add(obj.getString("name"));
-                    }else{
+                    } else {
                         spinner_labelID.add(obj.getString("label_id"));
                         spinner_labelName.add(obj.getString("name"));
                     }
@@ -320,20 +371,19 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 month = month + 1;
                 String date = year + "-" + month + "-" + dayOfMonth;
-                Map<String, String> m = new HashMap<>();
-                m.put("activity_id", evento.event_id);
-                m.put("days", date);
-                Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.POST, "/partecipant", response -> {
-                    Toast.makeText(DettagliEventoRicorrente.this, "Partipazione effettuata", Toast.LENGTH_SHORT).show();
-                    recreate();
-                }, response -> {
-                    Toast.makeText(DettagliEventoRicorrente.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
-                }, m);
+                if (selectedDate.contains(date)) {
+                    selectedDate.remove(date);
+                } else {
+                    selectedDate.add(date);
+                }
+
+                yourJoin.setText(getString(R.string.yourJoin));
+                for (String s : selectedDate) {
+                    yourJoin.append(" " + getDateFromEncoding(s));
+                }
             }
         };
         Calendar calendar = Calendar.getInstance();
-
-//        calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(startDate.getText().toString()));
 
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -342,6 +392,10 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         datePicker = new DatePickerDialog(this, dateListener, year, month, day);
     }
 
+    private String getDateFromEncoding(String date) {
+        String[] s = date.split("-");
+        return s[2] + "/" + s[1] + "/" + s[0];
+    }
 
     public void openDatePicker(View v) {
         datePicker.show();
@@ -456,24 +510,20 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                 holder.btn.setVisibility(View.VISIBLE);
             }
             holder.btn.setText("Elimina");
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    List<String> ids = new ArrayList<String>(labels_in_a_group.values());
-                    String label_id = ids.get(ids.indexOf(item));
+            holder.btn.setOnClickListener(v -> {
+                List<String> ids = new ArrayList<String>(labels_in_a_group.values());
+                String label_id = ids.get(ids.indexOf(item));
 //                    System.out.println(item);
-                    Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/label/" + evento.event_id + "/" + label_id, response -> {
-                        labelName.remove(item);
-                        addRecyclerView(labelName);
-                        spinner_labelID.add(label_id);
-                        spinner_labelName.add(item);
-                        dataSpinner.add(item);
-//                        dataSpinner.addAll(spinner_labelName);
-                        spinner.setAdapter(dataSpinner);
-                    }, error -> {
-                        Toast.makeText(DettagliEventoRicorrente.this, error.toString(), Toast.LENGTH_SHORT).show();
-                    }, new HashMap<>());
-                }
+                Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/label/" + evento.event_id + "/" + label_id, response -> {
+                    labelName.remove(item);
+                    addRecyclerView(labelName);
+                    spinner_labelID.add(label_id);
+                    spinner_labelName.add(item);
+                    dataSpinner.add(item);
+                    spinner.setAdapter(dataSpinner);
+                }, error -> {
+                    Toast.makeText(DettagliEventoRicorrente.this, error.toString(), Toast.LENGTH_SHORT).show();
+                }, new HashMap<>());
             });
         }
 
