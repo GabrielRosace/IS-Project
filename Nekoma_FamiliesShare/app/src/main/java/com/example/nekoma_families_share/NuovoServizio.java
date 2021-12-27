@@ -7,6 +7,9 @@ import android.app.DatePickerDialog;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +22,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 
@@ -45,28 +49,32 @@ public class NuovoServizio extends AppCompatActivity {
     private EditText serviceName;
     private EditText serviceDescription;
     private EditText serviceLocation;
-    private Spinner servicePattern;
+    private EditText serviceCarSpace;
+    private EditText serviceLendObj;
+    private EditText servicePickup;
+    private EditText serviceNOfMonths;
+
     private TextView serviceCarLabel;
     private TextView serviceLendObjLabel;
     private TextView serviceLendTimeLabel;
     private TextView servicePickupLabel;
-    private EditText serviceCarSpace;
-    private EditText serviceLendObj;
-    private EditText servicePickup;
-    private Button serviceLendTime;
-    private CheckBox serviceRecurrence;
-    private Spinner serviceType;
-    private Button serviceStartDate;
-    private Button serviceEndDate;
     private TextView serviceStartDateLabel;
     private TextView serviceEndDateLabel;
     private TextView serviceDaysLabel;
     private TextView serviceMonthLabel;
     private TextView serviceNOfMonthsLabel;
-    private EditText serviceNOfMonths;
-    private Button serviceMonthDate;
     private TextView serviceListofDates;
 
+    private Button serviceStartDate;
+    private Button serviceEndDate;
+    private Button serviceSave;
+    private Button serviceMonthDate;
+    private Button serviceLendTime;
+
+    private Spinner serviceType;
+    private Spinner servicePattern;
+
+    private CheckBox serviceRecurrence;
     private CheckBox checkMon;
     private CheckBox checkTue;
     private CheckBox checkWen;
@@ -75,10 +83,10 @@ public class NuovoServizio extends AppCompatActivity {
     private CheckBox checkSat;
     private CheckBox checkSun;
 
-    private List<String> startWeek;
-    private List<String> endWeek;
+    private List<String> startWeek = new ArrayList<>();
+    private List<String> endWeek = new ArrayList<>();
     private List<String> monthRec;
-    private List<String> monthEnd = new ArrayList<String>();
+    private List<String> monthEnd;
 
     private DatePickerDialog dataStartPicker;
     private DatePickerDialog dataEndPicker;
@@ -97,6 +105,8 @@ public class NuovoServizio extends AppCompatActivity {
                 finish();
             }
         });
+        //Save da inizializzare
+        serviceSave = findViewById(R.id.serviceSave);
         //Edit Text da inizializzare
         serviceImageUrl = findViewById(R.id.serviceImageUrl);
         serviceName = findViewById(R.id.serviceName);
@@ -108,7 +118,6 @@ public class NuovoServizio extends AppCompatActivity {
         serviceNOfMonthsLabel.setVisibility(View.GONE);
         serviceListofDates = findViewById(R.id.listOfDates);
         serviceListofDates.setVisibility(View.GONE);
-        serviceListofDates.setMovementMethod(new ScrollingMovementMethod());
         //CheckBox da inizializzare
         checkMon = findViewById(R.id.checkMon);
         checkTue = findViewById(R.id.checkTue);
@@ -152,6 +161,7 @@ public class NuovoServizio extends AppCompatActivity {
         serviceEndDate = findViewById(R.id.serviceEndDate);
         serviceEndDate.setVisibility(View.GONE);
         serviceMonthDate = findViewById(R.id.serviceMonthPicker);
+        serviceMonthDate.setEnabled(false);
         serviceMonthLabel = findViewById(R.id.monthPickerLabel);
         serviceMonthLabel.setVisibility(View.GONE);
         serviceMonthDate.setVisibility(View.GONE);
@@ -220,6 +230,7 @@ public class NuovoServizio extends AppCompatActivity {
 
             }
         });
+        //Listener che capisce se il checkbox è stato selezionato oppure no
         serviceRecurrence.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -242,6 +253,7 @@ public class NuovoServizio extends AppCompatActivity {
                 }
             }
         });
+        //Listener sull'elemento selezionato nello spinner
         serviceType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -312,6 +324,135 @@ public class NuovoServizio extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
+            }
+        });
+        //Listener che mi permette di attivare il bottone del picker solo dopo aver inserito il numero di mesi
+        serviceNOfMonths.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(serviceNOfMonths.length()==0){
+                    serviceMonthDate.setEnabled(false);
+                }else{
+                    serviceMonthDate.setEnabled(true);
+                    //Ricalcolo delle date di fine
+                    monthEnd=getDateMonthEnd(monthRec, Integer.parseInt(serviceNOfMonths.getText().toString()));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        //Listener su checkbox dei vari giorni
+        checkMon.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkTue.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkWen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkThu.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkFri.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkSat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        checkSun.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                if(serviceStartDate.getText().length()<=10){
+                    LocalDate firstDate = getStartWeek(serviceStartDate.getText().toString());
+                    startWeek = getWeekDates(firstDate);
+
+                }
+                if(serviceEndDate.getText().length()<=10){
+                    LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
+                    endWeek = getWeekDates(lastDate);
+                }
             }
         });
     }
@@ -395,6 +536,7 @@ public class NuovoServizio extends AppCompatActivity {
     // Metodo che permette di inzializzare il date picker, impostandolo alla data odierna
     private void initMonthDialogPicker() {
         monthRec = new ArrayList<String>();
+        monthEnd = new ArrayList<String>();
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -412,7 +554,6 @@ public class NuovoServizio extends AppCompatActivity {
                 }else{
                     monthRec.add(date);
                 }
-                System.out.println("DATE:"+monthRec.toString());
                 if(serviceNOfMonths.getText().toString().length()==0){
                     monthEnd=getDateMonthEnd(monthRec,1);
                 }else {
@@ -426,6 +567,7 @@ public class NuovoServizio extends AppCompatActivity {
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        //Blocco il calendario in modo tale che l'utente possa selezionare solamente i giorni del mese corrente
         dataMonthPicker = new DatePickerDialog(this,dateListener,year,month,day);
         calendar.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
         dataMonthPicker.getDatePicker().setMinDate(calendar.getTimeInMillis());
@@ -436,12 +578,11 @@ public class NuovoServizio extends AppCompatActivity {
     //Metodo che calcola le date della fine del mese
     private List<String> getDateMonthEnd(List<String> startDates,int nOfMonths){
         List<String> dates = new ArrayList<>();
-        for (int i = 0; i < monthRec.size(); i++) {
+        for (int i = 0; i < startDates.size(); i++) {
             DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate actDate = LocalDate.parse(monthRec.get(i),formatter);
+            LocalDate actDate = LocalDate.parse(startDates.get(i),formatter);
             dates.add(actDate.plusMonths(nOfMonths).toString());
         }
-        System.out.println("ARRAY FINE DATE:"+dates.toString());
         return dates;
     }
 
@@ -472,6 +613,7 @@ public class NuovoServizio extends AppCompatActivity {
         return firstDate;
     }
 
+    //Metodo che restituisce le date della settimana partendo dalla data di inizio
     private List<String> getWeekDates(LocalDate start){
         List<String> dates = new ArrayList<>();
         if(checkMon.isChecked()){
@@ -495,6 +637,7 @@ public class NuovoServizio extends AppCompatActivity {
         if(checkSun.isChecked()){
             dates.add(start.plusDays(6).toString());
         }
+        System.out.println("date:"+dates.toString());
         return dates;
     }
 
@@ -509,6 +652,7 @@ public class NuovoServizio extends AppCompatActivity {
     }
     public void openDateMonthPicker(View v){ dataMonthPicker.show();}
 
+    //Metodo che mi permette di comunicare con il server per creare un nuovo servizio
     public void newService(View v) throws ParseException {
         Map<String,String> params = new HashMap<>();
         params.put("group_id",Utilities.getGroupId(this));
@@ -548,18 +692,76 @@ public class NuovoServizio extends AppCompatActivity {
             params.put("end_date","["+serviceEndDate.getText().toString()+"]");
         }else if(serviceRecurrence.isChecked() && serviceType.getSelectedItem().toString().equals("Settimanale")){
             params.put("type","weekly");
-            params.put("start_date",startWeek.toString());
-            params.put("end_date",endWeek.toString());
+            if(startWeek.size()!=0){
+                params.put("start_date",startWeek.toString());
+            }
+            if(endWeek.size()!=0){
+                params.put("end_date",endWeek.toString());
+            }
         }else if(serviceRecurrence.isChecked() && serviceType.getSelectedItem().toString().equals("Mensile")){
             params.put("type","monthly");
             params.put("start_date",monthRec.toString());
             params.put("end_date",monthEnd.toString());
         }
-
-        Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
-            finish();
-        },error -> {
-
-        },params);
+        //Controlli per vedere se input è corretto
+        if(TextUtils.isEmpty(serviceName.getText())){
+            Toast.makeText(this, "Nome servizio mancante", Toast.LENGTH_SHORT).show();
+        }else if(TextUtils.isEmpty(serviceDescription.getText())){
+            Toast.makeText(this, "Descrizione servizio mancante", Toast.LENGTH_SHORT).show();
+        }else if(TextUtils.isEmpty(serviceLocation.getText())){
+            Toast.makeText(this, "Posizione servizio mancante", Toast.LENGTH_SHORT).show();
+        }else if(servicePattern.getSelectedItem().toString().equals("Carsharing") && TextUtils.isEmpty(serviceCarSpace.getText())){
+            Toast.makeText(this, "Numero di posti mancanti", Toast.LENGTH_SHORT).show();
+        }else if(servicePattern.getSelectedItem().toString().equals("Servizio alle persone") && TextUtils.isEmpty(servicePickup.getText())){
+            Toast.makeText(this, "Posto mancante mancanti", Toast.LENGTH_SHORT).show();
+        }else if(servicePattern.getSelectedItem().toString().equals("Prestito oggetti")) {
+            if(TextUtils.isEmpty(serviceLendObj.getText()) && serviceLendTime.getText().toString().length()>10){
+                Toast.makeText(this, "Oggetto da prestare e durata del prestito mancanti", Toast.LENGTH_SHORT).show();
+            }else if(TextUtils.isEmpty(serviceLendObj.getText())){
+                Toast.makeText(this, "Oggetto da prestare mancante", Toast.LENGTH_SHORT).show();
+            }else if(serviceLendTime.getText().toString().length()>10){
+                Toast.makeText(this, "Durata prestito mancante", Toast.LENGTH_SHORT).show();
+            }
+        }else if(serviceRecurrence.isChecked()){
+            switch (serviceType.getSelectedItem().toString()) {
+                case "Mensile":
+                    if(TextUtils.isEmpty(serviceNOfMonths.getText())){
+                        Toast.makeText(this, "Numero di mesi mancanti", Toast.LENGTH_SHORT).show();
+                    }else if(monthRec.size()==0){
+                        Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case "Giornaliero":
+                    if(serviceStartDate.getText().length()>10 && serviceEndDate.getText().length()>10){
+                        Toast.makeText(this, "Data di inizio e fine mancanti", Toast.LENGTH_SHORT).show();
+                    }else if(serviceStartDate.getText().length()>10){
+                        Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
+                    }else if(serviceEndDate.getText().length()>10){
+                        Toast.makeText(this, "Data di fine mancante", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case "Settimanale":
+                    if(startWeek.size()==0){
+                        Toast.makeText(this, "Data di inizio mancanti", Toast.LENGTH_SHORT).show();
+                    }else if(serviceStartDate.getText().length()>10 && serviceEndDate.getText().length()>10){
+                        Toast.makeText(this, "Data di inizio e fine mancanti", Toast.LENGTH_SHORT).show();
+                    }else if(serviceStartDate.getText().length()>10){
+                        Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
+                    }else if(serviceEndDate.getText().length()>10){
+                        Toast.makeText(this, "Data di fine mancante", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }else if(!serviceRecurrence.isChecked()){
+            if(serviceStartDate.getText().length()>10){
+                Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
+            }
+        }else{
+            Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
+                finish();
+            },error -> {
+                Toast.makeText(this, "Servizio non creato correttamente", Toast.LENGTH_SHORT).show();
+            },params);
+        }
     }
 }

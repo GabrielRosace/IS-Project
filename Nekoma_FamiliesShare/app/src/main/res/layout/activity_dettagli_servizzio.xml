@@ -40,7 +40,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:navigationIcon="@drawable/abc_vector_test"
         app:title="Dettagli servizio"
         app:titleTextColor="#FBFBFB" />
 
@@ -116,10 +116,11 @@
 
     <ImageView
         android:id="@+id/imageSevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="95dp"
         android:layout_marginTop="19dp"
+        android:scaleType="fitXY"
         app:layout_constraintStart_toEndOf="@+id/locationService"
         app:layout_constraintTop_toBottomOf="@+id/toolbarService"
         tools:srcCompat="@tools:sample/avatars" />

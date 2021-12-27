@@ -8,11 +8,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.media.ImageWriter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +31,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -240,6 +248,7 @@ public class YourService extends AppCompatActivity {
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
             Utilities.myService service = mData.get(position);
             holder.btn.setText(service.nome);
+            new ImageDownloader(holder.myImgView).execute(service.getImage());
             if(service.recurrence.equals("true")){
                 holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
                 holder.btn.setOnClickListener(new View.OnClickListener() {
@@ -276,12 +285,12 @@ public class YourService extends AppCompatActivity {
 
 
         public class ViewHolder extends RecyclerView.ViewHolder{
-            TextView myTextView;
+            ImageView myImgView;
             Button btn;
 
             ViewHolder(View itemView) {
                 super(itemView);
-                myTextView = itemView.findViewById(R.id.info);
+                myImgView = itemView.findViewById(R.id.myrecycle_view_img);
                 btn = itemView.findViewById(R.id.name_event);
             }
         }
@@ -291,6 +300,33 @@ public class YourService extends AppCompatActivity {
             return mData.get(id);
         }
 
+    }
+
+    // Classe per il download delle immagini
+    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+        ImageView holder;
+
+        public ImageDownloader(ImageView holder) {
+            this.holder = holder;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String urlOfImage = strings[0];
+            Bitmap logo = null;
+            try {
+                InputStream is = new URL(urlOfImage).openStream();
+                logo = BitmapFactory.decodeStream(is);
+            } catch (Exception e) { // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            holder.setImageBitmap(bitmap);
+        }
     }
 
 }

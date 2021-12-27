@@ -222,7 +222,7 @@ public class ListaBambiniAmici extends AppCompatActivity {
                 super(itemView);
                 myTextView = itemView.findViewById(R.id.info);
                 btn = itemView.findViewById(R.id.recycle_view_btn);
-                img =  itemView.findViewById(R.id.recycle_view_img);
+                img =  itemView.findViewById(R.id.myrecycle_view_img);
             }
         }
 

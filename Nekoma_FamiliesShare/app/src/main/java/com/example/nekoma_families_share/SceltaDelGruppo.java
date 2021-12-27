@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -20,13 +19,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SceltaDelGruppo extends AppCompatActivity {
     public void logout(View v){
@@ -136,7 +129,7 @@ public class SceltaDelGruppo extends AppCompatActivity {
                 super(itemView);
                 myTextView = itemView.findViewById(R.id.recycle_view_text);
                 btn = itemView.findViewById(R.id.recycle_view_btn);
-                img =  itemView.findViewById(R.id.recycle_view_img);
+                img =  itemView.findViewById(R.id.myrecycle_view_img);
                 //mcontext = itemView.getContext();
             }
         }

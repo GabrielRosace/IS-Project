@@ -44,20 +44,22 @@ router.post('/', (req, res, next) => {
       newActivity.activity_id = objectid()
       newActivity.creator_id = userId
       newActivity.status = false
-      newActivity.image_url = 'https://picsum.photos/200'
+      newActivity.image_url = req.body.image_url ? req.body.image_url : 'https://picsum.photos/200'
 
-      let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
-      let labels = []
-      for(let i = 0; i < idLabels.length; i++){
-        await Label.findOne({label_id: idLabels[i]}).exec().then(l => {
-          labels.push(l.label_id)
-        })
+      if(req.body.labels && req.body.labels != ''){
+        let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
+        let labels = []
+        for(let i = 0; i < idLabels.length; i++){
+          await Label.findOne({label_id: idLabels[i]}).exec().then(l => {
+            labels.push(l.label_id)
+          })
+        }
+        newActivity.labels = labels
       }
-      newActivity.labels = labels
 
       let start_date = startingDate(req.body.start_date)
       let end_date = endingDate(req.body.end_date)
-      dateValidator(req.body.type, start_date, end_date, res)
+      if(!dateValidator(req.body.type, start_date, end_date)) return res.status(400).send('Incorrect days')
 
       const newRecurrence = {
         type: req.body.type,
@@ -108,14 +110,14 @@ function endingDate (dateEnd) {
   return end_date
 }
 
-function dateValidator (type, start_date, end_date, res) {
-  if (type != 'daily' && type != 'weekly' && type != 'monthly') return res.status(400).send('Incorrect type')
+function dateValidator (type, start_date, end_date) {
+  if (type != 'daily' && type != 'weekly' && type != 'monthly') return false
 
-  if (start_date.length != end_date.length) return res.status(400).send('Dates does not match')
+  if (start_date.length != end_date.length) return false
   switch (type) {
     case 'daily':
-      if (start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
-      if (start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
+      if (start_date.length > 1 || end_date.length > 1) return false
+      if (start_date[0] > end_date[0]) return false
       break
     case 'weekly':
       let start_tmp = new Date(start_date[0].toString())
@@ -126,33 +128,34 @@ function dateValidator (type, start_date, end_date, res) {
       let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
       end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
 
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false 
 
       for (let i = 0; i < start_date.length; i++) {
-        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return false
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return false
+          if (end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return false
         } else {
-          if (start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-          if (end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
+          if (start_date[i] >= start_nextMonday) return false
+          if (end_date[i] >= end_nextMonday) return false
         }
       }
 
       break
 
     case 'monthly':
-      if (start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
+      if (start_date[start_date.length - 1] > end_date[0]) return false
 
       for (let i = 0; i < end_date.length; i++) {
-        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
+        if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false
         if (i < start_date.length - 1) {
-          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
-          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
+          if (start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return false
+          if (end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return false
         }
       }
       break
   }
+  return true
 }
 
 // Ritorna tutti gli eventi ricorrenti a cui un utente partecipa, secondo alcune caratteristiche, ad esempio tutti, solo quelli scaduti o solo quelli futuri
@@ -321,7 +324,7 @@ router.get('/partecipant/:group_id', async (req, res, next) => {
               let groupId = a[0].group_id
               if(groupId == group_id){
                 let end_date = a[0].Recurrence[0].end_date
-                if(end_date[end_date.length - 1] > new Date(Date.now()))
+                if(end_date[end_date.length - 1] >= new Date(Date.now()))
                   p[i].RecurringActivity[0] = a
                   result.push(p[i])
               }
@@ -519,66 +522,11 @@ router.put('/:activity_id', (req, res, next) => {
 
         if (req.body.date_type != 'daily' && req.body.date_type != 'weekly' && req.body.date_type != 'monthly') return res.status(400).send('Incorrect type')
 
-        // let start_dateSplitted = req.body.start_date.substring(1,req.body.start_date.length-1).replace(/\s+/g, '')
-        // start_dateSplitted = start_dateSplitted.split(',')
-        // let start_date = []
-        // for(i = 0; i < start_dateSplitted.length; i++){
-        //     start_date.push(new Date(start_dateSplitted[i]))
-        // }
         let start_date = startingDate(req.body.start_date)
 
-        // let end_dateSplitted = req.body.end_date.substring(1,req.body.end_date.length-1).replace(/\s+/g, '')
-        // end_dateSplitted = end_dateSplitted.split(',')
-        // let end_date = []
-        // for(i = 0; i < end_dateSplitted.length; i++){
-        //     end_date.push(new Date(end_dateSplitted[i]))
-        // }
         let end_date = endingDate(req.body.end_date)
 
-        dateValidator(req.body.date_type, start_date, end_date, res)
-
-        // if(start_date.length != end_date.length) return res.status(400).send('Dates does not match')
-        // switch(req.body.type){
-        //     case 'daily':
-        //         if(start_date.length > 1 || end_date.length > 1) return res.status(400).send('Incorrect dates')
-        //         if(start_date[0] > end_date[0]) return res.status(400).send('Dates does not match')
-        //         break
-        //     case 'weekly':
-        //         let start_tmp = new Date(start_date[0].toString())
-        //         let start_nextMonday = start_tmp.getDate() + (8 - start_tmp.getDay())
-        //         start_nextMonday = new Date(start_tmp.setDate(start_nextMonday))
-
-        //         let end_tmp = new Date(end_date[0].toString())
-        //         let end_nextMonday = end_tmp.getDate() + (8 - end_tmp.getDay())
-        //         end_nextMonday = new Date(end_tmp.setDate(end_nextMonday))
-
-        //         if(start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
-
-        //         for(let i = 0; i < start_date.length; i++){
-        //             if(start_date[i].getDay() != end_date[i].getDay() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
-        //             if(i < start_date.length - 1){
-        //                 if(start_date[i] > start_date[i + 1] || start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-        //                 if(end_date[i] > end_date[i + 1] || end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
-        //             }
-        //             else{
-        //                 if(start_date[i] >= start_nextMonday) return res.status(400).send('Dates does not match')
-        //                 if(end_date[i] >= end_nextMonday) return res.status(400).send('Dates does not match')
-        //             }
-        //         }
-        //         break
-
-        //     case 'monthly':
-        //         if(start_date[start_date.length - 1] > end_date[0]) return res.status(400).send('Incorrect dates')
-
-        //         for(let i = 0; i < end_date.length; i++){
-        //             if(start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return res.status(400).send('Dates does not match')
-        //             if(i < start_date.length - 1){
-        //                 if(start_date[i] > start_date[i + 1] || start_date[i].getMonth() != start_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
-        //                 if(end_date[i] > end_date[i + 1] || end_date[i].getMonth() != end_date[i + 1].getMonth()) return res.status(400).send('Dates does not match')
-        //             }
-        //         }
-        //         break
-        // }
+        if(!dateValidator(req.body.date_type, start_date, end_date)) return res.status(400).send('Incorrect days')
 
         const newRecurrence = {
           type: req.body.date_type,
@@ -610,7 +558,6 @@ router.put('/:activity_id', (req, res, next) => {
 })
 
 // Aggiunge un etichetta esistente ad un'attività esistente
-// ? Controllare se l'etichetta appartiene al gruppo dell'evento
 router.patch('/label/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -623,7 +570,7 @@ router.patch('/label/:activity_id', (req, res, next) => {
 
   RecurringActivity.findOne({activity_id: activity_id}).exec().then(a => {
     if(a){
-      Label.findOne({label_id: label_id}).exec().then(l => {
+      Label.findOne({label_id: label_id, group_id: a.group_id}).exec().then(l => {
         if(l){
           a.labels.push(l.label_id)
           a.save().then(() => {
