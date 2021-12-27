@@ -3006,7 +3006,7 @@ function dateValidator (type, start_date, end_date) {
 
 // parse a input list in string format, and return a object list
 function calculateDays (reqDays) {
-  let daysSplitted = reqDays ? reqDays.split(',') : undefined
+  let daysSplitted = reqDays.substring(1, reqDays.length - 1).split(',')
   let days = []
 
   for (let i = 0; i < daysSplitted.length; i++) {
