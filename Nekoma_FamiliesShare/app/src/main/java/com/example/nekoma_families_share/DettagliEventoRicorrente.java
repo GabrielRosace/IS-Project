@@ -219,6 +219,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             descrizione.setEnabled(true);
             addDate.setVisibility(View.GONE);
             btn.setText("Modifica");
+            yourJoin.setText("");
             dejoin.setVisibility(View.VISIBLE);
             dejoin.setOnClickListener(v -> {
                 Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/"+evento.event_id, response -> {
