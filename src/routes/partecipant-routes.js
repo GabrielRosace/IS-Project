@@ -69,8 +69,8 @@ function checkDates (r, days) {
       break
 
     case 'weekly':
-      valid = false
       for (let i = 0; i < days.length; i++) {
+        valid = false
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) {
             return false
@@ -84,15 +84,15 @@ function checkDates (r, days) {
       break
 
     case 'monthly':
-      valid = false
       for (let i = 0; i < days.length; i++) {
+        valid = false
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i].getDate() == r.start_date[j].getDate()) {
             valid = true
           }
-          if (!valid) return false
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return false
         }
+        if (!valid) return false
       }
       break
   }
