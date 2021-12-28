@@ -47,6 +47,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
     private LocalDate startLocalDate;
     private TextView datesMonth;
     private TextView NB;
+    private Button buttonCreate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,8 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         days = new ArrayList<>();
         datesStart = new ArrayList<>();
         datesEnd = new ArrayList<>();
+        buttonCreate = (Button) findViewById(R.id.createEventRicButton);
+        buttonCreate.setEnabled(false);
         number = (EditText) findViewById(R.id.frequenceNumber);
         NB = (TextView) findViewById(R.id.nb);
         titleNumber = (TextView) findViewById(R.id.titleFrequenceNumber);
@@ -122,9 +125,6 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                             c.setVisibility(View.VISIBLE);
                         }
                         break;
-
-
-
                 }
                 reccurenceSelceted = adapter.getItem(i).toString();
             }
@@ -152,38 +152,40 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         String id_group = Utilities.getPrefs(this).getString("group", "");
         String d = setDate();
         String arr[] = d.split("/");
-        map.put("group_id",id_group);
-        map.put("creator_id", Utilities.getUserID(Creazione_date_evetno_ricorrente.this));
-        map.put("name", name);
-        map.put("color","purple");
-        map.put("description",desc);
-        map.put("location", location);
-        map.put("labels",labels);
-        map.put("status", "false");
-        map.put("activity_id","");
-        map.put("image_url","");
-        map.put("type",arr[0]);
-        map.put("start_date",arr[1]);
-        map.put("end_date",arr[2]);
-        for (String s:
-             map.keySet()) {
-            System.out.println(map.get(s));
+        if(arr[1].equals("[]") || arr[2].equals("[]"))
+            Toast.makeText(Creazione_date_evetno_ricorrente.this,"dati non inseriti correttamente", Toast.LENGTH_LONG).show();
+        else {
+            map.put("group_id", id_group);
+            map.put("creator_id", Utilities.getUserID(Creazione_date_evetno_ricorrente.this));
+            map.put("name", name);
+            map.put("color", "purple");
+            map.put("description", desc);
+            map.put("location", location);
+            map.put("labels", labels);
+            map.put("status", "false");
+            map.put("activity_id", "");
+            map.put("image_url", "");
+            map.put("type", arr[0]);
+            map.put("start_date", arr[1]);
+            map.put("end_date", arr[2]);
+            for (String s :
+                    map.keySet()) {
+                System.out.println(map.get(s));
+            }
+            Utilities.httpRequest(Creazione_date_evetno_ricorrente.this, Request.Method.POST, "/recurringActivity", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Intent homepageA = new Intent(Creazione_date_evetno_ricorrente.this, Homepage.class);
+                    startActivity(homepageA);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(Creazione_date_evetno_ricorrente.this, error.toString(), Toast.LENGTH_LONG).show();
+                    System.err.println(error.getMessage());
+                }
+            }, map);
         }
-
-
-        Utilities.httpRequest(Creazione_date_evetno_ricorrente.this, Request.Method.POST, "/recurringActivity", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Intent homepageA = new Intent(Creazione_date_evetno_ricorrente.this,Homepage.class);
-                startActivity(homepageA);
-            }
-        },new Response.ErrorListener(){
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(Creazione_date_evetno_ricorrente.this, error.toString(), Toast.LENGTH_LONG).show();
-                System.err.println(error.getMessage());
-            }
-        },map);
     }
     private String setDate() {
         DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -301,7 +303,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                     //calcolo data inizio e fine della settimana
                     startLocalDate = getStartWeek(date);
                 }
-
+                buttonCreate.setEnabled(true);
             }
                 //metodo che calcola tutte le date utili della settimana in base alle scelte
                 //startWeek = getWeekDates(startDate);
@@ -313,6 +315,10 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         dataStartPicker = new DatePickerDialog(this,dateListener,year,month,day);
+        calendar.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        dataStartPicker.getDatePicker().setMinDate(calendar.getTimeInMillis());
+        calendar.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        dataStartPicker.getDatePicker().setMaxDate(calendar.getTimeInMillis());
     }
     private LocalDate getStartWeek(String sDate){
         DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");

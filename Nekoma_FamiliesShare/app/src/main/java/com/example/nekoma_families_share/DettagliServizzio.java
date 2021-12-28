@@ -57,6 +57,10 @@ public class DettagliServizzio extends AppCompatActivity {
     private  String groupId;
     public DatePickerDialog datePicker;
     public ConstraintLayout layout;
+    private TextView startText;
+    private TextView endText;
+    private TextView end;
+    private TextView start;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +90,10 @@ public class DettagliServizzio extends AppCompatActivity {
         desc = (EditText) findViewById(R.id.desceMultiLineService);
         lendTimeT = (TextView) findViewById(R.id.lendTime);
         lendTime = (TextView) findViewById(R.id.lendTime2);
+        startText = (TextView) findViewById(R.id.startText);
+        endText = (TextView) findViewById(R.id.endText);
+        start = (TextView) findViewById(R.id.start);
+        end = (TextView) findViewById(R.id.end);
         lendTime.setVisibility(View.GONE);
         lendTimeT.setVisibility(View.GONE);
         buttonS.setVisibility(View.GONE);
@@ -115,6 +123,10 @@ public class DettagliServizzio extends AppCompatActivity {
             lendTimeT.setVisibility(View.GONE);
         }
         if(service.recurrence.equals("true")){
+            startText.setVisibility(View.GONE);
+            endText.setVisibility(View.GONE);
+            this.start.setVisibility(View.GONE);
+            this.end.setVisibility(View.GONE);
             recType.setText(service.recType);
             if(service.recType.equals("monthly")){
                 String[] start = service.start_date.substring(1, service.start_date.length() - 1).split(",");
@@ -201,7 +213,17 @@ public class DettagliServizzio extends AppCompatActivity {
                 String end = service.end_date.substring(2, 12);
                 recType.setText("Questo evento si svolgerà dal " + start + " a " + end);
             }
+
         }else{
+            String start = service.formatDate(service.start_date.substring(2,service.start_date.length()));
+            String end = service.formatDate(service.end_date.substring(2,service.end_date.length()));
+            System.out.println("data ----> "+ service.start_date.substring(2,service.start_date.length()));
+            this.end.setText(end);
+            this.start.setText(start);
+            startText.setVisibility(View.VISIBLE);
+            endText.setVisibility(View.VISIBLE);
+            this.start.setVisibility(View.VISIBLE);
+            this.end.setVisibility(View.VISIBLE);
             rec.setVisibility(View.GONE);
             recType.setVisibility(View.GONE);
         }
@@ -346,14 +368,11 @@ public class DettagliServizzio extends AppCompatActivity {
             }
         };
         Calendar calendar = Calendar.getInstance();
-
-//        calendar.setTime(new SimpleDateFormat("dd/MM/yyyy").parse(startDate.getText().toString()));
-
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        datePicker = new DatePickerDialog(this, dateListener, year, month, day);
+        //Blocco il calendario in modo tale che l'utente possa selezionare solamente i giorni del mese corrente
+        datePicker = new DatePickerDialog(this,dateListener,year,month,day);
     }
     private static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
         ImageView holder;
