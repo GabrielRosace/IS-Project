@@ -20,7 +20,6 @@
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Archivio Eventi"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Body2"
             app:titleTextColor="#FFFFFF" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
