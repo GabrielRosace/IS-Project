@@ -162,6 +162,25 @@ public class Utilities {
         public myService(JSONObject obj) throws JSONException {
             this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), obj.getString( "nPart"), obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
         }
+        public myService(String s){
+            String[] strings = s.split("\\$");
+            this.service_id = strings[0];
+            this.owner_id = strings[1];
+            this.nome = strings[2];
+            this.descrizione = strings[3];
+            this.location = strings[4];
+            this.pattern = strings[5]; // il pattern che sceglie l'utente quando lo sceglie
+            this.car_space = strings[6];
+            this.lend_obj = strings[7]; // l'oggetto dato in prestito
+            this.lend_time = strings[8]; // quando va restituito l'oggetto preso in prestito
+            this.pickuplocation = strings[9]; // il posto in cui devi andare a prendere qualcosa per un terzo
+            this.img = strings[10];
+            this.nPart = strings[11];
+            this.recType = strings[12];
+            this.start_date = strings[13];
+            this.end_date = strings[14];
+            this.recurrence = strings[15];
+        }
 
         @Override
         public String toString() {
