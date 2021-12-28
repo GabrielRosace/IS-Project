@@ -237,40 +237,35 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                 datesEnd.add(d.plusMonths(shift).format(formatter));
             }
         }else if(reccurenceSelceted.equals("Giornaliera")){
-            s=s+"weekly/";
+            s=s+"daily/";
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
             int day = calendar.get(Calendar.DAY_OF_MONTH);
-            if(startLocalDate.getDayOfMonth()>=day && startLocalDate.getMonthValue()>=month && startLocalDate.getYear() >= year ){
-                datesStart.add(startLocalDate.format(formatter));
-                datesEnd.add(startLocalDate.plusDays(7).format(formatter));
-            }else
-                err=true;
+            datesStart.add(startLocalDate.format(formatter));
+            datesEnd.add(startLocalDate.plusDays(7).format(formatter));
 
         }
-        if(!err){
-            s=s+"[";
-            for(String c:datesStart) {
-                if (i == 0)
-                    s = s + c;
-                else
-                    s = s + "," + c;
-                i++;
-            }
-            i=0;
-            s=s+"]/[";
-            for(String c:datesEnd){
-                if(i==0)
-                    s=s+c;
-                else
-                    s=s+","+c;
-                i++;
-            }
-            s=s+"]";
-            System.out.println(s);
-        }else
-            s=null;
+        s=s+"[";
+        for(String c:datesStart) {
+            if (i == 0)
+                s = s + c;
+            else
+                s = s + "," + c;
+            i++;
+        }
+        i=0;
+        s=s+"]/[";
+        for(String c:datesEnd){
+            if(i==0)
+                s=s+c;
+            else
+                s=s+","+c;
+            i++;
+        }
+        s=s+"]";
+        System.out.println(s);
+
         return s;
     }
     private void initStartDatePicker() {

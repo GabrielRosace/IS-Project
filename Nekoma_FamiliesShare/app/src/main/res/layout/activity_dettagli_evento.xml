@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:visibility="visible"
     tools:context=".DettagliEvento">
 
     <LinearLayout
@@ -41,7 +42,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/progress_layout_det"
             android:layout_width="match_parent"
-            android:layout_height="1000dp">
+            android:layout_height="1000dp"
+            android:visibility="visible">
 
             <ProgressBar
                 android:id="@+id/progress_bar_det"

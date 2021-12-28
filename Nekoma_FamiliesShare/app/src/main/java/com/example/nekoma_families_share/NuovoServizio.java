@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,7 +68,7 @@ public class NuovoServizio extends AppCompatActivity {
 
     private Button serviceStartDate;
     private Button serviceEndDate;
-    private Button serviceSave;
+    private ImageView serviceSave;
     private Button serviceMonthDate;
     private Button serviceLendTime;
 
@@ -455,6 +456,16 @@ public class NuovoServizio extends AppCompatActivity {
                 }
             }
         });
+        serviceSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    newService(v);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     // Metodo che permette di inzializzare il date picker, impostandolo alla data odierna
@@ -703,18 +714,24 @@ public class NuovoServizio extends AppCompatActivity {
             params.put("start_date",monthRec.toString());
             params.put("end_date",monthEnd.toString());
         }
+        System.out.println(params.toString());
         //Controlli per vedere se input è corretto
         if(TextUtils.isEmpty(serviceName.getText())){
             Toast.makeText(this, "Nome servizio mancante", Toast.LENGTH_SHORT).show();
-        }else if(TextUtils.isEmpty(serviceDescription.getText())){
+        }
+        if(TextUtils.isEmpty(serviceDescription.getText())){
             Toast.makeText(this, "Descrizione servizio mancante", Toast.LENGTH_SHORT).show();
-        }else if(TextUtils.isEmpty(serviceLocation.getText())){
+        }
+        if(TextUtils.isEmpty(serviceLocation.getText())){
             Toast.makeText(this, "Posizione servizio mancante", Toast.LENGTH_SHORT).show();
-        }else if(servicePattern.getSelectedItem().toString().equals("Carsharing") && TextUtils.isEmpty(serviceCarSpace.getText())){
+        }
+        if(servicePattern.getSelectedItem().toString().equals("Carsharing") && TextUtils.isEmpty(serviceCarSpace.getText())){
             Toast.makeText(this, "Numero di posti mancanti", Toast.LENGTH_SHORT).show();
-        }else if(servicePattern.getSelectedItem().toString().equals("Servizio alle persone") && TextUtils.isEmpty(servicePickup.getText())){
+        }
+        if(servicePattern.getSelectedItem().toString().equals("Servizio alle persone") && TextUtils.isEmpty(servicePickup.getText())){
             Toast.makeText(this, "Posto mancante mancanti", Toast.LENGTH_SHORT).show();
-        }else if(servicePattern.getSelectedItem().toString().equals("Prestito oggetti")) {
+        }
+        if(servicePattern.getSelectedItem().toString().equals("Prestito oggetti")) {
             if(TextUtils.isEmpty(serviceLendObj.getText()) && serviceLendTime.getText().toString().length()>10){
                 Toast.makeText(this, "Oggetto da prestare e durata del prestito mancanti", Toast.LENGTH_SHORT).show();
             }else if(TextUtils.isEmpty(serviceLendObj.getText())){
@@ -722,7 +739,8 @@ public class NuovoServizio extends AppCompatActivity {
             }else if(serviceLendTime.getText().toString().length()>10){
                 Toast.makeText(this, "Durata prestito mancante", Toast.LENGTH_SHORT).show();
             }
-        }else if(serviceRecurrence.isChecked()){
+        }
+        if(serviceRecurrence.isChecked()){
             switch (serviceType.getSelectedItem().toString()) {
                 case "Mensile":
                     if(TextUtils.isEmpty(serviceNOfMonths.getText())){
@@ -752,16 +770,16 @@ public class NuovoServizio extends AppCompatActivity {
                     }
                     break;
             }
-        }else if(!serviceRecurrence.isChecked()){
+        }
+        if(!serviceRecurrence.isChecked()){
             if(serviceStartDate.getText().length()>10){
                 Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
             }
-        }else{
-            Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
+        }
+        Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
                 finish();
             },error -> {
                 Toast.makeText(this, "Servizio non creato correttamente", Toast.LENGTH_SHORT).show();
             },params);
-        }
     }
 }

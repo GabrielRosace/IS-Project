@@ -4,12 +4,12 @@
     <string name="email">Email:</string>
     <string name="password">Password:</string>
     <string name="login">Login</string>
-    <string name="url">http:/10.0.2.2:8080/api</string>
+    <string name="url">http:/192.168.1.10:8080/api</string>
     <string name="chisiamo">Siamo un team di studenti della facoltà di informatica dell\'Università Ca Foscari di Venezia.</string>
-    <string name="lapplicazione">Questa applicazione ha lo scopo di estendere l\'esistente Famiglie e Condividi, evolvendolo alla situazione attuale. Offre nuove funzionalità come la creazione di servizi finalizzati al prestito di beni, la creazione di eventi e l\'inclusione dei propri figli in una società cambiata dalla pandemia.</string>
-    <string name="eventi">Gli eventi possono essere comodamente creati attraverso l\'apposita sezione. Sono riservati al gruppo con cui si decide di condividere l\'evento.</string>
-    <string name="servizi">I servizi possono essere comodamente creati attraverso l\'apposita sezione. Vengono proposti anche dei template, come per il servizio di car sharing, sono riservati al gruppo con cui si decide di condividere il servizio.</string>
-    <string name="bambini">La nuova estensione ti permette di definire alcune preferenze del tuo bambino in modo da permettere agli utenti amichevoli di sapere a priori cosa piace al bambino specificatamente inserito nella sezione.</string>
+    <string name="lapplicazione">Questa applicazione ha lo scopo di estendere l\'esistente Families Share, evolvendolo alla situazione attuale. Offre nuove funzionalità come la creazione di servizi finalizzati al prestito di beni, la creazione di eventi riccorenti e non con etichette e la possibilità di assegnare ai propri figli preferenze legate alle etichette.</string>
+    <string name="eventi">Gli eventi possono essere comodamente creati attraverso l\'apposita sezione. Sono riservati al gruppo con cui si decide di condividere l\'evento con la possibilità di categorizzarlo grazie alle etichette.</string>
+    <string name="servizi">I servizi possono essere comodamente creati attraverso l\'apposita sezione. Vengono proposti dei template, come per il servizio di car sharing, sono riservati al gruppo con cui si decide di condividere il servizio.</string>
+    <string name="bambini">La nuova estensione permette di definire alcune preferenze del tuo bambino in modo da permettere agli utenti appartenenti allo stesso gruppo di conoscere le sue etichette. Ma ciò permette anche di visualizzare eventi filtrati in base alle sue preferenze nell\'apposita sezione.</string>
     <string name="nome">Genitore:</string>
     <!-- Stringhe usate nel layout del profilo -->
     <string name="profilepictureLabel">Foto profilo</string>

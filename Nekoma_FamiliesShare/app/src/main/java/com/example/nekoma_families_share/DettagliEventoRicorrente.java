@@ -19,10 +19,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -34,7 +32,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -83,21 +80,21 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         labels_in_a_group = new HashMap<>();
         eventLabels = new ArrayList<>();
 
-        TextView name = (TextView) findViewById(R.id.eventName);
-        descrizione = (EditText) findViewById(R.id.description);
-        TextView nPart = (TextView) findViewById(R.id.nPart);
-        Button btn = (Button) findViewById(R.id.button);
-        FloatingActionButton addDate = (FloatingActionButton) findViewById(R.id.addDate);
-        ImageView img = (ImageView) findViewById(R.id.eventImage);
-        TextView recurr = (TextView) findViewById(R.id.textView31);
-        spinner = (Spinner) findViewById(R.id.spinner);
+        TextView name = findViewById(R.id.eventName);
+        descrizione = findViewById(R.id.description);
+        TextView nPart = findViewById(R.id.nPart);
+        Button btn = findViewById(R.id.button);
+        FloatingActionButton addDate = findViewById(R.id.addDate);
+        ImageView img = findViewById(R.id.eventImage);
+        TextView recurr = findViewById(R.id.textView31);
+        spinner = findViewById(R.id.spinner);
 
-        yourJoin = (TextView) findViewById(R.id.yourJoin);
-        dejoin = (ImageView) findViewById(R.id.delete_action);
+        yourJoin = findViewById(R.id.yourJoin);
+        dejoin = findViewById(R.id.delete_action);
 
 
         // Aggiunta dell'evento torna indietro nella toolbar
-        Toolbar t = (Toolbar) findViewById(R.id.toolbar2);
+        Toolbar t = findViewById(R.id.toolbar2);
         t.setNavigationOnClickListener(v -> finish());
 
         Intent intent = getIntent();
@@ -108,10 +105,27 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
         evento = new Utilities.myRecEvent(extraData);
 
+//        Aggiunto le informazioni base relative all'evento
         name.setText(evento.nome);
         descrizione.setText(evento.descrizione);
 
         // Parsing delle etichette
+        if(evento.labels.contains("{")){ // devo controllare il formato che mi arriva dal server, se è un json object allora devo parsarlo
+            String s = "[";
+            try{
+                JSONArray arr = new JSONArray(evento.labels);
+                for (int i = 0; i < arr.length(); i++) {
+                    s+= "\"" + arr.getJSONObject(i).getString("label_id")+"\",";
+                }
+                if(s.length()>1){
+                    s = s.substring(0,s.length()-1);
+                }
+                s+="]";
+                evento.labels = s;
+            }catch(JSONException e){
+                e.printStackTrace();
+            }
+        }
         String[] strings = evento.labels.substring(1, evento.labels.length() - 1).split(",");
         if (!evento.labels.equals("[]")) {
             for (String s : strings) {
@@ -119,9 +133,8 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             }
         }
 
-        Utilities.httpRequest(this, Request.Method.GET, "/partecipant/nPart/" + evento.event_id, response -> {
-            nPart.append((String) response);
-        }, System.err::println, new HashMap<>());
+//        Ottengo il numero di partecipanti
+        Utilities.httpRequest(this, Request.Method.GET, "/partecipant/nPart/" + evento.event_id, response -> nPart.append((String) response), System.err::println, new HashMap<>());
 
 
         // Aggiunta della descrizione riguardante la ricorrenza
@@ -139,7 +152,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                 Calendar c = Calendar.getInstance();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
                 try {
-                    c.setTime(sdf.parse(s));
+                    c.setTime(Objects.requireNonNull(sdf.parse(s)));
                     giorni += c.get(Calendar.DAY_OF_MONTH) + ",";
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -147,7 +160,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             }
             giorni = giorni.substring(0, giorni.length() - 1);
 
-            Date startDate, endDate;
+//            Date startDate, endDate;
             String firstMonth = "", lastMonth = "";
             try {
                 Calendar c = Calendar.getInstance();
@@ -176,7 +189,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                 Calendar c = Calendar.getInstance();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
                 try {
-                    c.setTime(sdf.parse(s));
+                    c.setTime(Objects.requireNonNull(sdf.parse(s)));
                     switch (c.get(Calendar.DAY_OF_WEEK)) {
                         case 1:
                             giorni += "Domenica,";
@@ -209,35 +222,32 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             recurr.setText("Questo evento si svolgerà con cadenza settimanale nei giorni " + giorni + " dal " + start[0].substring(1, 11) + " al " + end[end.length - 1].substring(1, 11));
         }
 
-
+//    Ottengo le informazioni relative al creatore, nello specifico se l'utente che visiona l'evento è il creatore
         isCreator = evento.owner_id.equals(Utilities.getUserID(this));
 
 
         initDatePicker();
 
+//        Se è il creatore allora abilito la possibilà di modifica e gestione delle etichette
         if (isCreator) {
             descrizione.setEnabled(true);
             addDate.setVisibility(View.GONE);
             btn.setText("Modifica");
+            yourJoin.setText("");
             dejoin.setVisibility(View.VISIBLE);
-            dejoin.setOnClickListener(v -> {
-                Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/"+evento.event_id, response -> {
-                    Toast.makeText(DettagliEventoRicorrente.this, "Evento eliminato con successo", Toast.LENGTH_SHORT).show();
-                    recreate();
-                }, System.err::println, new HashMap<>());
-            });
+            dejoin.setOnClickListener(v -> Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/"+evento.event_id, response -> {
+                Toast.makeText(DettagliEventoRicorrente.this, "Evento eliminato con successo", Toast.LENGTH_SHORT).show();
+                recreate();
+            }, System.err::println, new HashMap<>()));
             findViewById(R.id.add_label).setVisibility(View.VISIBLE);
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Map<String, String> m = new HashMap<>();
-                    m.put("description", descrizione.getText().toString());
-                    Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PUT, "/recurringActivity/" + evento.event_id, response -> {
-                        Toast.makeText(DettagliEventoRicorrente.this, "Modifica effettuata con successo", Toast.LENGTH_SHORT).show();
-                    }, System.out::println, m);
-                }
+            btn.setOnClickListener(v -> {
+                Map<String, String> m = new HashMap<>();
+                m.put("description", descrizione.getText().toString());
+                Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PUT, "/recurringActivity/" + evento.event_id, response -> {
+                    Toast.makeText(DettagliEventoRicorrente.this, "Modifica effettuata con successo", Toast.LENGTH_SHORT).show();
+                }, System.out::println, m);
             });
-        } else {
+        } else { // Altrimenti abilito la possibilità di gestire la partecipazione
             Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/isPartecipant/" + evento.event_id, response -> {
                 isPartecipant = response.equals("true");
 
@@ -280,26 +290,21 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                     m.put("days", toSend);
 
                     if (isPartecipant) {
-                        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/partecipant/"+evento.event_id, response1 -> {
-                            Toast.makeText(DettagliEventoRicorrente.this, "Dati aggiornati con successo", Toast.LENGTH_SHORT).show();
-                        }, error -> {
-                            Toast.makeText(DettagliEventoRicorrente.this, "Errore, aggiornamento non riuscito", Toast.LENGTH_SHORT).show();
-                        }, m);
+                        Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.PATCH, "/partecipant/"+evento.event_id, response1 -> Toast.makeText(DettagliEventoRicorrente.this, "Dati aggiornati con successo", Toast.LENGTH_SHORT).show(), error -> Toast.makeText(DettagliEventoRicorrente.this, "Errore, aggiornamento non riuscito", Toast.LENGTH_SHORT).show(), m);
                     } else {
                         Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.POST, "/partecipant", response1 -> {
                             Toast.makeText(DettagliEventoRicorrente.this, "Partipazione effettuata", Toast.LENGTH_SHORT).show();
                             recreate();
-                        }, error -> {
-                            Toast.makeText(DettagliEventoRicorrente.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
-                        }, m);
+                        }, error -> Toast.makeText(DettagliEventoRicorrente.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show(), m);
                     }
                 });
             }, System.err::println, new HashMap<>());
         }
 
-
+//  Scarico l'immagine dell'evento
         new ImageDownloader(img).execute(evento.img);
 
+//        Ottengo le eitchette disponibili in un gruppo
         getLabelsInGroups();
 
 
@@ -364,23 +369,20 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         }, System.err::println, new HashMap<>());
     }
 
-
+// Calendario per aggiungere le date relative alla partecipazione
     public void initDatePicker() {
-        DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                month = month + 1;
-                String date = year + "-" + month + "-" + dayOfMonth;
-                if (selectedDate.contains(date)) {
-                    selectedDate.remove(date);
-                } else {
-                    selectedDate.add(date);
-                }
+        DatePickerDialog.OnDateSetListener dateListener = (view, year, month, dayOfMonth) -> {
+            month = month + 1;
+            String date = year + "-" + month + "-" + dayOfMonth;
+            if (selectedDate.contains(date)) {
+                selectedDate.remove(date);
+            } else {
+                selectedDate.add(date);
+            }
 
-                yourJoin.setText(getString(R.string.yourJoin));
-                for (String s : selectedDate) {
-                    yourJoin.append(" " + getDateFromEncoding(s));
-                }
+            yourJoin.setText(getString(R.string.yourJoin));
+            for (String s : selectedDate) {
+                yourJoin.append(" " + getDateFromEncoding(s));
             }
         };
         Calendar calendar = Calendar.getInstance();
@@ -392,6 +394,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         datePicker = new DatePickerDialog(this, dateListener, year, month, day);
     }
 
+//    Parsing della date per ottenere un formato più leggibile
     private String getDateFromEncoding(String date) {
         String[] s = date.split("-");
         return s[2] + "/" + s[1] + "/" + s[0];
@@ -403,7 +406,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
     // Classe che permette di scaricare le immagini dell'evento
     private static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
-        ImageView holder;
+        private ImageView holder;
 
         public ImageDownloader(ImageView holder) {
             this.holder = holder;
@@ -428,7 +431,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
         }
     }
 
-
+// Matching del numero del mese con il suo nome
     private String getMonth(int month) {
         String firstMonth = "";
         switch (month) {
@@ -476,7 +479,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
 
     // Aggiunta dei dati nella recycle view
     private void addRecyclerView(List<String> list) {
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_label);
+        RecyclerView recyclerView = findViewById(R.id.event_label);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DettagliEventoRicorrente.this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(DettagliEventoRicorrente.this, list);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -511,9 +514,8 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             }
             holder.btn.setText("Elimina");
             holder.btn.setOnClickListener(v -> {
-                List<String> ids = new ArrayList<String>(labels_in_a_group.values());
+                List<String> ids = new ArrayList<>(labels_in_a_group.values());
                 String label_id = ids.get(ids.indexOf(item));
-//                    System.out.println(item);
                 Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/label/" + evento.event_id + "/" + label_id, response -> {
                     labelName.remove(item);
                     addRecyclerView(labelName);
@@ -521,9 +523,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
                     spinner_labelName.add(item);
                     dataSpinner.add(item);
                     spinner.setAdapter(dataSpinner);
-                }, error -> {
-                    Toast.makeText(DettagliEventoRicorrente.this, error.toString(), Toast.LENGTH_SHORT).show();
-                }, new HashMap<>());
+                }, error -> Toast.makeText(DettagliEventoRicorrente.this, error.toString(), Toast.LENGTH_SHORT).show(), new HashMap<>());
             });
         }
 

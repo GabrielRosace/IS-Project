@@ -2616,9 +2616,11 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
     if (!checkDates(r, days)) return res.status(400).send('Incorrect days')
     if (service.pattern === 'car') {
-      Partecipant.findOne({ activity_id: service_id, service: true }).exec().then((p) => {
-        if (p.length >= parseInt(service.car_space)) {
-          return res.status(400).send('The car is full')
+      Partecipant.find({ activity_id: service_id, service: true }).exec().then((p) => {
+        if (p) {
+          if (p.length >= parseInt(service.car_space)) {
+            return res.status(400).send('The car is full')
+          }
         }
       })
     }
@@ -2686,7 +2688,7 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     let days = calculateDays(req.body.days)
 
     Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
-      if(!checkDates(r, days)) return res.status(400).send('Incorrect days')
+      if (!checkDates(r, days)) return res.status(400).send('Incorrect days')
       Partecipant.updateOne({ activity_id: r.activity_id, partecipant_id: userId, service: true }, { $set: { days: days } }).exec().then(() => {
         return res.status(200).send('Partecipation updated')
       })
@@ -2890,14 +2892,9 @@ router.get('/:id/service', async (req, res, next) => {
 
     let myList = []
     resList.forEach((service) => {
-      let over = false
-      service.start_date.forEach((getDate) => {
-        const myDate = new Date(Date.now())
-        if ((new Date(getDate)) < myDate) {
-          over = true
-        }
-      })
-      if (over) {
+      const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
+      const lastdate = service.end_date[service.end_date.length - 1]
+      if (myDate > lastdate) {
         myList.push(service)
       }
     })
@@ -2906,14 +2903,9 @@ router.get('/:id/service', async (req, res, next) => {
   if (time === 'next') {
     let myList = []
     resList.forEach((service) => {
-      let over = false
-      service.end_date.forEach((getDate) => {
-        const myDate = new Date(Date.now())
-        if ((new Date(getDate)) >= myDate) {
-          over = true
-        }
-      })
-      if (over) {
+      const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
+      const lastdate = service.start_date[service.start_date.length - 1]
+      if (myDate <= lastdate) {
         myList.push(service)
       }
     })
@@ -3022,15 +3014,14 @@ function checkDates (r, days) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
         if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
-          // return res.status(400).send('Incorrect days')
           return false
         }
       }
       break
 
     case 'weekly':
-      valid = false
       for (let i = 0; i < days.length; i++) {
+        valid = false
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) {
             return false
@@ -3044,15 +3035,15 @@ function checkDates (r, days) {
       break
 
     case 'monthly':
-      valid = false
       for (let i = 0; i < days.length; i++) {
+        valid = false
         for (let j = 0; j < r.start_date.length; j++) {
           if (days[i].getDate() == r.start_date[j].getDate()) {
             valid = true
           }
-          if (!valid) return false
           if (days[i] < r.start_date[0] || days[i] > r.end_date[r.end_date.length - 1]) return false
         }
+        if (!valid) return false
       }
       break
   }
