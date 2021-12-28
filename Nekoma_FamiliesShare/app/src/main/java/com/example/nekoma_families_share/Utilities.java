@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -164,6 +165,12 @@ public class Utilities {
         }
         public myService(String s){
             String[] strings = s.split("\\$");
+            String dateLend = "";
+            if(!strings[8].equals("")){
+                String[] lendTime = strings[8].split("T");
+                String[] settingDate = lendTime[0].split("-");
+                dateLend = settingDate[1]+"-"+settingDate[2]+"-"+settingDate[0];
+            }
             this.service_id = strings[0];
             this.owner_id = strings[1];
             this.nome = strings[2];
@@ -172,7 +179,7 @@ public class Utilities {
             this.pattern = strings[5]; // il pattern che sceglie l'utente quando lo sceglie
             this.car_space = strings[6];
             this.lend_obj = strings[7]; // l'oggetto dato in prestito
-            this.lend_time = strings[8]; // quando va restituito l'oggetto preso in prestito
+            this.lend_time = dateLend; // quando va restituito l'oggetto preso in prestito
             this.pickuplocation = strings[9]; // il posto in cui devi andare a prendere qualcosa per un terzo
             this.img = strings[10];
             this.nPart = strings[11];
@@ -181,7 +188,15 @@ public class Utilities {
             this.end_date = strings[14];
             this.recurrence = strings[15];
         }
-
+        public static boolean conteinService(List<myService> l, myService s){
+            System.out.println("ENTER -->"+s.service_id);
+            for(myService o: l){
+                System.out.println("--> "+o.service_id+" -->"+s.service_id);
+                if(o.service_id.equals(s.service_id))
+                    return true;
+            }
+            return false;
+        }
         @Override
         public String toString() {
             return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;        }

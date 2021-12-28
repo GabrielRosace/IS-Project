@@ -1,7 +1,10 @@
 package com.example.nekoma_families_share;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -10,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -52,6 +56,7 @@ public class DettagliServizzio extends AppCompatActivity {
     private TextView lendTime;
     private  String groupId;
     public DatePickerDialog datePicker;
+    public ConstraintLayout layout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +69,8 @@ public class DettagliServizzio extends AppCompatActivity {
                 finish();
             }
         });
-
+        initDatePicker();
+        layout = (ConstraintLayout) findViewById(R.id.progressLayoutService);
         groupId = Utilities.getGroupId(DettagliServizzio.this);
         String extras = getIntent().getStringExtra("servizio");
         service = new Utilities.myService(extras);
@@ -82,30 +88,25 @@ public class DettagliServizzio extends AppCompatActivity {
         lendTime = (TextView) findViewById(R.id.lendTime2);
         lendTime.setVisibility(View.GONE);
         lendTimeT.setVisibility(View.GONE);
-        new ImageDownloader(img).execute(data[10]);
+        buttonS.setVisibility(View.GONE);
+        new ImageDownloader(img).execute(service.img);
         for(int i=0;i<data.length;i++){
             System.out.println("<--->"+data[i]);
         }
         name.setText(this.service.nome);
         location.setText(this.service.location);
         desc.setText(service.descrizione);
-
         if(service.pattern.equals("car")){
-
             forType.setText(service.car_space);
             forTypeTitle.setText("Posti auto disponibili:");
             lendTime.setVisibility(View.GONE);
             lendTimeT.setVisibility(View.GONE);
         }else if(service.pattern.equals("lend")){
-            if(service.recurrence.equals("true")){
-                lendTime.setVisibility(View.VISIBLE);
-                lendTimeT.setVisibility(View.VISIBLE);
-                lendTime.setText(service.lend_time);
-            }
+            lendTime.setVisibility(View.VISIBLE);
+            lendTimeT.setVisibility(View.VISIBLE);
+            lendTime.setText(service.lend_time);
             forType.setText(service.lend_obj);
-
             forTypeTitle.setText("Ogetto in prestito:");
-
         }else if(service.pattern.equals("pickup")){
             forType.setText(service.pickuplocation);
             forTypeTitle.setText("luogo di ritrovo:");
@@ -215,60 +216,70 @@ public class DettagliServizzio extends AppCompatActivity {
                     map.put("description", desc.getText().toString());
                     map.put("location", location.getText().toString());
                     map.put("pattern",service.recType);
-                    if(data[5].equals("car")){
-                        map.put( "car_space",data[6] );
-                    }else if(data[5].equals("lend")){
-                        map.put( "lend_obj", data[7]);
-                        map.put( "lend_time",data[8]);
-                    }else if(data[5].equals("pickup")){
-                        map.put( "pickuplocation", data[9]);
+                    if(service.pattern.equals("car")){
+                        map.put( "car_space",service.car_space );
+                    }else if(service.pattern.equals("lend")){
+                        map.put( "lend_obj", service.lend_obj);
+                        map.put( "lend_time",service.lend_time);
+                    }else if(service.pattern.equals("pickup")){
+                        map.put( "pickuplocation", service.pickuplocation);
                     }
-                    map.put("img",data[10]);
-                    Utilities.httpRequest(DettagliServizzio.this, Request.Method.PATCH,"/groups/"+groupId+"/service/"+data[0], response -> {
+                    map.put("img",service.img);
+                    Utilities.httpRequest(DettagliServizzio.this, Request.Method.PATCH,"/groups/"+groupId+"/service/"+service.service_id, response -> {
                         finish();
                     }, System.err::println, map);
 
                 }
+
             });
+            buttonS.setVisibility(View.VISIBLE);
+            layout.setVisibility(View.GONE);
         }else{
             HashMap<String,String> m = new HashMap<>();
             List<Utilities.myService> l = new ArrayList<>();
             m.put("paretcipant", Utilities.getUserID(DettagliServizzio.this));
-            Utilities.httpRequest(DettagliServizzio.this, Request.Method.GET,"/"+groupId+"/service?", response -> {
+            Utilities.httpRequest(DettagliServizzio.this, Request.Method.GET,"/groups/"+groupId+"/service?partecipant=me", response -> {
                 try {
                     JSONArray arr = new JSONArray((String) response);
+                    System.out.println("ciao ");
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject obj = arr.getJSONObject(i);
                         l.add(new Utilities.myService(obj));
+                        System.out.println("----->---->"+l.toString());
+                    }
+                    if(!Utilities.myService.conteinService(l,this.service)){
+                        buttonS.setText("Partecipa");
+                        desc.setEnabled(false);
+                        buttonS.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) { //apre calendar
+                                openDatePicker(view);
+                            }
+                        });
+                        buttonS.setVisibility(View.VISIBLE);
+                        layout.setVisibility(View.GONE);
+                    }else{
+                        buttonS.setText("Smetti di partecipare");
+                        desc.setEnabled(false);
+                        buttonS.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                HashMap<String,String> map = new HashMap();
+                                map.put("activity_id", service.service_id);
+                                map.put("user_id",Utilities.getUserID(DettagliServizzio.this));
+                                Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+data[0]+"/partecipate", response -> {
+                                    finish();
+                                }, System.err::println,map);
+                            }
+                        });
+                        buttonS.setVisibility(View.VISIBLE);
+                        layout.setVisibility(View.GONE);
                     }
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
             }, System.err::println,m);
-            if(!l.contains(service)){
-                buttonS.setText("Partecipa");
-                desc.setEnabled(false);
-                buttonS.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) { //apre calendar
-                        openDatePicker(view);
-                    }
-                });
-            }else{
-                buttonS.setText("Smetti di parecipare");
-                desc.setEnabled(false);
-                buttonS.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        HashMap<String,String> map = new HashMap();
-                        map.put("activity_id", service.service_id);
-                        map.put("user_id",Utilities.getUserID(DettagliServizzio.this));
-                        Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+data[0]+"/partecipate", response -> {
-                            finish();
-                        }, System.err::println,map);
-                    }
-                });
-            }
+
         }
     }
     public void openDatePicker(View v) {
@@ -322,15 +333,16 @@ public class DettagliServizzio extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 month = month + 1;
-                String date = year + "-" + month + "-" + dayOfMonth;
-                Map<String, String> m = new HashMap<>();
-                m.put("days", date);
-                Utilities.httpRequest(DettagliServizzio.this, Request.Method.POST, "groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
-                    Toast.makeText(DettagliServizzio.this, "Partipazione effettuata", Toast.LENGTH_SHORT).show();
+                String date = "["+year + "-" + month + "-" + dayOfMonth+"]";
+                Map<String, String> myMap = new HashMap<>();
+                System.out.println("----"+date);
+                myMap.put("days", date);
+                Utilities.httpRequest(DettagliServizzio.this, Request.Method.POST, "/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
+                    Toast.makeText(DettagliServizzio.this, "Partecipazione effettuata", Toast.LENGTH_SHORT).show();
                     recreate();
                 }, response -> {
                     Toast.makeText(DettagliServizzio.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
-                }, m);
+                }, myMap);
             }
         };
         Calendar calendar = Calendar.getInstance();
@@ -368,4 +380,5 @@ public class DettagliServizzio extends AppCompatActivity {
             holder.setImageBitmap(bitmap);
         }
     }
+
 }
