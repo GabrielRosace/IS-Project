@@ -60,7 +60,7 @@
                 android:id="@+id/closed_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Servizi passati" />
+                android:text="scaduti" />
 
         </com.google.android.material.tabs.TabLayout>
 
