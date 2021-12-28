@@ -46,7 +46,7 @@ router.post('/', (req, res, next) => {
       newActivity.status = false
       newActivity.image_url = req.body.image_url ? req.body.image_url : 'https://picsum.photos/200'
 
-      if(req.body.labels && req.body.labels != ''){
+      if(req.body.labels && req.body.labels != '' && req.body.labels != '[]'){
         let idLabels = req.body.labels.substring(1, req.body.labels.length - 1).split(',')
         let labels = []
         for(let i = 0; i < idLabels.length; i++){
