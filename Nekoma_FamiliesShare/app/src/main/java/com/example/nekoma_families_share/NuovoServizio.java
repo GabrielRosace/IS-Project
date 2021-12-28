@@ -768,6 +768,7 @@ public class NuovoServizio extends AppCompatActivity {
                 Toast.makeText(this, "Data di inizio mancante", Toast.LENGTH_SHORT).show();
             }
         }else{
+            System.out.println("Sono qui");
             Utilities.httpRequest(this, Request.Method.POST,"/groups/"+Utilities.getGroupId(this)+"/service",response -> {
                 finish();
             },error -> {

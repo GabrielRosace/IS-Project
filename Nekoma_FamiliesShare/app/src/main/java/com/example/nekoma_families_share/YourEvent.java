@@ -132,7 +132,7 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/" + id_group + "?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
-                System.out.println(response);
+//                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj;
                     try {
@@ -155,7 +155,7 @@ public class YourEvent extends AppCompatActivity {
             try {
                 JSONArray arr = new JSONArray((String) response);
                 for (int i = 0; i < arr.length(); i++) {
-                    System.out.println(response);
+//                    System.out.println(response);
                     JSONObject obj = arr.getJSONObject(i);
                     scaduti_eventi.add(new Utilities.myRecEvent(obj));
                     this.getRecPartecipaScaduti();
@@ -172,7 +172,7 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/" + id_group + "?expired=true", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
-                System.out.println(response);
+//                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj;
                     try {
@@ -194,10 +194,10 @@ public class YourEvent extends AppCompatActivity {
         Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/" + id_group + "?expired=false", response -> {
             try {
                 JSONArray arr = new JSONArray((String) response);
-                System.out.println(response);
+//                System.out.println(response);
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
-                    System.out.println(obj);
+//                    System.out.println(obj);
                     partecipi_eventi.add(new Utilities.myRecEvent(obj));
                 }
             } catch (JSONException e) {
@@ -377,7 +377,7 @@ public class YourEvent extends AppCompatActivity {
                                         JSONArray Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
                                         for (int i = 0; i < Part.length(); ++i) {
-                                            System.out.println(Part.getString(i));
+//                                            System.out.println(Part.getString(i));
                                             if (Part.getString(i).equals(user_id)) {
                                                 find = true;
                                             }
@@ -556,26 +556,27 @@ public class YourEvent extends AppCompatActivity {
 
             if (event instanceof Utilities.myRecEvent) {
                 new ImageDownloader(holder.myImageView).execute(event.getImage());
-                System.out.println(event.getClass());
-                System.out.println(event.getName());
+//                System.out.println(event.getClass());
+//                System.out.println(event.getName());
                 holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event, getTheme()));
                 holder.btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent evento = new Intent(YourEvent.this, DettagliEventoRicorrente.class);
                         // System.out.println("intent: "+event.toString());
+//                        System.out.println("Myrecevent: "+ event);
                         evento.putExtra("evento", event.toString());
                         startActivity(evento);
                     }
                 });
             } else {
-                System.out.println(event.getImage());
+//                System.out.println(event.getImage());
 
                 if (event.getImage().equals("nan")) { // Non è stata specificata nessun immagine, ne setto una di default
-                    System.out.println("qui dentro**************************");
+//                    System.out.println("qui dentro**************************");
                     holder.myImageView.setImageDrawable(getDrawable(R.drawable.persone));
                 } else { // Scarico l'immagine dal server e la aggiungo alla view
-                    System.out.println("******************Secondo");
+//                    System.out.println("******************Secondo");
                     Utilities.httpRequest(YourEvent.this, Request.Method.GET, "/image/" + event.getImage(), response -> {
                         String url = "";
                         try {
@@ -604,6 +605,8 @@ public class YourEvent extends AppCompatActivity {
                     public void onClick(View view) {
                         Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
                         evento.putExtra("evento", event.toString());
+//                        System.out.println("evento: "+ event);
+
                         startActivity(evento);
                     }
                 });
