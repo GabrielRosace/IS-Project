@@ -17,7 +17,6 @@
             android:layout_height="55dp"
             android:background="@color/purple_500"
             android:minHeight="?attr/actionBarSize"
-            android:onClick="getHomePage"
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Archivio Eventi"

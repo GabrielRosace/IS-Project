@@ -30,6 +30,7 @@
     <string name="serviziricorrenti">Attività ricorrenti</string>
     <string name="carsharing">Carsharing</string>
     <string name="prestito">Prestito</string>
+    <string name="yourJoin">Giorni in cui partecipi:</string>
     <string-array name="eventName">
         <item>Evento semplice</item>
         <item>Carsharing</item>

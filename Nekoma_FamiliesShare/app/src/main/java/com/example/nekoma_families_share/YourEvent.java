@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class YourEvent extends AppCompatActivity {
     private List<Utilities.Situation> tuoi_eventi = new ArrayList<>();
@@ -89,7 +90,7 @@ public class YourEvent extends AppCompatActivity {
                 finish();
             }
         });
-
+        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

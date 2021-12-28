@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class YourService extends AppCompatActivity {
 
@@ -87,6 +88,7 @@ public class YourService extends AppCompatActivity {
         });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.service_tab);
+        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

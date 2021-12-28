@@ -7,6 +7,7 @@
     tools:context=".NuovoServizio">
 
     <ScrollView
+        android:id="@+id/scrollView4"
         android:layout_width="391dp"
         android:layout_height="729dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -379,19 +380,6 @@
                     app:layout_constraintTop_toBottomOf="@+id/servicePattern"
                     tools:ignore="SpeakableTextPresentCheck" />
 
-                <Button
-                    android:id="@+id/serviceSave"
-                    android:layout_width="361dp"
-                    android:layout_height="51dp"
-                    android:layout_marginStart="14dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="50dp"
-                    android:onClick="newService"
-                    android:text="@string/serviceSave"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-
                 <CheckBox
                     android:id="@+id/checkMon"
                     android:layout_width="65dp"
@@ -509,5 +497,19 @@
         app:navigationIcon="@drawable/abc_vector_test"
         app:title="@string/nsToolbar"
         app:titleTextColor="?attr/colorOnPrimary" />
+
+    <ImageView
+        android:id="@+id/serviceSave"
+        android:layout_width="41dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="354dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="683dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

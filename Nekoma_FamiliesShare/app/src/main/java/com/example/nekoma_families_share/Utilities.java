@@ -262,6 +262,7 @@ public class Utilities {
                 this.owner_id = recAct.getString("creator_id");
                 this.labels = recAct.getString("labels");
             } else {
+                System.out.println(obj);
                 this.nome = obj.getString("name");
                 this.img = obj.getString("image_url");
                 this.descrizione = obj.getString("description");

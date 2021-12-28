@@ -137,7 +137,6 @@ public class Profile extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Button saveChange = findViewById(R.id.profileSaveChanges);
-                emailLabel.setEnabled(isChecked);
                 nameLabel.setEnabled(isChecked);
                 surnameLabel.setEnabled(isChecked);
                 phoneLabel.setEnabled(isChecked);
@@ -152,6 +151,7 @@ public class Profile extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     // Metodo che permette di comunicare con il server, usato per eliminare un utente

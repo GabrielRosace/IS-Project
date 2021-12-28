@@ -19,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,7 +68,7 @@ public class NuovoServizio extends AppCompatActivity {
 
     private Button serviceStartDate;
     private Button serviceEndDate;
-    private Button serviceSave;
+    private ImageView serviceSave;
     private Button serviceMonthDate;
     private Button serviceLendTime;
 
@@ -452,6 +453,16 @@ public class NuovoServizio extends AppCompatActivity {
                 if(serviceEndDate.getText().length()<=10){
                     LocalDate lastDate = getStartWeek(serviceEndDate.getText().toString());
                     endWeek = getWeekDates(lastDate);
+                }
+            }
+        });
+        serviceSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    newService(v);
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
         });
