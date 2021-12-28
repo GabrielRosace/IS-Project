@@ -138,7 +138,10 @@ public class YourEvent extends AppCompatActivity {
                     try {
                         obj = arr.getJSONObject(i);
                     } catch (JSONException e) {
+
                         obj = arr.getJSONArray(0).getJSONObject(i);
+                        System.out.println("***********ETICHETTEEEE");
+                        System.out.println(obj);
                     }
                     tuoi_eventi.add(new Utilities.myRecEvent(obj));
                 }

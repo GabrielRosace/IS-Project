@@ -6,6 +6,31 @@
     android:layout_height="match_parent"
     tools:context=".NuovoServizio">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/nsToolbar"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:foregroundTint="?attr/colorOnPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/abc_vector_test"
+        app:title="@string/nsToolbar"
+        app:titleTextColor="?attr/colorOnPrimary" />
+
+    <ImageView
+        android:id="@+id/serviceSave"
+        android:layout_width="41dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
     <ScrollView
         android:id="@+id/scrollView4"
         android:layout_width="391dp"
@@ -343,7 +368,7 @@
                     android:layout_marginTop="7dp"
                     android:layout_marginEnd="29dp"
                     android:ems="10"
-                    android:inputType="textPersonName"
+                    android:inputType="number"
                     android:minHeight="48dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
@@ -482,30 +507,5 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/nsToolbar"
-        android:layout_width="409dp"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:foregroundTint="?attr/colorOnPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/abc_vector_test"
-        app:title="@string/nsToolbar"
-        app:titleTextColor="?attr/colorOnPrimary" />
-
-    <ImageView
-        android:id="@+id/serviceSave"
-        android:layout_width="41dp"
-        android:layout_height="42dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
