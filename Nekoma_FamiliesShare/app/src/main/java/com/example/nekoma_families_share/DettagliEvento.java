@@ -184,6 +184,7 @@ public class DettagliEvento extends AppCompatActivity {
         } else {
             eventLabels = Arrays.asList(evento.labels.split(","));
         }
+
         addRecyclerView(eventLabels); // Aggiungo le informazioni dell'etichette alla view
 
 

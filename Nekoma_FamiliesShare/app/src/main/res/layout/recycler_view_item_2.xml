@@ -9,8 +9,8 @@
   <androidx.cardview.widget.CardView
       android:id="@+id/cardView3"
       android:layout_width="65dp"
-      android:layout_height="67dp"
-      android:layout_marginStart="30dp"
+      android:layout_height="64dp"
+      android:layout_marginStart="25dp"
       app:cardCornerRadius="150dp"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent">

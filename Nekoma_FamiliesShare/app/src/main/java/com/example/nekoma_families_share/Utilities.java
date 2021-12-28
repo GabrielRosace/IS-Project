@@ -68,9 +68,7 @@ public class Utilities {
         return prefs.getString("token", "");
     }
 
-    /**
-     * With bearer token authentication and params
-     */ // Metodo per semplificare le richieste http
+    // Metodo per semplificare le richieste http con autenticazione e parametri
     public static void httpRequest(Context context, int method, String endpoint, Response.Listener onSuccess, Response.ErrorListener onError, Map<String, String> params) {
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = context.getString(R.string.url) + endpoint;
@@ -160,10 +158,13 @@ public class Utilities {
             this.recurrence = recurrence;
         }
 
+        //        Creazione di un servizio a partire dal json che arriva dal server
         public myService(JSONObject obj) throws JSONException {
-            this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), obj.getString( "nPart"), obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
+            this(obj.getString("service_id"), obj.getString("owner_id"), obj.getString("name"), obj.has("description") ? obj.getString("description") : "", obj.getString("location"), obj.getString("pattern"), obj.has("car_space") ? obj.getString("car_space") : "", obj.has("lend_obj") ? obj.getString("lend_obj") : "", obj.has("lend_time") ? obj.getString("lend_time") : "", obj.has("pickuplocation") ? obj.getString("pickuplocation") : "", obj.getString("img"), obj.getString("nPart"), obj.getString("type"), obj.getJSONArray("start_date").toString(), obj.getJSONArray("end_date").toString(), obj.getString("recurrence"));
         }
-        public myService(String s){
+
+        //        Creazione di un servizio a partire da una stringa nel seguente formato  ...$...$...$...
+        public myService(String s) {
             String[] strings = s.split("\\$");
             String dateLend = "";
             if(!strings[8].equals("")){
@@ -199,7 +200,8 @@ public class Utilities {
         }
         @Override
         public String toString() {
-            return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;        }
+            return service_id + '$' + owner_id + '$' + nome + '$' + descrizione + '$' + location + '$' + pattern + '$' + car_space + '$' + lend_obj + '$' + lend_time + '$' + pickuplocation + '$' + img + '$' + nPart + '$' + recType + '$' + start_date + '$' + end_date + '$' + recurrence;
+        }
 
         @Override
         public String getName() {
@@ -225,17 +227,17 @@ public class Utilities {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if(obj instanceof myRecEvent){
+            if (obj instanceof myRecEvent) {
                 myRecEvent o = (myRecEvent) obj;
                 return this.event_id.equals(o.event_id);
-            }else{
+            } else {
                 return false;
             }
         }
 
         public final String descrizione;
         public final String enddate;
-        public final String labels;
+        public String labels;
         public final String owner_id;
         public final String recType;
         public final String start_date;
@@ -255,55 +257,52 @@ public class Utilities {
             this.end_date = end_date;
         }
 
+        //        Creazione dei un evento ricorrente a partire dall'json che mi arriva dal server
         public myRecEvent(JSONObject obj) throws JSONException {
             JSONObject recAct = null;
-            if(obj.has("partecipant")){
+            if (obj.has("partecipant")) {
                 this.nPart = obj.getJSONObject("partecipant").length();
                 obj = obj.getJSONArray("event").getJSONObject(0);
-            }else{
+            } else {
                 this.nPart = 10;
             }
             if (obj.has("RecurringActivity") && !obj.getJSONArray("RecurringActivity").isNull(0)) {
-
-                try{
+                try {
                     recAct = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0);
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     recAct = obj.getJSONArray("RecurringActivity").getJSONObject(0);
                 }
-
                 this.nome = recAct.getString("name");
                 this.img = recAct.getString("image_url");
                 this.descrizione = recAct.getString("description");
                 this.owner_id = recAct.getString("creator_id");
                 this.labels = recAct.getString("labels");
             } else {
-                System.out.println(obj);
                 this.nome = obj.getString("name");
                 this.img = obj.getString("image_url");
                 this.descrizione = obj.getString("description");
                 this.owner_id = obj.getString("creator_id");
                 this.labels = obj.getString("labels");
             }
-
-            if(obj.has("Recurrence")){
+            if (obj.has("Recurrence")) {
                 this.recType = obj.getJSONArray("Recurrence").getJSONObject(0).getString("type");
                 this.start_date = obj.getJSONArray("Recurrence").getJSONObject(0).getString("start_date");
                 this.end_date = obj.getJSONArray("Recurrence").getJSONObject(0).getString("end_date");
                 this.event_id = obj.getJSONArray("Recurrence").getJSONObject(0).getString("activity_id");
                 this.enddate = ".";
-            }else if(obj.has("type")){
+            } else if (obj.has("type")) {
                 this.recType = obj.getString("type");
                 this.start_date = obj.getString("start_date");
                 this.end_date = obj.getString("end_date");
                 this.event_id = obj.getString("activity_id");
                 this.enddate = ".";
-            }else if(obj.has("RecurringActivity") && obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).has("Recurrence")){
+            } else if (obj.has("RecurringActivity") && obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).has("Recurrence")) {
                 this.recType = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("type");
                 this.start_date = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("start_date");
                 this.end_date = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("end_date");
                 this.event_id = obj.getJSONArray("RecurringActivity").getJSONArray(0).getJSONObject(0).getJSONArray("Recurrence").getJSONObject(0).getString("activity_id");
                 this.enddate = ".";
-            }else{
+            } else {
                 this.recType = "";
                 this.start_date = "";
                 this.end_date = "";
@@ -312,10 +311,9 @@ public class Utilities {
             }
         }
 
+        //        Creazione dell'evento ricorrente a partire da una stringa formattata in questo modo  ...$...$...$..$...
         public myRecEvent(String s) {
             String[] parsed = s.split("\\$");
-
-
             this.nome = parsed[0];
             this.event_id = parsed[1];
             this.img = parsed[2];
@@ -350,6 +348,7 @@ public class Utilities {
         }
     }
 
+    // Situation è il 'genitore' di evento,evento ricorrente e servizio. Queste attività sono accomunate da questi 3 metodi
     public interface Situation {
         String getName();
 
