@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -90,6 +92,7 @@ public class YourEvent extends AppCompatActivity {
                 finish();
             }
         });
+
         Objects.requireNonNull(tabLayout.getTabAt(0)).select();
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -308,11 +311,11 @@ public class YourEvent extends AppCompatActivity {
 
                                                 //controllo le date
                                                 String date = tmp.getString("end");
-                                                Calendar cal = Calendar.getInstance();
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-                                                cal.setTime(sdf.parse(date));
-
-                                                if (Calendar.getInstance().before(cal)) {
+                                                String[] tmp_date = date.split("T");
+                                                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                                LocalDate checkdate = LocalDate.parse(tmp_date[0],formatter);
+                                                System.out.println(LocalDate.now());
+                                                if (LocalDate.now().isEqual(checkdate) || LocalDate.now().isBefore(checkdate)) {
 
                                                     String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
@@ -421,11 +424,11 @@ public class YourEvent extends AppCompatActivity {
                                             } else {
 
                                                 String date = tmp.getString("end");
-                                                Calendar cal = Calendar.getInstance();
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-                                                cal.setTime(sdf.parse(date));
-
-                                                if (Calendar.getInstance().before(cal)) {
+                                                String[] tmp_date = date.split("T");
+                                                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                                LocalDate checkdate = LocalDate.parse(tmp_date[0],formatter);
+                                                System.out.println(LocalDate.now());
+                                                if (LocalDate.now().isEqual(checkdate) || LocalDate.now().isBefore(checkdate)) {
 
                                                     String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
@@ -493,7 +496,7 @@ public class YourEvent extends AppCompatActivity {
                                     }
                                     ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
                                     pr.setVisibility(View.GONE);
-                                } catch (JSONException | ParseException e) {
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 

@@ -168,9 +168,7 @@ public class Utilities {
             String[] strings = s.split("\\$");
             String dateLend = "";
             if(!strings[8].equals("")){
-                String[] lendTime = strings[8].split("T");
-                String[] settingDate = lendTime[0].split("-");
-                dateLend = settingDate[1]+"-"+settingDate[2]+"-"+settingDate[0];
+                dateLend=formatDate(strings[8]);
             }
             this.service_id = strings[0];
             this.owner_id = strings[1];
@@ -188,6 +186,11 @@ public class Utilities {
             this.start_date = strings[13];
             this.end_date = strings[14];
             this.recurrence = strings[15];
+        }
+        public String formatDate(String data){
+            String[] split1 = data.split("T");
+            String[] settingDate = split1[0].split("-");
+            return settingDate[1]+"-"+settingDate[2]+"-"+settingDate[0];
         }
         public static boolean conteinService(List<myService> l, myService s){
             System.out.println("ENTER -->"+s.service_id);
