@@ -3010,7 +3010,7 @@ function checkDates (r, days) {
   switch (r.type) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
-        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
+        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]){
           return false
         }
       }

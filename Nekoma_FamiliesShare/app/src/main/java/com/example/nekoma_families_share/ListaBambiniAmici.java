@@ -148,7 +148,6 @@ public class ListaBambiniAmici extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(ListaBambiniAmici.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
