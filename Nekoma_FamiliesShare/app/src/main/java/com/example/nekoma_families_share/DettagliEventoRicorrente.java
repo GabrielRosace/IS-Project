@@ -237,7 +237,7 @@ public class DettagliEventoRicorrente extends AppCompatActivity {
             dejoin.setVisibility(View.VISIBLE);
             dejoin.setOnClickListener(v -> Utilities.httpRequest(DettagliEventoRicorrente.this, Request.Method.DELETE, "/recurringActivity/"+evento.event_id, response -> {
                 Toast.makeText(DettagliEventoRicorrente.this, "Evento eliminato con successo", Toast.LENGTH_SHORT).show();
-                recreate();
+                finish();
             }, System.err::println, new HashMap<>()));
             findViewById(R.id.add_label).setVisibility(View.VISIBLE);
             btn.setOnClickListener(v -> {
