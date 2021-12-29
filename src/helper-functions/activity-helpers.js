@@ -82,7 +82,6 @@ const fetchAGroupEventActivity = async (groupId, calendarId, activityId) => {
     const pageEvents = resp.data.items
     const eventfromActivityId = pageEvents.filter(event => event.extendedProperties.shared.activityId === activityId)
     events = events.concat(eventfromActivityId)
-    console.log(events)
     nextPageToken = resp.data.nextPageToken
   } while (nextPageToken)
   return events

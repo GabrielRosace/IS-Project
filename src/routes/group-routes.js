@@ -1131,9 +1131,7 @@ router.post('/:id/activities/:activityId/label', async (req, res, next) => {
   let groupId = req.params.id
   let activityId = req.params.activityId
   if (!groupId || !activityId) { return res.status(400).send('Bad Request') }
-  // console.log(userId);
   const group = await Group.findOne({ group_id: groupId }).exec()
-  console.log(group)
   if (group) {
     const flabel = await Label.findOne({ label_id: label_id, group_id: groupId }).exec()
     if (!flabel) {
@@ -1153,7 +1151,6 @@ router.post('/:id/activities/:activityId/label', async (req, res, next) => {
     try {
       await Activity.updateOne({ activity_id: activityId }, { $set: { 'labels': nlabels } })
       const nact = await Activity.findOne({ activity_id: activityId })
-      console.log(nact)
       res.status(200).send('Label added to activity')
     } catch (error) {
       next(error)
@@ -1233,7 +1230,6 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
     }
     // get the information from google calendar
     const events = await ah.fetchAGroupEventActivity(group.group_id, group.calendar_id, activity_id)
-    console.log(events)
     if (events.length === 0) {
       return res.status(200).send({
         start: '',
@@ -1575,7 +1571,6 @@ router.post('/:id/activities', async (req, res, next) => {
     events.forEach(event => { event.extendedProperties.shared.activityId = activity_id })
     await Promise.all(
       events.map(event => {
-        console.log(event)
         calendar.events.insert({
           calendarId: group.calendar_id,
           resource: event
