@@ -52,6 +52,7 @@ public class DettagliServizzio extends AppCompatActivity {
     private Button buttonS;
     private EditText desc;
     private ImageView img;
+    public ImageView delete;
     private TextView lendTimeT;
     private TextView lendTime;
     private  String groupId;
@@ -79,6 +80,7 @@ public class DettagliServizzio extends AppCompatActivity {
         String extras = getIntent().getStringExtra("servizio");
         service = new Utilities.myService(extras);
         String[] data  = extras.split("\\$");
+        delete = (ImageView) findViewById(R.id.deleteImg);
         img = (ImageView) findViewById(R.id.imageSevice);
         name = (TextView) findViewById(R.id.textName);
         location = (TextView) findViewById(R.id.locationService);
@@ -97,6 +99,7 @@ public class DettagliServizzio extends AppCompatActivity {
         lendTime.setVisibility(View.GONE);
         lendTimeT.setVisibility(View.GONE);
         buttonS.setVisibility(View.GONE);
+        delete.setVisibility(View.GONE);
         new ImageDownloader(img).execute(service.img);
         for(int i=0;i<data.length;i++){
             System.out.println("<--->"+data[i]);
@@ -254,6 +257,7 @@ public class DettagliServizzio extends AppCompatActivity {
                 }
 
             });
+            delete.setVisibility(View.VISIBLE);
             buttonS.setVisibility(View.VISIBLE);
             layout.setVisibility(View.GONE);
         }else{
@@ -289,7 +293,7 @@ public class DettagliServizzio extends AppCompatActivity {
                                 HashMap<String,String> map = new HashMap();
                                 map.put("activity_id", service.service_id);
                                 map.put("user_id",Utilities.getUserID(DettagliServizzio.this));
-                                Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+data[0]+"/partecipate", response -> {
+                                Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
                                     finish();
                                 }, System.err::println,map);
                             }
@@ -303,6 +307,12 @@ public class DettagliServizzio extends AppCompatActivity {
             }, System.err::println,m);
 
         }
+    }
+    public void deleteService(View v){
+        Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id, response -> {
+            Toast.makeText(DettagliServizzio.this, "Servizio eliminato con successo", Toast.LENGTH_SHORT).show();
+            recreate();
+        }, System.err::println, new HashMap<>());
     }
     public void openDatePicker(View v) {
         datePicker.show();

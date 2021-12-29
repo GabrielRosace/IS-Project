@@ -48,6 +48,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
     private TextView datesMonth;
     private TextView NB;
     private Button buttonCreate;
+    private List<String> printMonthDate = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +96,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                startDate.setText("seleziona una data");
                 switch(adapter.getItem(i).toString()){
                     case "Giornaliera":
                         titleNumber.setVisibility(View.GONE);
@@ -103,6 +105,10 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                         NB.setVisibility(View.GONE);
                         for(CheckBox c : days){
                             c.setVisibility(View.GONE);
+                        }
+                        datesMonth.setText("");
+                        for (int j=0;j<printMonthDate.size();j++){
+                            printMonthDate.remove(j);
                         }
                         break;
                     case "Mensile":
@@ -114,6 +120,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                         for(CheckBox c : days){
                             c.setVisibility(View.GONE);
                         }
+                        datesMonth.setText("");
                         break;
                     case "Settimanale":
                         titleNumber.setText("Inserire il numero di settimane");
@@ -123,6 +130,10 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                         number.setVisibility(View.VISIBLE);
                         for(CheckBox c : days){
                             c.setVisibility(View.VISIBLE);
+                        }
+                        datesMonth.setText("");
+                        for (int j=0;j<printMonthDate.size();j++){
+                            printMonthDate.remove(j);
                         }
                         break;
                 }
@@ -235,7 +246,6 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
             s=s+"monthly/";
             for(String date: datesStart){
                 LocalDate d = LocalDate.parse(date,formatter);
-
                 datesEnd.add(d.plusMonths(shift).format(formatter));
             }
         }else if(reccurenceSelceted.equals("Giornaliera")){
@@ -276,30 +286,35 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
                 month = month+1;
-                String date = year+"-"+month+"-"+dayOfMonth;;
+                String date = year+"-"+month+"-"+dayOfMonth;
+                String print = dayOfMonth+"-"+month+"-"+year;
                 if(month<10 && dayOfMonth<10){
                     date = year+"-0"+month+"-0"+dayOfMonth;
+                    print ="0"+dayOfMonth+"-0"+month+"-"+year;
                 }else if(dayOfMonth<10){
                     date = year+"-"+month+"-0"+dayOfMonth;
+                    print = "0"+dayOfMonth+"-"+month+"-"+year;
                 }else if(month<10){
                     date = year+"-0"+month+"-"+dayOfMonth;
+                    print = dayOfMonth+"-0"+month+"-"+year;
                 }
-
-
                 if(reccurenceSelceted.equals("Mensile")){
                     DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
                     LocalDate d = LocalDate.parse(date,formatter);
-                    if(datesStart.contains(d.format(formatter)))
+                    if(datesStart.contains(d.format(formatter))) {
                         datesStart.remove(d.format(formatter));
-                    else{
+                        printMonthDate.remove(print);
+                    }else{
                         datesStart.add(d.format(formatter));
+                        printMonthDate.add(print);
                     }
                     datesMonth.setText("");
-                    for (String s:datesStart) {
-                        datesMonth.append(s+" ");
+                    for (String s:printMonthDate) {
+                        datesMonth.append(s+", ");
                     }
                 }else{
-                    startDate.setText(date);
+                    datesMonth.setText("");
+                    startDate.setText(print);
                     //calcolo data inizio e fine della settimana
                     startLocalDate = getStartWeek(date);
                 }
