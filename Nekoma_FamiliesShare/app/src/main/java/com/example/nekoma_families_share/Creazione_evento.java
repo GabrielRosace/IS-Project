@@ -278,6 +278,7 @@ public class Creazione_evento extends AppCompatActivity  {
             mapTime.put("category","");
             mapTime.put("status","ongoing");
             mapTime.put("parents","[]");
+            mapTime.put("description",desc);
 
 
 
@@ -292,6 +293,7 @@ public class Creazione_evento extends AppCompatActivity  {
                         Utilities.httpRequest(Creazione_evento.this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities/"+tmp.getString("id")+"/date", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
+                                Toast.makeText(Creazione_evento.this, "Evento aggiunto correttamente", Toast.LENGTH_LONG).show();
                                 Intent homepageA = new Intent(Creazione_evento.this,Homepage.class);
                                 startActivity(homepageA);
                             }
