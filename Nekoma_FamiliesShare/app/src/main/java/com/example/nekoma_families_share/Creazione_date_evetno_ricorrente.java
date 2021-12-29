@@ -109,6 +109,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                         datesMonth.setText("");
                         for (int j=0;j<printMonthDate.size();j++){
                             printMonthDate.remove(j);
+                            datesStart.remove(j);
                         }
                         break;
                     case "Mensile":
@@ -134,6 +135,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                         datesMonth.setText("");
                         for (int j=0;j<printMonthDate.size();j++){
                             printMonthDate.remove(j);
+                            datesStart.remove(j);
                         }
                         break;
                 }
@@ -284,7 +286,6 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
                 month = month+1;
                 String date = year+"-"+month+"-"+dayOfMonth;
                 String print = dayOfMonth+"-"+month+"-"+year;
