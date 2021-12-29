@@ -239,8 +239,8 @@ public class Creazione_evento extends AppCompatActivity  {
             map.put("status", "accepted");
             map.put("activity_id","");
             map.put("imgUrl","");
-
-            Utilities.httpRequest(this, Request.Method.GET, "/groups?searchBy=ids&ids=" + id_group, new Response.Listener<String>() {
+            map.put("group_name","");
+            /*Utilities.httpRequest(this, Request.Method.GET, "/groups?searchBy=ids&ids=" + id_group, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
@@ -257,9 +257,10 @@ public class Creazione_evento extends AppCompatActivity  {
                     Toast.makeText(Creazione_evento.this, error.toString(), Toast.LENGTH_LONG).show();
                     System.err.println(error.getMessage());
                 }
-            },new HashMap<>());
+            },new HashMap<>());*/
 
             HashMap<String,String> mapTime = new HashMap<>();
+
             mapTime.put("summary",nome);
             mapTime.put("location",luogo);
             mapTime.put("start",startD);
