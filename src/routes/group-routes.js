@@ -1233,6 +1233,7 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
     }
     // get the information from google calendar
     const events = await ah.fetchAGroupEventActivity(group.group_id, group.calendar_id, activity_id)
+    console.log(events)
     if (events.length === 0) {
       return res.status(200).send({
         start: '',
