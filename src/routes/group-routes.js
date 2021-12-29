@@ -1820,9 +1820,10 @@ router.delete('/:groupId/activities/:activityId', async (req, res, next) => {
     if (!member) {
       return res.status(401).send('Unauthorized')
     }
-    if (!member.admin) {
-      return res.status(401).send('Unauthorized')
-    }
+    // if (!member.admin) {
+    //   console.log("admin")
+    //   return res.status(401).send('Unauthorized')
+    // }
     const group = await Group.findOne({ group_id })
     const activity_id = req.params.activityId
     const resp = await calendar.events.list({
