@@ -189,7 +189,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
     }
     private String setDate() {
         DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        int shift = ((reccurenceSelceted.equals("Settimanale")) ? 7 : 1) * new Integer(number.getText().toString());
+        int shift = ((reccurenceSelceted.equals("Settimanale")) ? 7 : 1) * new Integer(number.getText().toString().equals("0") ? "1" : number.getText().toString());
         String s = new String();
         int i =0;
         boolean err = false;
