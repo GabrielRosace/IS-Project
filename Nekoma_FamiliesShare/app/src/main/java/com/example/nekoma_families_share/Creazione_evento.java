@@ -6,6 +6,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -29,7 +31,10 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +43,11 @@ import java.util.List;
 public class Creazione_evento extends AppCompatActivity  {
     protected static List<MyEtichette> etichette;
     private List<Button> labelSelect;
+    private Date startDate;
+    private Date endDate;
+    private Button buttonStartDate;
+    private Button buttonEndDate;
+    private DatePickerDialog dataStartPicker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +63,8 @@ public class Creazione_evento extends AppCompatActivity  {
 
         labelSelect = new ArrayList<>();
         String id_group = Utilities.getPrefs(this).getString("group", "");
+        buttonStartDate = (Button) findViewById(R.id.startDateEvent);
+        buttonEndDate = (Button) findViewById(R.id.endDateEvent);
         Utilities.httpRequest(this, Request.Method.GET, "/label/"+id_group, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -99,35 +111,98 @@ public class Creazione_evento extends AppCompatActivity  {
 
     }
 
-    public void showModalLabel(View v){
+    public void eventEndDate(View v){
+        DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month = month+1;
+                String date = year+"-"+month+"-"+dayOfMonth;;
+                if(month<10 && dayOfMonth<10){
+                    date = year+"-0"+month+"-0"+dayOfMonth;
+                }else if(dayOfMonth<10){
+                    date = year+"-"+month+"-0"+dayOfMonth;
+                }else if(month<10){
+                    date = year+"-0"+month+"-"+dayOfMonth;
+                }
+                buttonEndDate.setText(date);
+                //calcolo data inizio e fine della settimana
+                LocalDate startDate = getStartWeek(date);
 
+            }
+        };
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        dataStartPicker = new DatePickerDialog(this,dateListener,year,month,day);
+        dataStartPicker.show();
+    }
+
+    public void eventStartDate(View v){
+        DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month = month+1;
+                String date = year+"-"+month+"-"+dayOfMonth;;
+                if(month<10 && dayOfMonth<10){
+                    date = year+"-0"+month+"-0"+dayOfMonth;
+                }else if(dayOfMonth<10){
+                    date = year+"-"+month+"-0"+dayOfMonth;
+                }else if(month<10){
+                    date = year+"-0"+month+"-"+dayOfMonth;
+                }
+                buttonStartDate.setText(date);
+                //calcolo data inizio e fine della settimana
+                LocalDate startDate = getStartWeek(date);
+
+            }
+        };
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        dataStartPicker = new DatePickerDialog(this,dateListener,year,month,day);
+        dataStartPicker.show();
+    }
+    private LocalDate getStartWeek(String sDate){
+        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate firstDate = LocalDate.parse(sDate,formatter);
+        switch (firstDate.getDayOfWeek().toString()){
+            case "TUESDAY":
+                firstDate = firstDate.minusDays(1);
+                break;
+            case "WEDNESDAY":
+                firstDate = firstDate.minusDays(2);
+                break;
+            case "THURSDAY":
+                firstDate = firstDate.minusDays(3);
+                break;
+            case "FRIDAY":
+                firstDate = firstDate.minusDays(4);
+                break;
+            case "SATURDAY":
+                firstDate = firstDate.minusDays(5);
+                break;
+            case "SUNDAY":
+                firstDate = firstDate.minusDays(6);
+                break;
+        }
+        return firstDate;
     }
 
     public void onClickCreaButton(View v) throws ParseException {
         String nome = ((EditText)findViewById(R.id.inputEventNameRic)).getText().toString();
-        String luogo = ((EditText)findViewById(R.id.inputEventLcationRic)).getText().toString();
+        String luogo = ((EditText)findViewById(R.id.eventLocation)).getText().toString();
         String desc = ((EditText)findViewById(R.id.inputDescEventRic)).getText().toString();
-        String dataInizio = ((EditText)findViewById(R.id.inputEventDate)).getText().toString();
-        String dataFine = ((EditText)findViewById(R.id.inputEventEndEvent)).getText().toString();
-        String inizio = ((EditText) findViewById(R.id.inputEventStartTime)).getText().toString();
-        String fine = ((EditText) findViewById(R.id.inputEventEndTime)).getText().toString();
-        if(nome.equals("") || luogo.equals("") || desc.equals("") || dataInizio.equals("") || inizio.equals("") ||dataFine.equals("") || fine.equals("")){
+
+        if(nome.equals("") || luogo.equals("") || desc.equals("") || buttonEndDate.getText().toString().equals("") || buttonStartDate.getText().toString().equals("")){
             Toast.makeText(Creazione_evento.this, "INSERIRE TUTTI I CAMPI", Toast.LENGTH_LONG).show();
         }else{
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-            Date d = format.parse(dataInizio+" "+inizio);
-            String s = format2.format(d);
-            Date DInizio = format2.parse(s);
-
-            d = format.parse(dataFine+" "+fine);
-            s = format2.format(d);
-            Date DFine = format2.parse(s);
-            System.out.println(DInizio + " " +DFine);
-            String DateEnd = format2.format(DFine);
-            String DateStart = format2.format(DInizio);
-            System.out.println(DateStart + " " +DateEnd);
+            String s = buttonStartDate.getText().toString();
+            String s2 = buttonEndDate.getText().toString();
+            String startD = s+"T00:00:00Z";
+            String endD = s2+"T00:00:00Z";
             String labels = "[";
             Iterator i = labelSelect.iterator();
             boolean control = true;
@@ -147,7 +222,7 @@ public class Creazione_evento extends AppCompatActivity  {
                 }
             }
             labels = labels + "]";
-            System.out.println("----->"+labels);
+            System.out.println("-----> desc "+ desc);
 
             HashMap<String,String> map = new HashMap<>();
             String id_group = Utilities.getPrefs(this).getString("group", "");
@@ -183,27 +258,29 @@ public class Creazione_evento extends AppCompatActivity  {
                     System.err.println(error.getMessage());
                 }
             },new HashMap<>());
-            String[] Hinizio = inizio.split(":");
-            String[] Hfine = fine.split(":");
+
             HashMap<String,String> mapTime = new HashMap<>();
             mapTime.put("summary",nome);
             mapTime.put("location",luogo);
-            mapTime.put("start",DateStart);
-            mapTime.put("end",DateEnd);
+            mapTime.put("start",startD);
+            mapTime.put("end",endD);
             mapTime.put("cost","");
             mapTime.put("requiredChildren","2");
             mapTime.put("groupId",id_group);
-            mapTime.put("startHour",Hinizio[0]);
+            mapTime.put("startHour","10");
             mapTime.put("link","");
             mapTime.put("requiredParents","2");
             mapTime.put("repetition","none");
             mapTime.put("activityColor","#000000");
             mapTime.put("children","[]");
             mapTime.put("externals","[]");
-            mapTime.put("endHour",Hfine[0]);
+            mapTime.put("endHour","10");
             mapTime.put("category","");
             mapTime.put("status","ongoing");
             mapTime.put("parents","[]");
+
+
+
             Utilities.httpRequest(this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -238,13 +315,6 @@ public class Creazione_evento extends AppCompatActivity  {
             },map);
 
         }
-
-
-
-
-
-
-
     }
 
     public  static class SelectorLabels extends DialogFragment {
