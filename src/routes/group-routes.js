@@ -2866,12 +2866,7 @@ router.get('/:id/service', async (req, res, next) => {
     resList = recurrentList
   }
 
-  // FILTER TIME
-  // CHECK THIS PART
-
   if (time === 'expired') {
-    // ancora da implementare
-
     let myList = []
     resList.forEach((service) => {
       const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
@@ -2886,7 +2881,7 @@ router.get('/:id/service', async (req, res, next) => {
     let myList = []
     resList.forEach((service) => {
       const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
-      const lastdate = service.start_date[service.start_date.length - 1]
+      const lastdate = service.end_date[service.end_date.length - 1]
       if (myDate <= lastdate) {
         myList.push(service)
       }
