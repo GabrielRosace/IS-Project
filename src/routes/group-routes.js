@@ -2826,7 +2826,6 @@ router.get('/:id/service', async (req, res, next) => {
         }
       }
     })
-    console.log(partecipantList)
     resList = partecipantList
   }
 
