@@ -104,7 +104,6 @@ const Community = require('../models/community')
 const User = require('../models/user')
 const Label = require('../models/label')
 const Service = require('../models/service')
-// const RecurringActivity = require('../models/recurring-activity')
 const Recurrence = require('../models/recurrence')
 const Partecipant = require('../models/partecipant')
 
@@ -1250,6 +1249,7 @@ router.get('/:id/nekomaActivities/:activityId/information', async (req, res, nex
     next(error)
   }
 })
+
 // create an activity with more option of the default one
 router.post('/:id/nekomaActivities', async (req, res, next) => {
   if (!req.user_id) {
@@ -1306,6 +1306,7 @@ router.post('/:id/nekomaActivities', async (req, res, next) => {
     next(error)
   }
 })
+
 // create a timeslot with date, partecipats of one activity
 router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => {
   if (!req.user_id) {
@@ -1370,6 +1371,7 @@ router.post('/:id/nekomaActivities/:activityId/date', async (req, res, next) => 
     next(error)
   }
 })
+
 // update the timeslot of one activity
 router.patch(
   '/:groupId/nekomaActivities/:activityId/timeslots/:timeslotId',
@@ -1588,6 +1590,7 @@ router.post('/:id/activities', async (req, res, next) => {
     next(error)
   }
 })
+
 // get all the activity of one group, with labels if they exists
 router.get('/:id/activities', async (req, res, next) => {
   if (!req.user_id) {
@@ -1595,29 +1598,6 @@ router.get('/:id/activities', async (req, res, next) => {
   }
   const group_id = req.params.id
   const user_id = req.user_id
-
-  // Member.findOne({
-  //   group_id,
-  //   user_id,
-  //   group_accepted: true,
-  //   user_accepted: true
-  // })
-  //   .then(member => {
-  //     if (!member) {
-  //       return res.status(401).send('Unauthorized')
-  //     }
-  //     return Activity.find({ group_id })
-  //       .sort({ createdAt: -1 })
-  //       .lean()
-  //       .exec()
-  //       .then(activities => {
-  //         if (activities.length === 0) {
-  //           return res.status(404).send('Group has no activities')
-  //         }
-  //         res.json(activities)
-  //       })
-  //   })
-  //   .catch(next)
 
   const member = await Member.findOne({ group_id, user_id, group_accepted: true, user_accepted: true })
   if (!member) return res.status(401).send('Unauthorized')
@@ -1635,6 +1615,12 @@ router.get('/:id/activities', async (req, res, next) => {
   return res.json(activities)
 })
 
+// Ritorna tutte le attività secondo vari filtri:
+// - tutte le attività
+// - scadute
+// - ancora attive
+// - ricorrenti
+// - servizi
 router.get('/:id/services', async (req, res, next) => {
   if (!req.user_id) return res.status(401).send('Not authenticated')
 
@@ -1756,7 +1742,6 @@ router.get('/:id/services', async (req, res, next) => {
       break
     default:
       return res.status(400).send('Bad request')
-      break
   }
 })
 
@@ -2833,7 +2818,13 @@ router.get('/:id/service', async (req, res, next) => {
     let partecipantList = []
     let tmp = await Partecipant.find({ partecipant_id: userId, service: true })
     resList.forEach((service) => {
-      if (tmp.find(x => x.activity_id === service.service_id))partecipantList.push(service)
+      if (tmp.find(x => x.activity_id === service.service_id)) {
+        partecipantList.push(service)
+      } else {
+        if (creator === 'me') {
+          if (service.owner_id === userId) partecipantList.push(service)
+        }
+      }
     })
     resList = partecipantList
   }
@@ -2881,12 +2872,7 @@ router.get('/:id/service', async (req, res, next) => {
     resList = recurrentList
   }
 
-  // FILTER TIME
-  // CHECK THIS PART
-
   if (time === 'expired') {
-    // ancora da implementare
-
     let myList = []
     resList.forEach((service) => {
       const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
@@ -2901,7 +2887,7 @@ router.get('/:id/service', async (req, res, next) => {
     let myList = []
     resList.forEach((service) => {
       const myDate = new Date(new Date(Date.now()).setHours(0, 0, 0, 0))
-      const lastdate = service.start_date[service.start_date.length - 1]
+      const lastdate = service.end_date[service.end_date.length - 1]
       if (myDate <= lastdate) {
         myList.push(service)
       }
@@ -3010,7 +2996,7 @@ function checkDates (r, days) {
   switch (r.type) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
-        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]){
+        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
           return false
         }
       }

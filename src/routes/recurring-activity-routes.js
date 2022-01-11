@@ -2,11 +2,7 @@
 const express = require('express')
 const router = new express.Router()
 
-// const Label = require('../models/label')
 const Group = require('../models/group')
-// const Member = require('../models/member')
-// const Child = require('../models/child')
-// const Parent = require('../models/parent')
 const Partecipant = require('../models/partecipant')
 const Label = require('../models/label')
 const RecurringActivity = require('../models/recurring-activity')
@@ -14,17 +10,9 @@ const Recurrence = require('../models/recurrence')
 const objectid = require('objectid')
 const { newExportEmail } = require('../helper-functions/export-activity-data')
 
-// // TODO endpoint per avere eventi con lo le stesse label (stessi interessi)
-// // TODO modifica le query per la ricerca degli oggetti
-// // TODO aggiunta e eliminazione label da evento
-// // TODO endpoint per nPart
-// // TODO modificare get eventi filter by label
-// // TODO endpoint per dire se un utente partecipa o meno ad un evento -> bool
+
 
 // Crea una nuova attività ricorrente
-// // TODO verificare che in caso di weekly e monthly i giorni siano rispettati
-// // TODO group_name non serve
-// // TODO controllare che con una ricorrenza daily ci sia solo una start_date e una sola end_date
 router.post('/', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -90,6 +78,7 @@ router.post('/', (req, res, next) => {
   })
 })
 
+// Calcola le date di inizio dell'evento passate dall'utente
 function startingDate (dateStart) {
   let start_dateSplitted = dateStart.substring(1, dateStart.length - 1).replace(/\s+/g, '')
   start_dateSplitted = start_dateSplitted.split(',')
@@ -100,6 +89,7 @@ function startingDate (dateStart) {
   return start_date
 }
 
+// Calcola le date di inizio dell'evento passate dall'utente
 function endingDate (dateEnd) {
   let end_dateSplitted = dateEnd.substring(1, dateEnd.length - 1).replace(/\s+/g, '')
   end_dateSplitted = end_dateSplitted.split(',')
@@ -110,9 +100,12 @@ function endingDate (dateEnd) {
   return end_date
 }
 
+// Verifica che le date, in base al tipo di ricorrenza, seguino determinate regole:
+// - daily: la data di inizio deve essere minore della data di fine
+// - weekly: l'i-esimo giorno di inizio deve essere lo stesso giorno dell'i-esimo giorno di fine (es. gli i-esimi giorni devono essere entrambi lunedì)
+// - monthly: l'i-esimo giorno di inizio deve essere lo stesso numero dell'i-esimo giorno di fine (es. gli i-esimi giorni devono essere entrambi il 5) 
 function dateValidator (type, start_date, end_date) {
   if (type != 'daily' && type != 'weekly' && type != 'monthly') return false
-
   if (start_date.length != end_date.length) return false
   switch (type) {
     case 'daily':
@@ -140,12 +133,9 @@ function dateValidator (type, start_date, end_date) {
           if (end_date[i] >= end_nextMonday) return false
         }
       }
-
       break
-
     case 'monthly':
       if (start_date[start_date.length - 1] > end_date[0]) return false
-
       for (let i = 0; i < end_date.length; i++) {
         if (start_date[i].getDate() != end_date[i].getDate() || start_date[i] > end_date[i]) return false
         if (i < start_date.length - 1) {
@@ -446,15 +436,12 @@ router.get('/creator/:group_id', (req, res, next) => {
         }
       ]).then(a => {
         for(let i = 0; i < a.length; i++){
-          console.log(i);
           let end_dates = a[i].Recurrence[0].end_date
           if(end_dates[end_dates.length - 1] >= new Date(Date.now()))
             result.push(a[i])
         }
-        // console.log(result);
         return res.status(200).json(result)
       }).catch(error => {
-        console.log();
         return res.status(400).send('Error')
       })
       break
@@ -471,9 +458,6 @@ router.get('/:activity_id', (req, res, next) => {
   let activity_id = req.params.activity_id
   if (!activity_id) return res.status(400).send('Bad Request')
 
-  // RecurringActivity.findOne({ activity_id: activity_id }).exec().then((a) => {
-  //   return res.status(200).send(a)
-  // })
   RecurringActivity.aggregate([
     {
       '$lookup': {
@@ -507,7 +491,7 @@ router.delete('/:activity_id', (req, res, user) => {
   return res.status(200).send('Event deleted')
 })
 
-// Modifica le informazioni di un evento ricorrente
+// Modifica le informazioni di un evento ricorrente. I dati modificabili sono la descrizione e le date della ricorrenza
 router.put('/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -591,7 +575,7 @@ router.patch('/label/:activity_id', (req, res, next) => {
   })
 })
 
-// Elimina un'etichetta associata ad un evento da quest'ultimo
+// Elimina un'etichetta associata ad un evento
 router.delete('/label/:activity_id/:label_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -602,24 +586,6 @@ router.delete('/label/:activity_id/:label_id', (req, res, next) => {
   let label_id = req.params.label_id
   if(!label_id) return res.status(400).send('Bad Request')
 
-  // RecurringActivity.findOne({activity_id: activity_id}).exec().then(a => {
-  //   if(a){
-  //     console.log(a.labels);
-  //     for(let i = 0; i < a.labels.length; i++){
-  //       if(a.labels[i] == label_id)
-  //         delete a.labels[i]
-  //     }
-  //     console.log(a.labels);
-  //     a.save().then(() => {
-  //       return res.status(200).send('Label deleted')
-  //     }).catch(error => {
-  //       return res.status(400).send("Can't delete label")
-  //     })
-  //   }
-  //   else{
-  //     return res.status(400).send('Activity does not exist')
-  //   }
-  // })
   RecurringActivity.updateOne({activity_id: activity_id}, {$pull: {labels: label_id}}).then(() => {
     return res.status(200).send('Label deleted')
   }).catch(error => {
@@ -662,6 +628,7 @@ router.get('/label/:label_id', (req, res, next) => {
   })
 })
 
+// Ritorna true se l'utente partecipa all'evento specificato
 router.get('/isPartecipant/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
