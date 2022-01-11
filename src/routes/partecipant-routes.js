@@ -4,10 +4,8 @@ const router = new express.Router()
 const Partecipant = require('../models/partecipant')
 const RecurringActivity = require('../models/recurring-activity')
 const Recurrence = require('../models/recurrence')
-const objectid = require('objectid')
 
-// // TODO modificare come vengono passati i giorni dal client (con le [])
-// // TODO aggiungere il campo nPart per dire quanti partecipanti partecipano ad un evento
+// Aggiunge un nuovo partecipante ad un evento
 router.post('/', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -47,6 +45,7 @@ router.post('/', (req, res, next) => {
   })
 })
 
+// Prende dal client la stringa contenente i giorni che vuole partecipare e ritorna un array di tipo Date contenente i giorni
 function calculateDays (reqDays) {
   let daysSplitted = reqDays.substring(1, reqDays.length - 1).split(',')
   let days = []
@@ -57,6 +56,10 @@ function calculateDays (reqDays) {
   return days
 }
 
+// Controlla se le date che vengono passate dal client rispettano alcuni criteri, in base al tipo di ricorrenza dell'evento:
+// - daily: le date sono comprese tra la data di inizio e la data di fine
+// - weekly: le date sono comprese tra la data di inizio e la data di fine e i giorni passati dall'utente rispettano i giorni della settimana dell'evento
+// - monthly: le date sono comprese tra la data di inizio e la data di fine e il numero dei giorni passati dall'utente rispettano il numero dei giorni mensili dell'evento
 function checkDates (r, days) {
   let valid = false
   switch (r.type) {
@@ -67,7 +70,6 @@ function checkDates (r, days) {
         }
       }
       break
-
     case 'weekly':
       for (let i = 0; i < days.length; i++) {
         valid = false
@@ -108,7 +110,7 @@ router.delete('/:activity_id', (req, res, next) => {
   return res.status(200).send('Partecipation deleted')
 })
 
-// Modifica una partecipazione
+// Modifica una partecipazione (i giorni)
 router.patch('/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -126,7 +128,6 @@ router.patch('/:activity_id', (req, res, next) => {
 })
 
 // Ritorna il numero di partecipanti ad un evento
-// ! modificata
 router.get('/nPart/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }
@@ -141,6 +142,7 @@ router.get('/nPart/:activity_id', (req, res, next) => {
   })
 })
 
+// Ritorna tutti i giorni per il quale l'evento è definito
 router.get('/days/:activity_id', (req, res, next) => {
   let userId = req.user_id
   if (!userId) { return res.status(401).send('Not authenticated') }

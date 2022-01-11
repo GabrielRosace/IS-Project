@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 
 const partecipantSchema = new mongoose.Schema({
-  // The same of user_id
   partecipant_id: {
     type: String,
     required: true
