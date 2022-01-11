@@ -2818,8 +2818,15 @@ router.get('/:id/service', async (req, res, next) => {
     let partecipantList = []
     let tmp = await Partecipant.find({ partecipant_id: userId, service: true })
     resList.forEach((service) => {
-      if (tmp.find(x => x.activity_id === service.service_id))partecipantList.push(service)
+      if (tmp.find(x => x.activity_id === service.service_id)) {
+        partecipantList.push(service)
+      } else {
+        if (creator === 'me') {
+          if (service.owner_id === userId) partecipantList.push(service)
+        }
+      }
     })
+    console.log(partecipantList)
     resList = partecipantList
   }
 
@@ -2990,7 +2997,7 @@ function checkDates (r, days) {
   switch (r.type) {
     case 'daily':
       for (let i = 0; i < days.length; i++) {
-        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]){
+        if (days[i] < r.start_date[0] || days[i] > r.end_date[0]) {
           return false
         }
       }
