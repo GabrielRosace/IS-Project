@@ -167,7 +167,7 @@ public class DettagliServizzio extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                recType.setText("Questo evento si svolgerà con cadenza mensile nei giorni " + giorni + " a partire da " + firstMonth + " fino a " + lastMonth);
+                recType.setText("Questo servizio si svolgerà con cadenza mensile nei giorni " + giorni + " a partire da " + firstMonth + " fino a " + lastMonth);
             }
             if(service.recType.equals("weekly")){
                 String[] start = service.start_date.substring(1, service.start_date.length() - 1).split(",");
@@ -311,7 +311,8 @@ public class DettagliServizzio extends AppCompatActivity {
     public void deleteService(View v){
         Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id, response -> {
             Toast.makeText(DettagliServizzio.this, "Servizio eliminato con successo", Toast.LENGTH_SHORT).show();
-            recreate();
+//            recreate();
+            finish();
         }, System.err::println, new HashMap<>());
     }
     public void openDatePicker(View v) {

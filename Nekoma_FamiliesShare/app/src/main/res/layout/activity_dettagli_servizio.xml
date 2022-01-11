@@ -105,7 +105,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="100dp"
-        android:text="Ricorrennza"
+        android:text="Ricorrenza"
         android:textAlignment="center"
         android:textColor="#050505"
         android:textSize="16sp"
