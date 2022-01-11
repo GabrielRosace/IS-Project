@@ -257,7 +257,7 @@ public class YourService extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         //todo mettere dettaglio servizio ricorrente
-                        Intent servizio = new Intent(YourService.this, DettagliServizzio.class);
+                        Intent servizio = new Intent(YourService.this, DettagliServizio.class);
                         servizio.putExtra("servizio", service.toString());
                         startActivity(servizio);
                     }
@@ -268,7 +268,7 @@ public class YourService extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         //todo mettere dettaglio servizio
-                        Intent servizio = new Intent(YourService.this, DettagliServizzio.class);
+                        Intent servizio = new Intent(YourService.this, DettagliServizio.class);
                         servizio.putExtra("servizio", service.toString());
                         startActivity(servizio);
                     }

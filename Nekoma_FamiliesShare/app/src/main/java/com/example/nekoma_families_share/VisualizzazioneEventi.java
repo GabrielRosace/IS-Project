@@ -313,7 +313,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 });
             } else if (eve instanceof Utilities.myService) {
                 holder.btn.setOnClickListener(v -> {
-                    Intent evento = new Intent(VisualizzazioneEventi.this, DettagliServizzio.class);
+                    Intent evento = new Intent(VisualizzazioneEventi.this, DettagliServizio.class);
                     evento.putExtra("servizio", eve.toString());
                     startActivity(evento);
                 });

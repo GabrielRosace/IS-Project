@@ -28,7 +28,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
+public class Creazione_date_evento_ricorrente extends AppCompatActivity {
     private List<CheckBox> days;
     private List<String> datesStart;
     private List<String> datesEnd;
@@ -53,7 +53,7 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_creazione_date_evetno_ricorrente);
+        setContentView(R.layout.activity_creazione_date_evento_ricorrente);
         Toolbar t = (Toolbar) findViewById(R.id.toolbar_data_event_ric);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,10 +166,10 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
         String d = setDate();
         String arr[] = d.split("/");
         if(arr[1].equals("[]") || arr[2].equals("[]"))
-            Toast.makeText(Creazione_date_evetno_ricorrente.this,"dati non inseriti correttamente", Toast.LENGTH_LONG).show();
+            Toast.makeText(Creazione_date_evento_ricorrente.this,"dati non inseriti correttamente", Toast.LENGTH_LONG).show();
         else {
             map.put("group_id", id_group);
-            map.put("creator_id", Utilities.getUserID(Creazione_date_evetno_ricorrente.this));
+            map.put("creator_id", Utilities.getUserID(Creazione_date_evento_ricorrente.this));
             map.put("name", name);
             map.put("color", "purple");
             map.put("description", desc);
@@ -185,16 +185,16 @@ public class Creazione_date_evetno_ricorrente extends AppCompatActivity {
                     map.keySet()) {
                 System.out.println(map.get(s));
             }
-            Utilities.httpRequest(Creazione_date_evetno_ricorrente.this, Request.Method.POST, "/recurringActivity", new Response.Listener<String>() {
+            Utilities.httpRequest(Creazione_date_evento_ricorrente.this, Request.Method.POST, "/recurringActivity", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    Intent homepageA = new Intent(Creazione_date_evetno_ricorrente.this, Homepage.class);
+                    Intent homepageA = new Intent(Creazione_date_evento_ricorrente.this, Homepage.class);
                     startActivity(homepageA);
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(Creazione_date_evetno_ricorrente.this, error.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(Creazione_date_evento_ricorrente.this, error.toString(), Toast.LENGTH_LONG).show();
                     System.err.println(error.getMessage());
                 }
             }, map);

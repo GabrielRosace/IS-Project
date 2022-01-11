@@ -89,7 +89,7 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Creazione_evento_ricorrente.this, Creazione_date_evetno_ricorrente.class);
+                Intent i = new Intent(Creazione_evento_ricorrente.this, Creazione_date_evento_ricorrente.class);
                 i.putExtra("name",((EditText)(findViewById(R.id.inputEventNameRic))).getText().toString());
                 i.putExtra("location",((EditText)(findViewById(R.id.inputEventLcationRic))).getText().toString());
                 i.putExtra("desc",((EditText)(findViewById(R.id.inputDescEventRic))).getText().toString());

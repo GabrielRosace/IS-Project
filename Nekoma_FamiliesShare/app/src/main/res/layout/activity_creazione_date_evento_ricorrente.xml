@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Creazione_date_evetno_ricorrente">
+    tools:context=".Creazione_date_evento_ricorrente">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_data_event_ric"

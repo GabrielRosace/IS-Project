@@ -1,19 +1,15 @@
 package com.example.nekoma_families_share;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -40,7 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class DettagliServizzio extends AppCompatActivity {
+public class DettagliServizio extends AppCompatActivity {
     private Utilities.myService service;
     private TextView name;
     private TextView location;
@@ -65,7 +61,7 @@ public class DettagliServizzio extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dettagli_servizzio);
+        setContentView(R.layout.activity_dettagli_servizio);
 
         Toolbar t = (Toolbar) findViewById(R.id.toolbarService);
         t.setNavigationOnClickListener(new View.OnClickListener() {
@@ -76,7 +72,7 @@ public class DettagliServizzio extends AppCompatActivity {
         });
         initDatePicker();
         layout = (ConstraintLayout) findViewById(R.id.progressLayoutService);
-        groupId = Utilities.getGroupId(DettagliServizzio.this);
+        groupId = Utilities.getGroupId(DettagliServizio.this);
         String extras = getIntent().getStringExtra("servizio");
         service = new Utilities.myService(extras);
         String[] data  = extras.split("\\$");
@@ -230,7 +226,7 @@ public class DettagliServizzio extends AppCompatActivity {
             rec.setVisibility(View.GONE);
             recType.setVisibility(View.GONE);
         }
-        if(service.owner_id.equals(Utilities.getUserID(DettagliServizzio.this))){
+        if(service.owner_id.equals(Utilities.getUserID(DettagliServizio.this))){
             buttonS.setText("Modifica");
             desc.setEnabled(true);
             buttonS.setOnClickListener(new View.OnClickListener() {
@@ -250,7 +246,7 @@ public class DettagliServizzio extends AppCompatActivity {
                         map.put( "pickuplocation", service.pickuplocation);
                     }
                     map.put("img",service.img);
-                    Utilities.httpRequest(DettagliServizzio.this, Request.Method.PATCH,"/groups/"+groupId+"/service/"+service.service_id, response -> {
+                    Utilities.httpRequest(DettagliServizio.this, Request.Method.PATCH,"/groups/"+groupId+"/service/"+service.service_id, response -> {
                         finish();
                     }, System.err::println, map);
 
@@ -263,8 +259,8 @@ public class DettagliServizzio extends AppCompatActivity {
         }else{
             HashMap<String,String> m = new HashMap<>();
             List<Utilities.myService> l = new ArrayList<>();
-            m.put("paretcipant", Utilities.getUserID(DettagliServizzio.this));
-            Utilities.httpRequest(DettagliServizzio.this, Request.Method.GET,"/groups/"+groupId+"/service?partecipant=me", response -> {
+            m.put("paretcipant", Utilities.getUserID(DettagliServizio.this));
+            Utilities.httpRequest(DettagliServizio.this, Request.Method.GET,"/groups/"+groupId+"/service?partecipant=me", response -> {
                 try {
                     JSONArray arr = new JSONArray((String) response);
                     System.out.println("ciao ");
@@ -292,8 +288,8 @@ public class DettagliServizzio extends AppCompatActivity {
                             public void onClick(View view) {
                                 HashMap<String,String> map = new HashMap();
                                 map.put("activity_id", service.service_id);
-                                map.put("user_id",Utilities.getUserID(DettagliServizzio.this));
-                                Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
+                                map.put("user_id",Utilities.getUserID(DettagliServizio.this));
+                                Utilities.httpRequest(DettagliServizio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
                                     finish();
                                 }, System.err::println,map);
                             }
@@ -309,8 +305,8 @@ public class DettagliServizzio extends AppCompatActivity {
         }
     }
     public void deleteService(View v){
-        Utilities.httpRequest(DettagliServizzio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id, response -> {
-            Toast.makeText(DettagliServizzio.this, "Servizio eliminato con successo", Toast.LENGTH_SHORT).show();
+        Utilities.httpRequest(DettagliServizio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id, response -> {
+            Toast.makeText(DettagliServizio.this, "Servizio eliminato con successo", Toast.LENGTH_SHORT).show();
 //            recreate();
             finish();
         }, System.err::println, new HashMap<>());
@@ -370,11 +366,11 @@ public class DettagliServizzio extends AppCompatActivity {
                 Map<String, String> myMap = new HashMap<>();
                 System.out.println("----"+date);
                 myMap.put("days", date);
-                Utilities.httpRequest(DettagliServizzio.this, Request.Method.POST, "/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
-                    Toast.makeText(DettagliServizzio.this, "Partecipazione effettuata", Toast.LENGTH_SHORT).show();
+                Utilities.httpRequest(DettagliServizio.this, Request.Method.POST, "/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
+                    Toast.makeText(DettagliServizio.this, "Partecipazione effettuata", Toast.LENGTH_SHORT).show();
                     recreate();
                 }, response -> {
-                    Toast.makeText(DettagliServizzio.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DettagliServizio.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
                 }, myMap);
             }
         };
