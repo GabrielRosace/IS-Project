@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,7 +47,9 @@ public class DettagliServizio extends AppCompatActivity {
     private TextView forTypeTitle;
     private TextView rec;
     private TextView recType;
+    private TextView dateSelecteString;
     private Button buttonS;
+    private FloatingActionButton addData;
     private EditText desc;
     private ImageView img;
     public ImageView delete;
@@ -58,6 +62,8 @@ public class DettagliServizio extends AppCompatActivity {
     private TextView endText;
     private TextView end;
     private TextView start;
+    private List<String> dateSelect;
+    private List<String> dateSelectDB;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,12 +77,16 @@ public class DettagliServizio extends AppCompatActivity {
             }
         });
         initDatePicker();
+        addData= (FloatingActionButton) findViewById(R.id.addDateService);
+        dateSelect = new ArrayList<>();
+        dateSelectDB = new ArrayList<>();
         layout = (ConstraintLayout) findViewById(R.id.progressLayoutService);
         groupId = Utilities.getGroupId(DettagliServizio.this);
         String extras = getIntent().getStringExtra("servizio");
         service = new Utilities.myService(extras);
         String[] data  = extras.split("\\$");
         delete = (ImageView) findViewById(R.id.deleteImg);
+        dateSelecteString= (TextView) findViewById(R.id.dateSelected);
         img = (ImageView) findViewById(R.id.imageSevice);
         name = (TextView) findViewById(R.id.textName);
         location = (TextView) findViewById(R.id.locationService);
@@ -96,6 +106,7 @@ public class DettagliServizio extends AppCompatActivity {
         lendTimeT.setVisibility(View.GONE);
         buttonS.setVisibility(View.GONE);
         delete.setVisibility(View.GONE);
+        addData.setVisibility(View.GONE);
         new ImageDownloader(img).execute(service.img);
         for(int i=0;i<data.length;i++){
             System.out.println("<--->"+data[i]);
@@ -111,13 +122,13 @@ public class DettagliServizio extends AppCompatActivity {
         }else if(service.pattern.equals("lend")){
             lendTime.setVisibility(View.VISIBLE);
             lendTimeT.setVisibility(View.VISIBLE);
-            lendTime.setText(service.lend_time);
+            String[] s = service.lend_time.split("-");
+            lendTime.setText(s[1]+"-"+s[0]+"-"+s[2]);
             forType.setText(service.lend_obj);
             forTypeTitle.setText("Ogetto in prestito:");
         }else if(service.pattern.equals("pickup")){
             forType.setText(service.pickuplocation);
             forTypeTitle.setText("luogo di ritrovo:");
-
             lendTime.setVisibility(View.GONE);
             lendTimeT.setVisibility(View.GONE);
         }
@@ -214,11 +225,11 @@ public class DettagliServizio extends AppCompatActivity {
             }
 
         }else{
-            String start = service.formatDate(service.start_date.substring(2,service.start_date.length()));
-            String end = service.formatDate(service.end_date.substring(2,service.end_date.length()));
+            String[] start = service.formatDate(service.start_date.substring(2,service.start_date.length())).split("-");
+            String[] end = service.formatDate(service.end_date.substring(2,service.end_date.length())).split("-");
             System.out.println("data ----> "+ service.start_date.substring(2,service.start_date.length()));
-            this.end.setText(end);
-            this.start.setText(start);
+            this.end.setText(end[1]+"-"+end[0]+"-"+end[2]);
+            this.start.setText(start[1]+"-"+start[0]+"-"+start[2]);
             startText.setVisibility(View.VISIBLE);
             endText.setVisibility(View.VISIBLE);
             this.start.setVisibility(View.VISIBLE);
@@ -228,6 +239,7 @@ public class DettagliServizio extends AppCompatActivity {
         }
         if(service.owner_id.equals(Utilities.getUserID(DettagliServizio.this))){
             buttonS.setText("Modifica");
+            addData.setVisibility(View.GONE);
             desc.setEnabled(true);
             buttonS.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -249,14 +261,13 @@ public class DettagliServizio extends AppCompatActivity {
                     Utilities.httpRequest(DettagliServizio.this, Request.Method.PATCH,"/groups/"+groupId+"/service/"+service.service_id, response -> {
                         finish();
                     }, System.err::println, map);
-
                 }
-
             });
             delete.setVisibility(View.VISIBLE);
             buttonS.setVisibility(View.VISIBLE);
             layout.setVisibility(View.GONE);
         }else{
+
             HashMap<String,String> m = new HashMap<>();
             List<Utilities.myService> l = new ArrayList<>();
             m.put("paretcipant", Utilities.getUserID(DettagliServizio.this));
@@ -271,16 +282,34 @@ public class DettagliServizio extends AppCompatActivity {
                     }
                     if(!Utilities.myService.conteinService(l,this.service)){
                         buttonS.setText("Partecipa");
+                        if(service.recurrence.equals("true"))
+                            addData.setVisibility(View.VISIBLE);
                         desc.setEnabled(false);
                         buttonS.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) { //apre calendar
-                                openDatePicker(view);
+                                Map<String, String> myMap = new HashMap<>();
+                                String s="[";
+                                Iterator i = dateSelectDB.iterator();
+
+                                while(i.hasNext()){
+                                    String sup = (String) i.next();
+                                    s = (i.hasNext()) ? s+sup+"," : s+sup;
+                                }
+                                s = s+"]";
+                                myMap.put("days", s);
+                                Utilities.httpRequest(DettagliServizio.this, Request.Method.POST, "/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
+                                    Toast.makeText(DettagliServizio.this, "Partecipazione effettuata", Toast.LENGTH_SHORT).show();
+                                    recreate();
+                                }, response -> {
+                                    Toast.makeText(DettagliServizio.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
+                                }, myMap);
                             }
                         });
                         buttonS.setVisibility(View.VISIBLE);
                         layout.setVisibility(View.GONE);
                     }else{
+                        addData.setVisibility(View.GONE);
                         buttonS.setText("Smetti di partecipare");
                         desc.setEnabled(false);
                         buttonS.setOnClickListener(new View.OnClickListener() {
@@ -303,6 +332,9 @@ public class DettagliServizio extends AppCompatActivity {
             }, System.err::println,m);
 
         }
+    }
+    public void addDate(View v){
+        openDatePicker(v);
     }
     public void deleteService(View v){
         Utilities.httpRequest(DettagliServizio.this, Request.Method.DELETE,"/groups/"+groupId+"/service/"+service.service_id, response -> {
@@ -362,16 +394,20 @@ public class DettagliServizio extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 month = month + 1;
-                String date = "["+year + "-" + month + "-" + dayOfMonth+"]";
-                Map<String, String> myMap = new HashMap<>();
-                System.out.println("----"+date);
-                myMap.put("days", date);
-                Utilities.httpRequest(DettagliServizio.this, Request.Method.POST, "/groups/"+groupId+"/service/"+service.service_id+"/partecipate", response -> {
-                    Toast.makeText(DettagliServizio.this, "Partecipazione effettuata", Toast.LENGTH_SHORT).show();
-                    recreate();
-                }, response -> {
-                    Toast.makeText(DettagliServizio.this, "Errore, partecipazione non aggiunta", Toast.LENGTH_SHORT).show();
-                }, myMap);
+                String s = year + "-" + month + "-" + dayOfMonth;
+                String print = dayOfMonth+"-"+month+"-"+year;
+                if(dateSelectDB.contains(s)){
+                    dateSelectDB.remove(s);
+                    dateSelect.remove(print);
+                }else{
+                    dateSelect.add(print);
+                    dateSelectDB.add(s);
+                }
+
+                dateSelecteString.setText(" ");
+                for(String o : dateSelect){
+                    dateSelecteString.append(o+" ");
+                }
             }
         };
         Calendar calendar = Calendar.getInstance();
