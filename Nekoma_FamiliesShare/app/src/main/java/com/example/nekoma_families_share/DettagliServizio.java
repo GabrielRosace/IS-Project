@@ -108,9 +108,9 @@ public class DettagliServizio extends AppCompatActivity {
         delete.setVisibility(View.GONE);
         addData.setVisibility(View.GONE);
         new ImageDownloader(img).execute(service.img);
-        for(int i=0;i<data.length;i++){
-            System.out.println("<--->"+data[i]);
-        }
+//        for(int i=0;i<data.length;i++){
+//            System.out.println("<--->"+data[i]);
+//        }
         name.setText(this.service.nome);
         location.setText(this.service.location);
         desc.setText(service.descrizione);
@@ -227,7 +227,7 @@ public class DettagliServizio extends AppCompatActivity {
         }else{
             String[] start = service.formatDate(service.start_date.substring(2,service.start_date.length())).split("-");
             String[] end = service.formatDate(service.end_date.substring(2,service.end_date.length())).split("-");
-            System.out.println("data ----> "+ service.start_date.substring(2,service.start_date.length()));
+//            System.out.println("data ----> "+ service.start_date.substring(2,service.start_date.length()));
             this.end.setText(end[1]+"-"+end[0]+"-"+end[2]);
             this.start.setText(start[1]+"-"+start[0]+"-"+start[2]);
             startText.setVisibility(View.VISIBLE);
@@ -274,11 +274,11 @@ public class DettagliServizio extends AppCompatActivity {
             Utilities.httpRequest(DettagliServizio.this, Request.Method.GET,"/groups/"+groupId+"/service?partecipant=me", response -> {
                 try {
                     JSONArray arr = new JSONArray((String) response);
-                    System.out.println("ciao ");
+//                    System.out.println("ciao ");
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject obj = arr.getJSONObject(i);
                         l.add(new Utilities.myService(obj));
-                        System.out.println("----->---->"+l.toString());
+//                        System.out.println("----->---->"+l.toString());
                     }
                     if(!Utilities.myService.conteinService(l,this.service)){
                         buttonS.setText("Partecipa");

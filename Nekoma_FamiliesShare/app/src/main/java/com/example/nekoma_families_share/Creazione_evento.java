@@ -72,7 +72,7 @@ public class Creazione_evento extends AppCompatActivity  {
                     etichette = new ArrayList<>();
 
                     JSONArray tmp = new JSONArray(response);
-                    System.out.println(tmp);
+//                    System.out.println(tmp);
                     LinearLayout ll = (LinearLayout) findViewById(R.id.linearLabelsRic);
                     for(int i=0;i<tmp.length();++i) {
                         Creazione_evento.MyEtichette nuovo = new Creazione_evento.MyEtichette(new JSONObject(tmp.getString(i)).getString("name"), new JSONObject(tmp.getString(i)).getString("label_id"));
@@ -222,7 +222,7 @@ public class Creazione_evento extends AppCompatActivity  {
                 }
             }
             labels = labels + "]";
-            System.out.println("-----> desc "+ desc);
+//            System.out.println("-----> desc "+ desc);
 
             HashMap<String,String> map = new HashMap<>();
             String id_group = Utilities.getPrefs(this).getString("group", "");
@@ -290,7 +290,7 @@ public class Creazione_evento extends AppCompatActivity  {
                     try {
                         tmp = new JSONObject(response);
                         mapTime.put("activityId",tmp.getString("id"));
-                        System.out.println("----->"+mapTime);
+//                        System.out.println("----->"+mapTime);
                         Utilities.httpRequest(Creazione_evento.this, Request.Method.POST, "/groups/"+id_group+"/nekomaActivities/"+tmp.getString("id")+"/date", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {

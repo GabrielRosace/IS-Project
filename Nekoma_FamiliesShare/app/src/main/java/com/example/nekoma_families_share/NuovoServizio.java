@@ -648,7 +648,7 @@ public class NuovoServizio extends AppCompatActivity {
         if(checkSun.isChecked()){
             dates.add(start.plusDays(6).toString());
         }
-        System.out.println("date:"+dates.toString());
+//        System.out.println("date:"+dates.toString());
         return dates;
     }
 
@@ -714,7 +714,7 @@ public class NuovoServizio extends AppCompatActivity {
             params.put("start_date",monthRec.toString());
             params.put("end_date",monthEnd.toString());
         }
-        System.out.println(params.toString());
+//        System.out.println(params.toString());
         //Controlli per vedere se input è corretto
         if(TextUtils.isEmpty(serviceName.getText())){
             Toast.makeText(this, "Nome servizio mancante", Toast.LENGTH_SHORT).show();

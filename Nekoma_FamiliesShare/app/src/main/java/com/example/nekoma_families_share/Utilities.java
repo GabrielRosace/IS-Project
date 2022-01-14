@@ -193,9 +193,9 @@ public class Utilities {
             return settingDate[1]+"-"+settingDate[2]+"-"+settingDate[0];
         }
         public static boolean conteinService(List<myService> l, myService s){
-            System.out.println("ENTER -->"+s.service_id);
+//            System.out.println("ENTER -->"+s.service_id);
             for(myService o: l){
-                System.out.println("--> "+o.service_id+" -->"+s.service_id);
+//                System.out.println("--> "+o.service_id+" -->"+s.service_id);
                 if(o.service_id.equals(s.service_id))
                     return true;
             }

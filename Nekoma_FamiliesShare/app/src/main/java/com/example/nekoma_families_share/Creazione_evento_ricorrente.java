@@ -52,7 +52,7 @@ public class Creazione_evento_ricorrente extends AppCompatActivity {
                     etichette = new ArrayList<>();
 
                     JSONArray tmp = new JSONArray(response);
-                    System.out.println(tmp);
+//                    System.out.println(tmp);
                     LinearLayout ll = (LinearLayout) findViewById(R.id.linearLabelsRic);
                     for(int i=0;i<tmp.length();++i) {
                         Creazione_evento.MyEtichette nuovo = new Creazione_evento.MyEtichette(new JSONObject(tmp.getString(i)).getString("name"), new JSONObject(tmp.getString(i)).getString("label_id"));
