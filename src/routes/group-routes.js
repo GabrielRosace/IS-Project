@@ -2474,8 +2474,9 @@ router.delete('/:id/service/:serviceId', async (req, res, next) => {
   let group_id = req.params.id
   let service_id = req.params.serviceId
   let user_id = req.user_id
-
+  // return something if the group exist
   const group = Group.findOne({ group_id: group_id })
+  // return something if the user is a member
   const member = await Member.findOne({
     group_id,
     user_id,
@@ -2490,12 +2491,16 @@ router.delete('/:id/service/:serviceId', async (req, res, next) => {
 
   try {
     const service_id = req.params.serviceId
+    // return something if the service exist
     const service = await Service.findOne({ service_id: service_id })
     if (!service) {
       return res.status(404).send('Service dont exist')
     }
+    // delete all partecipations
     await Partecipant.deleteMany({ activity_id: service_id, service: true }).catch(() => { console.log('Deleting error') })
+    // delete dates of recurrence
     await Recurrence.deleteMany({ activity_id: service_id, service: true }).catch(() => { console.log('Deleting error') })
+    // delete the service
     await Service.findOneAndDelete({ service_id: service_id })
     res.status(200).send('Service deleted')
   } catch (error) {
@@ -2510,8 +2515,9 @@ router.post('/:id/service', async (req, res, next) => {
   let start_date = startingDate(req.body.start_date)
   let end_date = endingDate(req.body.end_date)
   if (!dateValidator(req.body.type, start_date, end_date)) return res.status(400).send('Incorrect days')
-
+  // return something if the group exist
   const group = Group.findOne({ group_id: group_id })
+  // return something if the user is a member
   const member = await Member.findOne({
     group_id,
     user_id,
@@ -2524,7 +2530,7 @@ router.post('/:id/service', async (req, res, next) => {
   if (!member) return res.status(401).send('Unauthorized')
 
   const { name, description, location, pattern, car_space, lend_obj, lend_time, pickuplocation, img, recurrence } = req.body
-
+  // create the service object
   const newService = {
     group_id,
     name,
@@ -2550,7 +2556,7 @@ router.post('/:id/service', async (req, res, next) => {
     default:
       return res.status(400).send('Bad Request')
   }
-
+  // create the recurrence with dates object
   const newRecurrence = {
     type: req.body.type,
     start_date: start_date,
@@ -2561,7 +2567,9 @@ router.post('/:id/service', async (req, res, next) => {
   newRecurrence.recurrence_id = objectid()
   newRecurrence.activity_id = newService.service_id
   try {
+    // create the service object in db
     Service.create(newService).then((s) => {
+      // if service object is created then we create the recurrence object in db
       Recurrence.create(newRecurrence).then(() => {
         res.status(200).send({ service_id: newService.service_id })
       }).catch((error) => {
@@ -2584,19 +2592,20 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 
   let service_id = req.params.serviceId
   if (!service_id) return res.status(400).send('Bad Request')
-
+  // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
+  // return something if the service exist
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
 
   if (!group) return res.status(400).send('Group not found')
   if (!service) return res.status(400).send('Service not found')
-
+  // check if the dates is correct
   let days = calculateDays(req.body.days)
   if (days.length === 0) return res.status(400).send('Days not found')
 
-  // verify that the partecipantion is correct
   Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
     if (!checkDates(r, days)) return res.status(400).send('Incorrect days')
+    // check if the pattern is car, then check if it have avaiable space
     if (service.pattern === 'car') {
       Partecipant.find({ activity_id: service_id, service: true }).exec().then((p) => {
         if (p) {
@@ -2609,6 +2618,7 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
     // create the partecipation
     Partecipant.findOne({ partecipant_id: userId, activity_id: service_id, service: true }).exec().then((p) => {
       if (!p) {
+        // create the partecipation object
         const newPartecipant = {
           partecipant_id: userId,
           activity_id: service_id,
@@ -2634,18 +2644,19 @@ router.post('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 router.delete('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
-
+  // exit if the user isn't authenticated
   if (!userId) return res.status(401).send('Not authenticated')
 
   let service_id = req.params.serviceId
   if (!service_id) return res.status(400).send('Bad Request')
-
+  // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
+  // return something if the service exist
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
 
   if (!group) return res.status(400).send('Group not found')
   if (!service) return res.status(400).send('Service not found')
-
+  // delete the partecipation
   Partecipant.deleteOne({ activity_id: service_id, partecipant_id: userId, service: true }).exec()
   return res.status(200).send('Partecipation deleted')
 })
@@ -2654,21 +2665,23 @@ router.delete('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
-
+  // exit if the user isn't authenticated
   if (!userId) return res.status(401).send('Not authenticated')
 
   let service_id = req.params.serviceId
   if (!service_id) return res.status(400).send('Bad Request')
-
+  // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
+  // return something if the service exist
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
 
   if (!group) return res.status(400).send('Group not found')
   if (!service) return res.status(400).send('Service not found')
 
   if (req.body.days) {
+    // check if the dates is corrects
     let days = calculateDays(req.body.days)
-
+    // update partecipation dates
     Recurrence.findOne({ activity_id: service_id, service: true }).exec().then((r) => {
       if (!checkDates(r, days)) return res.status(400).send('Incorrect days')
       Partecipant.updateOne({ activity_id: r.activity_id, partecipant_id: userId, service: true }, { $set: { days: days } }).exec().then(() => {
@@ -2682,20 +2695,21 @@ router.patch('/:id/service/:serviceId/partecipate', async (req, res, next) => {
 router.patch('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
-
+  // exit if the user isn't authenticated
   if (!userId) return res.status(401).send('Not authenticated')
 
   let service_id = req.params.serviceId
   if (!service_id) return res.status(400).send('Bad Request')
-
+  // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
+  // return something if the service exist
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
 
   if (!group) return res.status(400).send('Group not found')
   if (!service) return res.status(400).send('Service not found')
 
   const { name, description, location, img } = req.body
-
+  // create updated service object
   const newService = {
     name,
     img: (!img) ? 'https://picsum.photos/200' : img,
@@ -2703,6 +2717,7 @@ router.patch('/:id/service/:serviceId', async (req, res, next) => {
     location
   }
   try {
+    // update the service in the db
     Service.updateOne({ service_id: service_id }, newService).exec().then(() => {
       return res.status(200).send('Service updated')
     })
@@ -2715,15 +2730,18 @@ router.patch('/:id/service/:serviceId', async (req, res, next) => {
 router.get('/:id/service/:serviceId', async (req, res, next) => {
   let userId = req.user_id
   let group_id = req.params.id
-
+  // exit if the user isn't authenticated
   if (!userId) return res.status(401).send('Not authenticated')
 
   let service_id = req.params.serviceId
   if (!service_id) return res.status(400).send('Bad Request')
-
+ // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
+  // return something if the service exist
   const service = await Service.findOne({ service_id: service_id, group_id: group_id })
+  // return something if the partecipant exist
   const partecipants = await Partecipant.find({ activity_id: service_id, service: true })
+  // return something if the recurrence dates exist
   const recurrance = await Recurrence.findOne({ activity_id: service_id, service: true })
 
   if (!group) return res.status(400).send('Group not found')
@@ -2762,13 +2780,17 @@ router.get('/:id/service', async (req, res, next) => {
 
   let resList = []
   let emptyList = []
-
+  // return something if the group exist
   const group = await Group.findOne({ group_id: group_id })
 
+  // eixt if the user isn't authenticated
   if (!userId) return res.status(401).send('Not authenticated')
   if (!group) return res.status(400).send('Group not found')
 
+  // return something if the service exist
   let tmp = await Service.find({ group_id: group_id })
+
+  // create a base list of service where we can filter
   await tmp.reduce(async (promise, service) => {
     await promise
     try {
@@ -2799,10 +2821,11 @@ router.get('/:id/service', async (req, res, next) => {
   },
   Promise.resolve())
 
-  // controllare il merde delle varie liste ritornate
+  // return all the service froma  group if there isn't filters
   if (!partecipant && !creator && !time && !pattern) {
     resList = emptyList
   }
+  // find the services that the user created
   if (creator === 'me') {
     let creatorList = []
     emptyList.forEach((service) => {
@@ -2813,6 +2836,7 @@ router.get('/:id/service', async (req, res, next) => {
   if (!creator) {
     resList = emptyList
   }
+  // find the services that the user partecipate, and that he created
   if (partecipant === 'me') {
     // ancora da implementare
     let partecipantList = []
@@ -2829,9 +2853,8 @@ router.get('/:id/service', async (req, res, next) => {
     resList = partecipantList
   }
 
-  // PATTERN FILTER
+  // filter by pattern
   if (pattern === 'car') {
-    // ancora da implementare
     let patternList = []
     let tmp = await Service.find({ group_id: group_id, pattern: 'car' })
     resList.forEach((service) => {
@@ -2840,7 +2863,6 @@ router.get('/:id/service', async (req, res, next) => {
     resList = patternList
   }
   if (pattern === 'lend') {
-    // ancora da implementare
     let patternList = []
     let tmp = await Service.find({ group_id: group_id, pattern: 'lend' })
     resList.forEach((service) => {
@@ -2849,7 +2871,6 @@ router.get('/:id/service', async (req, res, next) => {
     resList = patternList
   }
   if (pattern === 'pickup') {
-    // ancora da implementare
     let patternList = []
     let tmp = await Service.find({ group_id: group_id, pattern: 'pickup' })
     resList.forEach((service) => {
@@ -2857,6 +2878,7 @@ router.get('/:id/service', async (req, res, next) => {
     })
     resList = patternList
   }
+  // find services that is recurrent or not
   if (recurrent === 'true') {
     let recurrentList = []
     emptyList.forEach((service) => {
@@ -2871,7 +2893,7 @@ router.get('/:id/service', async (req, res, next) => {
     })
     resList = recurrentList
   }
-
+  // find services that is expired
   if (time === 'expired') {
     let myList = []
     resList.forEach((service) => {
@@ -2883,6 +2905,7 @@ router.get('/:id/service', async (req, res, next) => {
     })
     resList = myList
   }
+  // find services that is possible to partecipate
   if (time === 'next') {
     let myList = []
     resList.forEach((service) => {
