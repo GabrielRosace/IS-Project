@@ -89,7 +89,7 @@ public class Etichette extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(Etichette.this, "ERRORE", Toast.LENGTH_LONG).show();
-                // System.err.println(error.getMessage());
+
             }
         }, new HashMap<>());
     }
@@ -251,7 +251,7 @@ public class Etichette extends AppCompatActivity {
                     public void onResponse(String response1) {
                         try{
                             JSONArray tmp = new JSONArray(response1);
-                            // System.out.println(tmp);
+
                             for(int i=0;i<tmp.length();++i){
                                 myEtichette nuovo = new myEtichette(new JSONObject(tmp.getString(i)).getString("name"),new JSONObject(tmp.getString(i)).getString("label_id"));
                                 etichette.add(nuovo);
@@ -269,7 +269,7 @@ public class Etichette extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                       //  System.err.println(error.getMessage());
+
                     }
                 }, new HashMap<>());
             }
@@ -277,7 +277,7 @@ public class Etichette extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(Etichette.this, error.toString(), Toast.LENGTH_LONG).show();
-                // System.err.println(error.getMessage());
+
             }
         },data);
 

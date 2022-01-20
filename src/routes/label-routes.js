@@ -7,6 +7,7 @@ const Member = require('../models/member')
 const Child = require('../models/child')
 const Parent = require('../models/parent')
 const Activity = require('../models/activity')
+const RecurringActivity = require('../models/recurring-activity')
 const objectid = require('objectid')
 
 // Ritorna tutte le etichette appartenenti al gruppo specificato tramite l'id
@@ -130,6 +131,9 @@ router.delete('/:label_id', async (req, res, next) => {
 			Activity.updateMany({group_id : g.group_id}, { $pull : {labels : { $in : [l.label_id]}}}).then((data) => {
 				console.log('Label deleted from activities');
 			})
+			RecurringActivity.updateMany({group_id: g.group_id}, {$pull: {labels: {$in : [l.label_id]}}}).then((data) => {
+				console.log('Label deleted from recurring events');
+			})
 		})
 	})
 
@@ -168,7 +172,6 @@ router.post('/child', (req, res, next) => {
 				}
 			})
 		}else{
-			// ! Non esiste l'etichetta
 			return res.status(400).send('Label does not exists')
 		}
 	})
@@ -197,7 +200,6 @@ router.get('/child/:child_id', async (req, res, next) => {
 			return res.status(200).send(childLabels)
 		}
 		else{
-			// ! Child does not exist
 			return res.status(400).send('Child does not exist')
 		}
 	})

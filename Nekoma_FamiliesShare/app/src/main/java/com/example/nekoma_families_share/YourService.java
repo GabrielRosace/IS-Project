@@ -2,38 +2,63 @@ package com.example.nekoma_families_share;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.media.ImageWriter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.material.tabs.TabLayout;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class YourService extends AppCompatActivity {
-    private List<myService> tuoi_servizi = new ArrayList<>();
-    private List<myService> partecipi_servizi = new ArrayList<>();
-    private List<myService> scaduti_servizi = new ArrayList<>();
+
+    private List<Utilities.myService> tuoi_servizi = new ArrayList<>();
+    private List<Utilities.myService> partecipi_servizi = new ArrayList<>();
+    private List<Utilities.myService> scaduti_servizi = new ArrayList<>();
     private String id_group;
     private String user_id;
 
+
+    // le operazioni vengono effettuate nella onPostResume e non nella
+    // onCreate in quanto , nel caso in cui l'utente acceda alla view successiva,
+    // quando si ritorna nell'activity corrente,
+    // i componenti ri riaggiornano con le nuove informazioni nel caso ci siano
+    // quindi per esempio nel caso in cui l'utente aggiorni la sua partecipazione
+    // quando si ritornerà alla medesima schermata la sua visualizzazione sarà aggiornata
     @Override
     protected void onPostResume() {
         super.onPostResume();
-
+        ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.progress_service);
+        pr.setVisibility(View.VISIBLE);
         tuoi_servizi = new ArrayList<>();
         partecipi_servizi = new ArrayList<>();
         scaduti_servizi = new ArrayList<>();
@@ -63,6 +88,7 @@ public class YourService extends AppCompatActivity {
         });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.service_tab);
+        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -91,20 +117,96 @@ public class YourService extends AppCompatActivity {
 
         // chiamata per popolare le liste
         this.setmyService();
-        this.setPartecipi_servizi();
-        this.setScaduti_servizi();
     }
 
+    // necessario per creare l'oggetto che poi verrà passato tramite le shared preference
+    // a dettagli servizio
+    public Utilities.myService populateService (JSONObject response) throws JSONException{
+        return new Utilities.myService(response);
+    }
+
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi dell'utente che
+    // che non sono scaduti, quindi ancora validi.
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setmyService(){
-        // popolare nel caso in cui sia tuo
+        Utilities.httpRequest(this, Request.Method.GET,"/groups/"+this.id_group+ "/service?creator=me&time=next", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try{
+                    JSONArray tmp = new JSONArray(response);
+                    for (int i=0;i<tmp.length();++i){
+                        tuoi_servizi.add(populateService(tmp.getJSONObject(i)));
+                    }
+                    addRecyclerView(tuoi_servizi);
+                    YourService.this.setPartecipi_servizi();
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(YourService.this, "Non hai servizi", Toast.LENGTH_SHORT).show();
+            }
+        }, new HashMap<>());
     }
 
+
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi a cui l'utente partecipa l'utente che
+    // che non sono scaduti, quindi ancora validi
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setPartecipi_servizi(){
-        // popolare nel caso in cui partecipi
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?partecipant=me&time=next", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try{
+                    JSONArray tmp = new JSONArray(response);
+                    for (int i=0;i<tmp.length();++i){
+                        partecipi_servizi.add(populateService(tmp.getJSONObject(i)));
+                    }
+                    YourService.this.setScaduti_servizi();
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(YourService.this, "Non ci sono servizi a cui partecipi", Toast.LENGTH_SHORT).show();
+            }
+        }, new HashMap<>());
     }
 
+    // Questo chiamata permette grazie ai filtri di richiamare i servizi a cui l'utente partecipa l'utente, e che ha creato che
+    // che non sono scaduti, quindi ancora validi
+    // questa funzione usufruisce della classe in utilities che parsa direttamente l'oggetto,
+    // per l'activity successiva
     public void setScaduti_servizi(){
-        // popolare nel caso in cui l'evento sia scaduto
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/"+this.id_group+"/service?creator=me&partecipant=me&time=expired", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try{
+                    JSONArray tmp = new JSONArray(response);
+                    for (int i=0;i<tmp.length();++i){
+                        scaduti_servizi.add(populateService(tmp.getJSONObject(i)));
+                    }
+                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.progress_service);
+                    pr.setVisibility(View.GONE);
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(YourService.this, "Non ci sono servizi", Toast.LENGTH_SHORT).show();
+            }
+        }, new HashMap<>());
+    }
+    public void setRicorrentiServizi(){
+
     }
 
     @Override
@@ -114,7 +216,7 @@ public class YourService extends AppCompatActivity {
     }
 
     // metodo che popola la recycle view
-    private void addRecyclerView(List<myService> list){
+    private void addRecyclerView(List<Utilities.myService> list){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.servizi_rv);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
@@ -122,14 +224,16 @@ public class YourService extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    // recycle view
+
+    // recycle view, al momento dell'onClick sono stati distinti
+    // servizi con ricorrenza oppure servizi senza ricorrenza
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<myService> mData;
+        private List<Utilities.myService> mData;
         private LayoutInflater mInflater;
 
 
-        MyRecyclerViewAdapter(Context context, List<myService> data) {
+        MyRecyclerViewAdapter(Context context, List<Utilities.myService> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
@@ -144,19 +248,33 @@ public class YourService extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
-            myService service = mData.get(position);
-            // System.out.println(" ************************* questo è event: "+event.toString());
+            Utilities.myService service = mData.get(position);
             holder.btn.setText(service.nome);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //todo mettere dettaglio servizio
-                    Intent servizio = new Intent(YourService.this, DettagliEvento.class);
-                    // System.out.println("intent: "+event.toString());
-                    servizio.putExtra("servizio", service.toString());
-                    startActivity(servizio);
-                }
-            });
+            new ImageDownloader(holder.myImgView).execute(service.getImage());
+            if(service.recurrence.equals("true")){
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio ricorrente
+                        Intent servizio = new Intent(YourService.this, DettagliServizio.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }else{
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.purple_500,getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //todo mettere dettaglio servizio
+                        Intent servizio = new Intent(YourService.this, DettagliServizio.class);
+                        servizio.putExtra("servizio", service.toString());
+                        startActivity(servizio);
+                    }
+                });
+            }
+
 
         }
 
@@ -169,46 +287,47 @@ public class YourService extends AppCompatActivity {
 
 
         public class ViewHolder extends RecyclerView.ViewHolder{
-            TextView myTextView;
+            ImageView myImgView;
             Button btn;
 
             ViewHolder(View itemView) {
                 super(itemView);
-                myTextView = itemView.findViewById(R.id.info);
+                myImgView = itemView.findViewById(R.id.myrecycle_view_img);
                 btn = itemView.findViewById(R.id.name_event);
             }
         }
 
 
-        myService getItem(int id) {
+        Utilities.myService getItem(int id) {
             return mData.get(id);
         }
 
     }
 
-    private class myService{
-        public final String nome;
-        public final String service_id;
-        public final String img;
-        public final int nPart;
-        public final String descrizione;
-        public final String enddate;
-        public final String labels;
-        public final String owner_id;
-        public myService(String nome, String img, String service_id, int nPart, String descrizione, String enddate, String labels, String owner_id) {
-            this.nome = nome;
-            this.img = img;
-            this.service_id = service_id;
-            this.nPart = nPart;
-            this.descrizione = descrizione;
-            this.enddate = enddate;
-            this.labels = labels;
-            this.owner_id = owner_id;
+    // Classe per il download delle immagini
+    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+        ImageView holder;
+
+        public ImageDownloader(ImageView holder) {
+            this.holder = holder;
         }
 
         @Override
-        public String toString() {
-            return nome+'/'+service_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
+        protected Bitmap doInBackground(String... strings) {
+            String urlOfImage = strings[0];
+            Bitmap logo = null;
+            try {
+                InputStream is = new URL(urlOfImage).openStream();
+                logo = BitmapFactory.decodeStream(is);
+            } catch (Exception e) { // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            holder.setImageBitmap(bitmap);
         }
     }
 

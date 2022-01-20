@@ -59,8 +59,8 @@ public class DettagliEvento extends AppCompatActivity {
 
     private ArrayAdapter dataSpinner;
     private List<String> labelsId;
-    private Spinner spinner;
     private List<String> selectedLabel;
+    private Spinner spinner;
     private Map<String, String> event_labels_id;
 
     private List<String> eventLabels;
@@ -184,6 +184,7 @@ public class DettagliEvento extends AppCompatActivity {
         } else {
             eventLabels = Arrays.asList(evento.labels.split(","));
         }
+
         addRecyclerView(eventLabels); // Aggiungo le informazioni dell'etichette alla view
 
 

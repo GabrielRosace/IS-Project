@@ -20,7 +20,24 @@
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Archivio Servizi"
-            app:titleTextColor="#FFFFFF" />
+            app:titleTextColor="?attr/colorOnPrimary" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/progress_service"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/progressBar4"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="300dp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/service_tab"
@@ -43,7 +60,8 @@
                 android:id="@+id/closed_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Servizi passati" />
+                android:text="scaduti" />
+
         </com.google.android.material.tabs.TabLayout>
 
         <ScrollView
@@ -62,5 +80,6 @@
                     tools:listitem="@layout/recycler_view_item_2" />
             </LinearLayout>
         </ScrollView>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,22 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".Creazione_evento">
 
-    <Button
-        android:id="@+id/nextButtonEvent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:onClick="onClickCreaButton"
-        android:text="Crea"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar7"
+        android:id="@+id/toolbar_eve_rec"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
+        android:isScrollContainer="false"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,14 +21,25 @@
         app:title="Crea un evento"
         app:titleTextColor="#FFFFFF" />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="16dp"
+        android:onClick="onClickCreaButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
     <ScrollView
         android:id="@+id/scrollView5"
-        android:layout_width="416dp"
-        android:layout_height="456dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="384dp"
+        android:layout_height="693dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar7">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_eve_rec">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -48,51 +49,39 @@
                 android:id="@+id/textView23"
                 android:layout_width="79dp"
                 android:layout_height="27dp"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginTop="20dp"
                 android:text="Etichette"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputDescEvent" />
+                app:layout_constraintTop_toBottomOf="@+id/inputDescEventRic" />
 
             <ScrollView
-                android:id="@+id/scrollView4"
-                android:layout_width="371dp"
+                android:id="@+id/scrollLabels"
+                android:layout_width="0dp"
                 android:layout_height="138dp"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="15dp"
                 android:background="#FFFFFF"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView23">
+                app:layout_constraintTop_toBottomOf="@+id/textView23"
+                tools:ignore="SpeakableTextPresentCheck">
 
                 <LinearLayout
-                    android:id="@+id/linearLabels"
+                    android:id="@+id/linearLabelsRic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
             </ScrollView>
 
             <EditText
-                android:id="@+id/inputEventDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:ems="10"
-                android:inputType="date"
-                android:minHeight="48dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView19"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-            <EditText
-                android:id="@+id/inputDescEvent"
+                android:id="@+id/inputDescEventRic"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="16dp"
                 android:ems="10"
@@ -104,26 +93,29 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <EditText
-                android:id="@+id/inputEventName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
+                android:id="@+id/inputEventNameRic"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="30dp"
                 android:ems="10"
                 android:inputType="textPersonName"
+                android:maxLength="18"
                 android:minHeight="48dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:text="Inserire un nome per l'evento"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="24dp"
+                android:text="Nome evento"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -131,118 +123,88 @@
                 android:id="@+id/textView21"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="36dp"
                 android:text="Luogo dell'evento"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventStartTime" />
-
-            <EditText
-                android:id="@+id/inputEventLcation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:minHeight="48dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView21" />
+                app:layout_constraintTop_toBottomOf="@+id/textView27" />
 
             <TextView
                 android:id="@+id/textView19"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="36dp"
                 android:text="Data inizio evento"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventName" />
+                app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
             <TextView
                 android:id="@+id/textView22"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="36dp"
                 android:text="Descrizione"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventLcation" />
+                app:layout_constraintTop_toBottomOf="@+id/textView21" />
 
             <TextView
                 android:id="@+id/textView27"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="36dp"
                 android:text="Data fine evento"
                 android:textColor="#000000"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventDate" />
+                app:layout_constraintTop_toBottomOf="@+id/textView19" />
+
+            <Button
+                android:id="@+id/endDateEvent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="30dp"
+                android:onClick="eventEndDate"
+                android:text="seleziona una data"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/startDateEvent" />
+
+            <Button
+                android:id="@+id/startDateEvent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="30dp"
+                android:onClick="eventStartDate"
+                android:text="seleziona una data"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputEventNameRic" />
 
             <EditText
-                android:id="@+id/inputEventEndEvent"
-                android:layout_width="wrap_content"
+                android:id="@+id/eventLocation"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="30dp"
                 android:ems="10"
-                android:inputType="date"
+                android:inputType="textPersonName"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView27" />
-
-            <TextView
-                android:id="@+id/textView25"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:text="Ora di inizio"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventEndEvent" />
-
-            <EditText
-                android:id="@+id/inputEventStartTime"
-                android:layout_width="106dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:ems="10"
-                android:inputType="time"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView25" />
-
-            <TextView
-                android:id="@+id/textView26"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="55dp"
-                android:layout_marginTop="20dp"
-                android:text="Ora di fine"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                app:layout_constraintStart_toEndOf="@+id/textView25"
-                app:layout_constraintTop_toBottomOf="@+id/inputEventEndEvent" />
-
-            <EditText
-                android:id="@+id/inputEventEndTime"
-                android:layout_width="106dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="55dp"
-                android:layout_marginTop="5dp"
-                android:ems="10"
-                android:inputType="time"
-                app:layout_constraintStart_toEndOf="@+id/inputEventStartTime"
-                app:layout_constraintTop_toBottomOf="@+id/textView26" />
+                app:layout_constraintTop_toBottomOf="@+id/endDateEvent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

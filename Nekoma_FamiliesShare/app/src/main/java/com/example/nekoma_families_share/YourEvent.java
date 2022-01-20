@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -42,11 +44,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class YourEvent extends AppCompatActivity {
-    private List<myEventi> tuoi_eventi = new ArrayList<>();
-    private List<myEventi> partecipi_eventi = new ArrayList<>();
-    private List<myEventi> scaduti_eventi = new ArrayList<>();
+    private List<Utilities.Situation> tuoi_eventi = new ArrayList<>();
+    private List<Utilities.Situation> partecipi_eventi = new ArrayList<>();
+    private List<Utilities.Situation> scaduti_eventi = new ArrayList<>();
+    private List<Utilities.Situation> recurrent_event = new ArrayList<>();
     private String id_group;
     private String user_id;
 
@@ -55,9 +59,15 @@ public class YourEvent extends AppCompatActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
+
+        ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
+        pr.setVisibility(View.VISIBLE);
+
         tuoi_eventi = new ArrayList<>();
         partecipi_eventi = new ArrayList<>();
         scaduti_eventi = new ArrayList<>();
+        recurrent_event = new ArrayList<>();
+
         String userToken = Utilities.getToken(YourEvent.this);
         String[] split_token = userToken.split("\\.");
         String base64Body = split_token[1];
@@ -65,10 +75,10 @@ public class YourEvent extends AppCompatActivity {
         try {
             JSONObject res = new JSONObject(body);
             user_id = res.getString("user_id");
-        }catch(JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-        id_group = Utilities.getPrefs(this).getString("group","");
+        id_group = Utilities.getPrefs(this).getString("group", "");
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         TabItem tabYourEvent = (TabItem) findViewById(R.id.your_events);
@@ -83,16 +93,17 @@ public class YourEvent extends AppCompatActivity {
             }
         });
 
+        Objects.requireNonNull(tabLayout.getTabAt(0)).select();
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if(tab.getPosition()==0){
+                if (tab.getPosition() == 0) {
                     // caso 1 - eventi che sono tuoi
                     addRecyclerView(tuoi_eventi);
-                }else if(tab.getPosition()==1){
+                } else if (tab.getPosition() == 1) {
                     // caso 2 - eventi a cui hai partecipato
                     addRecyclerView(partecipi_eventi);
-                }else{
+                } else {
                     // caso 3 - eventi che sono scaduti
                     addRecyclerView(scaduti_eventi);
                 }
@@ -117,265 +128,371 @@ public class YourEvent extends AppCompatActivity {
         setContentView(R.layout.activity_your_event);
     }
 
+
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi creati dall'utente ma che non sono scaduti
+    public void getRecTuoiAttuali() {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/" + id_group + "?expired=false", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj;
+                    try {
+                        obj = arr.getJSONObject(i);
+                    } catch (JSONException e) {
+
+                        obj = arr.getJSONArray(0).getJSONObject(i);
+
+                    }
+                    tuoi_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi a cui l'utente partecipa ma che non sono scaduti
+    public void getRecTuoiScaduti() {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/creator/" + id_group + "?expired=true", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    scaduti_eventi.add(new Utilities.myRecEvent(obj));
+                    this.getRecPartecipaScaduti();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi a cui l'utente partecipa ma che sono scaduti
+    public void getRecPartecipaScaduti() {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/" + id_group + "?expired=true", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj;
+                    try {
+                        obj = arr.getJSONObject(i);
+                    } catch (JSONException e) {
+                        obj = arr.getJSONArray(0).getJSONObject(i);
+                    }
+                    scaduti_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+
+    // questo metodo serve per visualizzare le informazioni dell'evento ricorrente
+    // usufruisce del filtro expired per vedere gli eventi creati dall'utente ma che non sono scaduti
+    public void getRecTuoiPartecipa() {
+        Utilities.httpRequest(this, Request.Method.GET, "/recurringActivity/partecipant/" + id_group + "?expired=false", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    partecipi_eventi.add(new Utilities.myRecEvent(obj));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
+
+
     // questo metodo mi permette di popolare le 3 liste che riguardano
     // gli eventi con possibilità di definizione di etichette dei bambini
-    //todo parte non ancora completamente implementata manca la definizione di ricorrenza
-    //todo che sarà sviluppata nella versione 1.1 del codice sorgente
-    public void getEvents(){
+    // i seguenti controlli sono stati eseguiti lato front-end per rispettare la retrcompatibilità con il database
+    // dell'applicazione originale
+    // se io sono il creatore posso avere tre casi :
+    //      - sono un repetition==true?  -> tuoi eventi
+    //      - altrimenti
+    //      - è un evento passato?
+    //          - controllo se la data è una stringa vuota da information oppure è prima della data di fine -> tuoi eventi
+    //          - altrimenti -> scaduti eventi
+    // altrimenti sono un partecipante?
+    //      - si, è finito ? -> si -> partecipi eventi -> altrimenti scaduti eventi
+    public void getEvents() {
         Utilities.httpRequest(this, Request.Method.GET, "/groups/" + id_group + "/activities", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                try{
-                    //System.out.println("**********"+response);
+                try {
                     JSONArray tmp = new JSONArray(response);
-                    for(int i=0;i<tmp.length();++i){
+                    YourEvent.this.getRecTuoiAttuali();
+                    YourEvent.this.getRecTuoiPartecipa();
+                    YourEvent.this.getRecTuoiScaduti();
+                    YourEvent.this.getRecPartecipaScaduti();
+                    for (int i = 0; i < tmp.length(); ++i) {
                         final String tmp_activity = tmp.getString(i);
-                        String id_activity= new JSONObject(tmp.getString(i)).getString("activity_id");
-                        Utilities.httpRequest(YourEvent.this, Request.Method.GET, "/groups/" + id_group + "/nekomaActivities/" + id_activity +"/information", new Response.Listener<String>() {
+                        String id_activity = new JSONObject(tmp.getString(i)).getString("activity_id");
+                        Utilities.httpRequest(YourEvent.this, Request.Method.GET, "/groups/" + id_group + "/nekomaActivities/" + id_activity + "/information", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response1) {
                                 try {
-                                    //System.out.println("** sono le info dell'activity :"+new JSONObject(tmp_activity).getString("name") + " e le info sono: " + response1);
                                     JSONObject tmp = new JSONObject(response1);
-                                    // caso in cui sono il creatore
 
-                                    if(new JSONObject(tmp_activity).getString("creator_id").equals(user_id)){
-                                        //se io sono il creatore posso avere tre casi :
-                                        //      - sono un repetition==true?  -> tuoi eventi (fatto)
-                                        //      - altrimenti
-                                        //      - è un evento passato?
-                                        //          - controllo se la data è una stringa vuota da information oppure è prima della data di fine -> tuoi eventi (fatto)
-                                        //          - altrimenti -> scaduti eventi (fatto)
-                                        // altrimenti sono un partecipante?
-                                        //      - si, è finito ? -> si -> partecipi eventi -> altrimenti scaduti eventi
-                                        // System.out.println("primo caso");
-                                        if(new JSONObject(tmp_activity).getBoolean("repetition")){
-                                            String name= new JSONObject(tmp_activity).getString("name");
+                                    // caso in cui sono il creatore
+                                    if (new JSONObject(tmp_activity).getString("creator_id").equals(user_id)) {
+                                        if (new JSONObject(tmp_activity).getBoolean("repetition")) {
+
+                                            String name = new JSONObject(tmp_activity).getString("name");
                                             String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                             String id_img = "nan";
-                                            if(new JSONObject(tmp_activity).has("image_id")){
+                                            if (new JSONObject(tmp_activity).has("image_id")) {
                                                 id_img = new JSONObject(tmp_activity).getString("image_id");
                                             }
                                             int nPart = new JSONArray(tmp.getString("parents")).length();
                                             String descrizione = new JSONObject(tmp_activity).getString("description");
-                                            String end = "TODO"; //todo finire di implemetare in 1.1
+                                            String end = "";
                                             String labels = "";
                                             JSONObject tmp_ = new JSONObject(tmp_activity);
-                                            if(tmp_.has("labels")){
-                                                JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                if(a.length()>0){
+                                            if (tmp_.has("labels")) {
+                                                JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                if (a.length() > 0) {
                                                     for (int j = 0; j < a.length(); j++) {
                                                         labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                     }
-                                                }else{
-                                                    labels =",";
+                                                } else {
+                                                    labels = ",";
                                                 }
-                                            }else{
-                                                labels=",";
+                                            } else {
+                                                labels = ",";
                                             }
                                             String ownerid = new JSONObject(tmp_activity).getString("creator_id");
-                                            myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
-                                            tuoi_eventi.add(eve);
-                                        }else if(!new JSONObject(tmp_activity).getBoolean("repetition")){
 
-                                            if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
-                                                String name= new JSONObject(tmp_activity).getString("name");
+                                            myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
+                                            tuoi_eventi.add(eve);
+
+                                        } else if (!new JSONObject(tmp_activity).getBoolean("repetition")) {
+
+                                            if (tmp.getString("end").equals("")) {
+                                                String name = new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                 String id_img = "nan";
-                                                if(new JSONObject(tmp_activity).has("image_id")){
+                                                if (new JSONObject(tmp_activity).has("image_id")) {
                                                     id_img = new JSONObject(tmp_activity).getString("image_id");
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                if(tmp_.has("labels")){
-                                                    JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                    if(a.length()>0){
+                                                if (tmp_.has("labels")) {
+                                                    JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                    if (a.length() > 0) {
                                                         for (int j = 0; j < a.length(); j++) {
                                                             labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                         }
-                                                    }else{
-                                                        labels =",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
-                                                }else{
-                                                    labels=",";
+                                                } else {
+                                                    labels = ",";
                                                 }
                                                 String ownerid = new JSONObject(tmp_activity).getString("creator_id");
-                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
+
+                                                myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                 tuoi_eventi.add(eve);
-                                            }else{
-                                                String date =tmp.getString("end");
-                                                Calendar cal = Calendar.getInstance();
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-                                                cal.setTime(sdf.parse(date));
-                                                if(Calendar.getInstance().before(cal)){
-                                                    String name= new JSONObject(tmp_activity).getString("name");
+
+                                            } else {
+
+                                                //controllo le date
+                                                String date = tmp.getString("end");
+                                                String[] tmp_date = date.split("T");
+                                                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                                LocalDate checkdate = LocalDate.parse(tmp_date[0],formatter);
+                                                if (LocalDate.now().isEqual(checkdate) || LocalDate.now().isBefore(checkdate)) {
+
+                                                    String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
-                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                    if (new JSONObject(tmp_activity).has("image_id")) {
                                                         id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
 
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                    if(tmp_.has("labels")){
-                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                        if(a.length()>0){
+                                                    if (tmp_.has("labels")) {
+                                                        JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                        if (a.length() > 0) {
                                                             for (int j = 0; j < a.length(); j++) {
                                                                 labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                             }
-                                                        }else{
-                                                            labels =",";
+                                                        } else {
+                                                            labels = ",";
                                                         }
-                                                    }else{
-                                                        labels=",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
-                                                    String ownerid= new JSONObject(tmp_activity).getString("creator_id");
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
+                                                    String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
+                                                    myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                     tuoi_eventi.add(eve);
-                                                }else{
-                                                    String name= new JSONObject(tmp_activity).getString("name");
+
+                                                } else {
+
+                                                    String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
-                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                    if (new JSONObject(tmp_activity).has("image_id")) {
                                                         id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                    if(tmp_.has("labels")){
-                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                        if(a.length()>0){
+                                                    if (tmp_.has("labels")) {
+                                                        JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                        if (a.length() > 0) {
                                                             for (int j = 0; j < a.length(); j++) {
                                                                 labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                             }
-                                                        }else{
-                                                            labels =",";
+                                                        } else {
+                                                            labels = ",";
                                                         }
-                                                    }else{
-                                                        labels=",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
-                                                    String ownerid= new JSONObject(tmp_activity).getString("creator_id");
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
+                                                    String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
+                                                    myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                     scaduti_eventi.add(eve);
                                                 }
                                             }
                                         }
-                                    }else{
-                                        // System.out.println("secondo caso");
-                                        JSONArray  Part = new JSONArray(tmp.getString("parents"));
+                                    } else {
+
+                                        JSONArray Part = new JSONArray(tmp.getString("parents"));
                                         Boolean find = false;
-                                        for (int i=0;i<Part.length();++i){
-                                            System.out.println(Part.getString(i));
-                                            if(Part.getString(i).equals(user_id)){
+                                        for (int i = 0; i < Part.length(); ++i) {
+
+                                            if (Part.getString(i).equals(user_id)) {
                                                 find = true;
                                             }
                                         }
-                                        if(find==true){
-                                            if(tmp.getString("end").equals("") /*quando sistemato da togliere*/){
-                                                String name= new JSONObject(tmp_activity).getString("name");
+
+                                        if (find == true) {
+
+                                            if (tmp.getString("end").equals("")) {
+
+                                                String name = new JSONObject(tmp_activity).getString("name");
                                                 String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                 String id_img = "nan";
-                                                if(new JSONObject(tmp_activity).has("image_id")){
+                                                if (new JSONObject(tmp_activity).has("image_id")) {
                                                     id_img = new JSONObject(tmp_activity).getString("image_id");
                                                 }
                                                 int nPart = new JSONArray(tmp.getString("parents")).length();
                                                 String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                String end = "todo"; //todo finire di implemetare in 1.1
+                                                String end = "";
                                                 String labels = "";
                                                 JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                if(tmp_.has("labels")){
-                                                    JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                    if(a.length()>0){
+                                                if (tmp_.has("labels")) {
+                                                    JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                    if (a.length() > 0) {
                                                         for (int j = 0; j < a.length(); j++) {
                                                             labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                         }
-                                                    }else{
-                                                        labels =",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
-                                                }else{
-                                                    labels=",";
+                                                } else {
+                                                    labels = ",";
                                                 }
-                                                String ownerid= new JSONObject(tmp_activity).getString("creator_id");
-                                                myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
+                                                String ownerid = new JSONObject(tmp_activity).getString("creator_id");
+
+                                                myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                 tuoi_eventi.add(eve);
-                                            }else{
-                                                String date =tmp.getString("end");
-                                                Calendar cal = Calendar.getInstance();
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-                                                cal.setTime(sdf.parse(date));
-                                                if(Calendar.getInstance().before(cal)){
-                                                    String name= new JSONObject(tmp_activity).getString("name");
+
+                                            } else {
+
+                                                String date = tmp.getString("end");
+                                                String[] tmp_date = date.split("T");
+                                                DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                                LocalDate checkdate = LocalDate.parse(tmp_date[0],formatter);
+
+                                                if (LocalDate.now().isEqual(checkdate) || LocalDate.now().isBefore(checkdate)) {
+
+                                                    String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
-                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                    if (new JSONObject(tmp_activity).has("image_id")) {
                                                         id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                    if(tmp_.has("labels")){
-                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                        if(a.length()>0){
+                                                    if (tmp_.has("labels")) {
+                                                        JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                        if (a.length() > 0) {
                                                             for (int j = 0; j < a.length(); j++) {
                                                                 labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                             }
-                                                        }else{
-                                                            labels =",";
+                                                        } else {
+                                                            labels = ",";
                                                         }
-                                                    }else{
-                                                        labels=",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
                                                     String ownerid = new JSONObject(tmp_activity).getString("creator_id");
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels,ownerid);
+
+                                                    myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                     partecipi_eventi.add(eve);
-                                                }else{
-                                                    String name= new JSONObject(tmp_activity).getString("name");
+                                                } else {
+
+                                                    String name = new JSONObject(tmp_activity).getString("name");
                                                     String id_activity = new JSONObject(tmp_activity).getString("activity_id");
                                                     String id_img = "nan";
-                                                    if(new JSONObject(tmp_activity).has("image_id")){
+                                                    if (new JSONObject(tmp_activity).has("image_id")) {
                                                         id_img = new JSONObject(tmp_activity).getString("image_id");
                                                     }
                                                     int nPart = new JSONArray(tmp.getString("parents")).length();
                                                     String descrizione = new JSONObject(tmp_activity).getString("description");
-                                                    String end = "todo";
+                                                    String end = "";
                                                     String labels = "";
                                                     JSONObject tmp_ = new JSONObject(tmp_activity);
-                                                    if(tmp_.has("labels")){
-                                                        JSONArray a= new JSONArray(tmp_.getString("labels"));
-                                                        if(a.length()>0){
+                                                    if (tmp_.has("labels")) {
+                                                        JSONArray a = new JSONArray(tmp_.getString("labels"));
+                                                        if (a.length() > 0) {
                                                             for (int j = 0; j < a.length(); j++) {
                                                                 labels += new JSONObject(a.get(j).toString()).getString("name") + ",";
                                                             }
-                                                        }else{
-                                                            labels =",";
+                                                        } else {
+                                                            labels = ",";
                                                         }
-                                                    }else{
-                                                        labels=",";
+                                                    } else {
+                                                        labels = ",";
                                                     }
                                                     String ownerid = new JSONObject(tmp_activity).getString("creator_id");
-                                                    myEventi eve = new myEventi(name,id_img,id_activity,nPart,descrizione,end,labels, ownerid);
+
+                                                    myEventi eve = new myEventi(name, id_img, id_activity, nPart, descrizione, end, labels, ownerid);
                                                     scaduti_eventi.add(eve);
+
                                                 }
                                             }
                                         }
                                     }
-                                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
-                                    pr.setVisibility(View.GONE);
-                                    if(tuoi_eventi.size()>0){
-
+                                    if (tuoi_eventi.size() > 0) {
                                         addRecyclerView(tuoi_eventi);
                                     }
-                                } catch (JSONException | ParseException e) {
+                                    ConstraintLayout pr = (ConstraintLayout) findViewById(R.id.eventi_progress);
+                                    pr.setVisibility(View.GONE);
+
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
@@ -384,12 +501,11 @@ public class YourEvent extends AppCompatActivity {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                                // System.err.println(error.toString());
                             }
                         }, new HashMap<>());
                     }
 
-                }catch(JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -397,13 +513,12 @@ public class YourEvent extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(YourEvent.this, "ERRORE", Toast.LENGTH_SHORT).show();
-                // System.err.println(error.toString());
             }
         }, new HashMap<>());
     }
 
     // metodo che popola la recycle view
-    private void addRecyclerView(List<myEventi> list){
+    private void addRecyclerView(List<Utilities.Situation> list) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.lista_eventi);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, list);
@@ -412,17 +527,17 @@ public class YourEvent extends AppCompatActivity {
     }
 
 
-
-
-    // recycle view
+    // recycle view per gli eventi con etichette e per gli eventi ricorrenti
+    // grazie al principio di ereditarietà, i due oggetti: myEventi e Utilities.myRecEve estendendo
+    // entrambe Utilities.Situation, possono usare la stessa RecyclerView
+    // ciò non sarebbe stato possibile altrimenti
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<myEventi> mData;
-
+        private List<Utilities.Situation> mData;
         private LayoutInflater mInflater;
 
 
-        MyRecyclerViewAdapter(Context context, List<myEventi> data) {
+        MyRecyclerViewAdapter(Context context, List<Utilities.Situation> data) {
             this.mInflater = LayoutInflater.from(context);
             this.mData = data;
         }
@@ -437,18 +552,65 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyRecyclerViewAdapter.ViewHolder holder, int position) {
-            myEventi event = mData.get(position);
-            // System.out.println(" ************************* questo è event: "+event.toString());
-            holder.btn.setText(event.nome);
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
-                    // System.out.println("intent: "+event.toString());
-                    evento.putExtra("evento", event.toString());
-                    startActivity(evento);
+
+            Utilities.Situation event = mData.get(position);
+            holder.btn.setText(event.getName());
+
+            if (event instanceof Utilities.myRecEvent) {
+                new ImageDownloader(holder.myImageView).execute(event.getImage());
+
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.recurrent_event, getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent evento = new Intent(YourEvent.this, DettagliEventoRicorrente.class);
+
+                        evento.putExtra("evento", event.toString());
+                        startActivity(evento);
+                    }
+                });
+            } else {
+
+
+                if (event.getImage().equals("nan")) { // Non è stata specificata nessun immagine, ne setto una di default
+
+                    holder.myImageView.setImageDrawable(getDrawable(R.drawable.persone));
+                } else { // Scarico l'immagine dal server e la aggiungo alla view
+
+                    Utilities.httpRequest(YourEvent.this, Request.Method.GET, "/image/" + event.getImage(), response -> {
+                        String url = "";
+                        try {
+                            JSONObject obj = new JSONObject((String) response);
+                            if (obj.has("url") && !obj.getString("url").equals("image.url")) {
+                                if (obj.getString("url").contains(".svg")) {
+                                    url = getString(R.string.urlnoapi) + obj.getString("path");
+                                } else {
+                                    url = obj.getString("url");
+
+                                }
+                            } else {
+                                url = getString(R.string.urlnoapi) + obj.getString("path");
+                            }
+                            new ImageDownloader(holder.myImageView).execute(url);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }, System.err::println, new HashMap<>());
                 }
-            });
+
+                holder.btn.setBackgroundColor(getResources().getColor(R.color.purple_500, getTheme()));
+                holder.btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent evento = new Intent(YourEvent.this, DettagliEvento.class);
+                        evento.putExtra("evento", event.toString());
+
+                        startActivity(evento);
+                    }
+                });
+            }
+
 
         }
 
@@ -459,28 +621,54 @@ public class YourEvent extends AppCompatActivity {
         }
 
 
-
-        public class ViewHolder extends RecyclerView.ViewHolder{
-            TextView myTextView;
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            ImageView myImageView;
             Button btn;
 
             ViewHolder(View itemView) {
                 super(itemView);
-                myTextView = itemView.findViewById(R.id.info);
+                myImageView = itemView.findViewById(R.id.myrecycle_view_img);
                 btn = itemView.findViewById(R.id.name_event);
             }
         }
 
 
-        myEventi getItem(int id) {
+        Utilities.Situation getItem(int id) {
             return mData.get(id);
         }
 
     }
-    // recycle view
 
-    // permette di usare gli eventi in modo più semplice
-    private class  myEventi{
+    // Classe per il download delle immagini
+    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+        ImageView holder;
+
+        public ImageDownloader(ImageView holder) {
+            this.holder = holder;
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String urlOfImage = strings[0];
+            Bitmap logo = null;
+            try {
+                InputStream is = new URL(urlOfImage).openStream();
+                logo = BitmapFactory.decodeStream(is);
+            } catch (Exception e) { // Catch the download exception
+                e.printStackTrace();
+            }
+            return logo;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            holder.setImageBitmap(bitmap);
+        }
+    }
+
+    // La classe myEventi implementa Utilities.Situation
+    // è necessaria per fornire un codice scalabile
+    private class myEventi implements Utilities.Situation {
         public final String nome;
         public final String event_id;
         public final String img;
@@ -503,19 +691,22 @@ public class YourEvent extends AppCompatActivity {
 
         @Override
         public String toString() {
-            return nome+'/'+event_id+'/'+img+'/'+nPart+'/'+descrizione+'/'+enddate+'/'+labels+'/'+owner_id;
+            return nome + '/' + event_id + '/' + img + '/' + nPart + '/' + descrizione + '/' + enddate + '/' + labels + '/' + owner_id;
         }
-    }
 
+        @Override
+        public String getName() {
+            return this.nome;
+        }
 
-    public void getHomePage(View v){
-        Intent homepage = new Intent(YourEvent.this,Homepage.class);
-        startActivity(homepage);
-    }
+        @Override
+        public String getImage() {
+            return this.img;
+        }
 
-    public SharedPreferences getPrefs(){
-        SharedPreferences prefs;
-        prefs=YourEvent.this.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
-        return prefs;
+        @Override
+        public String getLabels_id() {
+            return this.labels;
+        }
     }
 }

@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,7 +39,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
     private String userid;
     private String groupid;
-    private List<Evento> activities = null;
+    private List<Utilities.Situation> activities = null;
     private List<String> child_pref = null;
     public ConstraintLayout progress_layout;
     public ProgressBar progress_bar;
@@ -53,34 +52,48 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         userid = Utilities.getUserID(this);
         groupid = Utilities.getPrefs(this).getString("group", "");
 
-        Toolbar t = (Toolbar) findViewById(R.id.toolbar6);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+//        Impostazione per tornare indietro alla homepage
+        Toolbar t = findViewById(R.id.toolbar6);
+        t.setNavigationOnClickListener(v -> finish());
 
         // Inizializzo i filtri per quanto riguarda la visualizzazione degli eventi
-        ChipGroup chipGroup = (ChipGroup) findViewById(R.id.chipgroup);
+        ChipGroup chipGroup = findViewById(R.id.chipgroup);
+        chipGroup.check(R.id.attività);
 
-        chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(ChipGroup group, int checkedId) {
-                if (checkedId == R.id.attività) {
-                    addRecyclerView(activities);
-                } else if (checkedId == R.id.servPersona) {
-                    getServPerson();
-                } else {
-                    addRecyclerView(getRecommendedActivities());
+        chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.attività) { // Se selezioni le attività allora mostro solo quelle
+                addRecyclerView(activities);
+            } else if (checkedId == R.id.servPersona) { // Se selezioni i servizi alla persona allora mostro solo quelle
+                getServices("pickup");
+            } else if (checkedId == R.id.consigliate) { // Se selezioni le attività consigliate allora mostro solo quelle
+                List<Utilities.Situation> rec = getRecommendedActivities();
+                for (String label:child_pref) {
+                    Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/recurringActivity/label/"+label, response -> {
+                        try{
+                            JSONArray arr = new JSONArray((String) response);
+                            for (int i = 0; i < arr.length(); i++) {
+                                Utilities.myRecEvent eve = new Utilities.myRecEvent(arr.getJSONObject(i));
+                                if(!rec.contains(eve)){
+                                    rec.add(eve);
+                                }
+                            }
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }, System.err::println, new HashMap<>());
                 }
+                addRecyclerView(rec);
+            } else if (checkedId == R.id.servRicorrenti) { // Se selezioni le attività ricorrenti allora mostro solo quelle
+                getRecurring();
+            } else if (checkedId == R.id.prestito) { // Se selezioni le attività che riguardano il prestito allora mostro solo quelle
+                getServices("lend");
+            } else if (checkedId == R.id.carsharing) { // Se selezioni le attività che riguardano il carsharing allora mostro solo quelle
+                getServices("car");
             }
         });
 
         // Aggiungo i dati alla view
-        getActivities(() -> {
-            addRecyclerView(activities);
-        });
+        getActivities(() -> addRecyclerView(activities));
         getMyChildPref();
 
     }
@@ -90,12 +103,14 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_visualizzazione_eventi);
         // Schermata di caricamento
-        progress_layout = (ConstraintLayout) findViewById(R.id.progress_layout);
-        progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
+        progress_layout = findViewById(R.id.progress_layout);
+        progress_bar = findViewById(R.id.progress_bar);
     }
 
     // Ottengo gli interessi dei figli del visualizzatore della view
     private void getMyChildPref() {
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
         String my_id = Utilities.getUserID(this);
         child_pref = new ArrayList<>();
         Utilities.httpRequest(this, Request.Method.GET, "/users/" + my_id + "/children", response -> {
@@ -112,7 +127,6 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                         }
                     }
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -145,38 +159,96 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                         img = e.getString("image_id");
                     }
 
-                    activities.add(new Evento(e.getString("name"), img, e.getString("activity_id"), 10 /*TODO*/, e.getString("description"), "TODO", labels, labels_ids, e.getString("creator_id")));
+                    activities.add(new Evento(e.getString("name"), img, e.getString("activity_id"), 10, e.getString("description"), ".", labels, labels_ids, e.getString("creator_id")));
                 }
 
-                r.run();
+                Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
+                    try {
+                        JSONArray arr = new JSONArray((String) response);
+                        for (int i = 0; i < arr.length(); i++) {
+                            JSONObject obj = arr.getJSONObject(i);
+                            activities.add(new Utilities.myRecEvent(obj));
+                        }
+                        r.run();
+                        progress_bar.setVisibility(View.GONE);
+                        progress_layout.setVisibility(View.GONE);
 
-                progress_bar.setVisibility(View.GONE);
-                progress_layout.setVisibility(View.GONE);
-
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },System.out::println, new HashMap<>());
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }, error -> {
-            Toast.makeText(this, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
-        }, new HashMap<>());
+        }, error -> Toast.makeText(this, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show(), new HashMap<>());
     }
 
-    private void getServPerson() { //TODO not implemented yet, è parte della seconda feature
-        List<Evento> activities = new ArrayList<>();
-        Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
-        addRecyclerView(activities);
+//    Ottengo i servizi in base al pattern specificato
+    private void getServices(String pattern) {
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
+        List<Utilities.Situation> activities = new ArrayList<>();
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/service?pattern="+pattern, response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    activities.add(new Utilities.myService(arr.getJSONObject(i)));
+                }
+                addRecyclerView(activities);
+                progress_layout.setVisibility(View.GONE);
+                progress_bar.setVisibility(View.GONE);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
     }
 
+//    Ottengo le attività ricorrenti, sia eventi che servizi
+    private void getRecurring() {
+        List<Utilities.Situation> services = new ArrayList<>();
+
+        progress_layout.setVisibility(View.VISIBLE);
+        progress_bar.setVisibility(View.VISIBLE);
+
+        Utilities.httpRequest(this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/services?filterBy=recurrent", response -> {
+            try {
+                JSONArray arr = new JSONArray((String) response);
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    services.add(new Utilities.myRecEvent(obj));
+                }
+
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/groups/" + Utilities.getGroupId(this) + "/service", response1 -> {
+                    try {
+                        JSONArray arr1 = new JSONArray((String) response1);
+                        for (int j = 0; j < arr1.length(); j++) {
+                            JSONObject obj1 = arr1.getJSONObject(j);
+                            services.add(new Utilities.myService(obj1));
+                        }
+                        addRecyclerView(services);
+                        progress_layout.setVisibility(View.GONE);
+                        progress_bar.setVisibility(View.GONE);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, System.out::println, new HashMap<>());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, System.out::println, new HashMap<>());
+    }
 
     // Ottengo le attività che possono interessare ai figli
-    private List<Evento> getRecommendedActivities() {
-        List<Evento> recommendedActivities = new ArrayList<>();
+    private List<Utilities.Situation> getRecommendedActivities() {
+        List<Utilities.Situation> recommendedActivities = new ArrayList<>();
+
         if (child_pref != null) {
-            for (Evento a : activities) {
-                String[] lab = a.labels_ids.split(",");
+            for (Utilities.Situation a : activities) {
+                String[] lab = a.getLabels_id().split(",");
                 for (String l : lab) {
-                    if (l != "") {
+                    if (!l.equals("")) {
                         if (child_pref.contains(l) && !recommendedActivities.contains(a)) {
                             recommendedActivities.add(a);
                         }
@@ -193,8 +265,8 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    private void addRecyclerView(List<Evento> list) {
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.activities_recycle_view);
+    private void addRecyclerView(List<Utilities.Situation> list) {
+        RecyclerView recyclerView = findViewById(R.id.activities_recycle_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(VisualizzazioneEventi.this);
         MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(VisualizzazioneEventi.this, list);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -202,18 +274,13 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
 
-    public void goBack(View v) {
-        Intent homepage = new Intent(VisualizzazioneEventi.this, Homepage.class);
-        startActivity(homepage);
-    }
-
     // Classe per la gestione della recycle view
-    private class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
+    public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
 
-        private List<Evento> eventoList;
+        private List<Utilities.Situation> eventoList;
         private LayoutInflater mInflater;
 
-        public MyRecyclerViewAdapter(Context context, List<Evento> eventoList) {
+        public MyRecyclerViewAdapter(Context context, List<Utilities.Situation> eventoList) {
             this.eventoList = eventoList;
             this.mInflater = LayoutInflater.from(context);
         }
@@ -227,44 +294,57 @@ public class VisualizzazioneEventi extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final Evento eve = eventoList.get(position);
-            holder.tv.setText(eve.nome);
+            final Utilities.Situation eve = eventoList.get(position);
+            holder.tv.setText(eve.getName());
             holder.btn.setText("Info");
-            holder.btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+
+
+            if (eve instanceof Evento) {
+                holder.btn.setOnClickListener(v -> {
                     Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEvento.class);
                     evento.putExtra("evento", eve.toString());
                     startActivity(evento);
-                }
-            });
+                });
+            } else if (eve instanceof Utilities.myRecEvent) {
+                holder.btn.setOnClickListener(v -> {
+                    Intent evento = new Intent(VisualizzazioneEventi.this, DettagliEventoRicorrente.class);
+                    evento.putExtra("evento", eve.toString());
+                    startActivity(evento);
+                });
+            } else if (eve instanceof Utilities.myService) {
+                holder.btn.setOnClickListener(v -> {
+                    Intent evento = new Intent(VisualizzazioneEventi.this, DettagliServizio.class);
+                    evento.putExtra("servizio", eve.toString());
+                    startActivity(evento);
+                });
+            }
 
             // Se è presente scarico l'immagine e la aggiungo, altrimenti uso una di default
-            if (eve.img.equals("nan")) {
+            if (eve.getImage().equals("nan")) {
                 holder.img.setImageDrawable(getDrawable(R.drawable.persone));
+            } else if (eve instanceof Utilities.myService || eve instanceof Utilities.myRecEvent) {
+                new ImageDownloader(holder.img).execute(eve.getImage());
             } else {
-                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/"+eve.img, response -> {
-                    String url="";
+                Utilities.httpRequest(VisualizzazioneEventi.this, Request.Method.GET, "/image/" + eve.getImage(), response -> {
+                    String url = "";
                     try {
-                        JSONObject obj = new JSONObject((String)response);
-                        if(obj.has("url") && !obj.getString("url").equals("image.url")){
-                            if(obj.getString("url").contains(".svg")){
-                                url = getString(R.string.urlnoapi)+obj.getString("path");
-                            }else{
+                        JSONObject obj = new JSONObject((String) response);
+                        if (obj.has("url") && !obj.getString("url").equals("image.url")) {
+                            if (obj.getString("url").contains(".svg")) {
+                                url = getString(R.string.urlnoapi) + obj.getString("path");
+                            } else {
                                 url = obj.getString("url");
 
                             }
-                        }else{
-                            url = getString(R.string.urlnoapi)+obj.getString("path");
+                        } else {
+                            url = getString(R.string.urlnoapi) + obj.getString("path");
                         }
                         new ImageDownloader(holder.img).execute(url);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }, error -> {
-                    System.err.println(error);
-                }, new HashMap<>());
+                }, System.err::println, new HashMap<>());
 
             }
         }
@@ -284,15 +364,15 @@ public class VisualizzazioneEventi extends AppCompatActivity {
                 super(itemView);
                 this.tv = itemView.findViewById(R.id.recycle_view_text);
                 this.btn = itemView.findViewById(R.id.recycle_view_btn);
-                this.img = itemView.findViewById(R.id.recycle_view_img);
+                this.img = itemView.findViewById(R.id.myrecycle_view_img);
             }
         }
     }
 
 
     // Classe per il download delle immagini
-    private class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
-        ImageView holder;
+    private static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+        private ImageView holder;
 
         public ImageDownloader(ImageView holder) {
             this.holder = holder;
@@ -302,10 +382,10 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         protected Bitmap doInBackground(String... strings) {
             String urlOfImage = strings[0];
             Bitmap logo = null;
-            try{
+            try {
                 InputStream is = new URL(urlOfImage).openStream();
                 logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
+            } catch (Exception e) { // Catch the download exception
                 e.printStackTrace();
             }
             return logo;
@@ -318,7 +398,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
     }
 
     // Model di evento
-    public static class Evento {
+    public static class Evento implements Utilities.Situation {
         public final String nome;
         public final String event_id;
         public final String img;
@@ -349,7 +429,7 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         public static Evento getEventoFromString(String toParse) {
             String[] parsed = toParse.split("/");
 
-            if (parsed.length <= 6) {
+            if (parsed.length <= 7) {
                 return new Evento(parsed[0], parsed[2], parsed[1], Integer.parseInt(parsed[3]), parsed[4], parsed[5], "", parsed[6]);
             }
             return new Evento(parsed[0], parsed[2], parsed[1], Integer.parseInt(parsed[3]), parsed[4], parsed[5], parsed[6], parsed[7]);
@@ -360,6 +440,22 @@ public class VisualizzazioneEventi extends AppCompatActivity {
         public String toString() {
             return nome + '/' + event_id + '/' + img + '/' + nPart + '/' + descrizione + '/' + enddate + '/' + labels + '/' + owner_id;
         }
+
+        @Override
+        public String getName() {
+            return this.nome;
+        }
+
+        @Override
+        public String getImage() {
+            return this.img;
+        }
+
+        @Override
+        public String getLabels_id() {
+            return this.labels_ids;
+        }
     }
+
 
 }

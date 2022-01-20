@@ -17,17 +17,16 @@
             android:layout_height="55dp"
             android:background="@color/purple_500"
             android:minHeight="?attr/actionBarSize"
-            android:onClick="getHomePage"
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/abc_vector_test"
             app:title="Archivio Eventi"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Body2"
             app:titleTextColor="#FFFFFF" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/eventi_progress"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/eventi_pr"
@@ -44,30 +43,41 @@
             </RelativeLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/your_events"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tuoi eventi" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/active_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Partecipo" />
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="413dp"
+                    android:layout_height="wrap_content">
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/closed_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="scaduti" />
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/your_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tuoi eventi" />
 
-        </com.google.android.material.tabs.TabLayout>
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/active_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Partecipo" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/closed_events"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="scaduti" />
+
+                </com.google.android.material.tabs.TabLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <ScrollView
             android:layout_width="match_parent"

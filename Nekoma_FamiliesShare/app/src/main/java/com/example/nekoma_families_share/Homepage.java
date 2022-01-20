@@ -76,7 +76,6 @@ public class Homepage extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Toast.makeText(Homepage.this, error.toString(), Toast.LENGTH_LONG).show();
-                    // System.err.println(error.getMessage());
                 }
             },new HashMap<>());
         }catch(JSONException e){
@@ -89,7 +88,7 @@ public class Homepage extends AppCompatActivity {
         return  prefs.getString("token","");
     }
 
-    // tutti i seguenti metodi sono necessari per spostarsi attraverso le interfacce
+    // tutti i seguenti metodi sono necessari per spostarsi attraverso le activity
 
     public void getBambini(View v){
         Intent bambino = new Intent(Homepage.this,ListaBambiniAmici.class);
@@ -100,8 +99,6 @@ public class Homepage extends AppCompatActivity {
         Intent group = new Intent(Homepage.this,SceltaDelGruppo.class);
         startActivity(group);
     }
-
-
 
     public void getActivities(View v){
         Intent activities = new Intent(Homepage.this, VisualizzazioneEventi.class);
@@ -114,12 +111,14 @@ public class Homepage extends AppCompatActivity {
     }
 
     public void getCreateEvent(View v){
-        Intent event = new Intent(Homepage.this,Creazione_evento.class);
+        Intent event = new Intent(Homepage.this,SceltaCreazione.class);
         startActivity(event);
     }
 
     public void getService(View v){
-        Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
+        // Toast.makeText(Homepage.this, "COMING SOON", Toast.LENGTH_LONG).show();
+        Intent service = new Intent(Homepage.this,YourService.class);
+        startActivity(service);
     }
 
 }

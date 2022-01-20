@@ -1,17 +1,16 @@
 const mongoose = require('mongoose')
 
-// model for the service that provides our app
-const serviceSchema = new mongoose.Schema({
-  service_id: {
+const activitySchema = new mongoose.Schema({
+  activity_id: {
     type: String,
     unique: true,
     required: true
   },
-  owner_id: {
+  group_id: {
     type: String,
     required: true
   },
-  group_id: {
+  image_url: {
     type: String,
     required: true
   },
@@ -20,31 +19,28 @@ const serviceSchema = new mongoose.Schema({
     required: true
   },
   description: String,
-  location: {
+  location: String,
+  color: {
+    type: String,
+    required: true,
+    default: 'black'
+  },
+  labels: {
+    type: [String]
+  },
+  status: {
     type: String,
     required: true
   },
-  pattern: {
+  creator_id: {
     type: String,
     required: true
-  },
-  car_space: String,
-  lend_obj: String,
-  lend_time: Date,
-  pickuplocation: String,
-  img: {
-    type: String,
-    required: true
-  },
-  recurrence: {
-    type: Boolean
   }
-
 }, { timestamps: true, toJSON: { virtuals: true } })
 
-serviceSchema.index({ group_id: 1, createdAt: -1 })
+activitySchema.index({ group_id: 1, createdAt: -1 })
 
 mongoose.pluralize(null)
-const model = mongoose.model('Service', serviceSchema)
+const model = mongoose.model('RecurringActivity', activitySchema)
 
 module.exports = model

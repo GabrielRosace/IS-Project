@@ -147,6 +147,8 @@ public class NewChild extends AppCompatActivity implements AdapterView.OnItemSel
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         datePicker = new DatePickerDialog(this,dateListener,year,month,day);
+        calendar.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DAY_OF_MONTH));
+        datePicker.getDatePicker().setMaxDate(calendar.getTimeInMillis());
     }
 
     // Metodo che permette di aggiungere i dati di un nuovo bambino nel database

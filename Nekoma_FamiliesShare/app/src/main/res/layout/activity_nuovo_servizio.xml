@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NuovoServizio">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/nsToolbar"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:foregroundTint="?attr/colorOnPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/abc_vector_test"
+        app:title="@string/nsToolbar"
+        app:titleTextColor="?attr/colorOnPrimary" />
+
+    <ImageView
+        android:id="@+id/serviceSave"
+        android:layout_width="41dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+    <ScrollView
+        android:id="@+id/scrollView4"
+        android:layout_width="391dp"
+        android:layout_height="729dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nsToolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="890dp">
+
+                <TextView
+                    android:id="@+id/imageUrlLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/serviceImageUrl"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/serviceImageUrl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageUrlLabel"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/nameServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="33dp"
+                    android:text="@string/serviceName"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageUrlLabel" />
+
+                <EditText
+                    android:id="@+id/serviceName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:maxLength="18"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/nameServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceImageUrl"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/serviceDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/descriptionServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceName"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/serviceLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="41dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/locationServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceDescription"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/locationServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceLocation"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/descriptionServiceLabel" />
+
+                <TextView
+                    android:id="@+id/patternServiceLabel"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/servicePattern"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/locationServiceLabel" />
+
+                <TextView
+                    android:id="@+id/startdateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="17dp"
+                    android:text="@string/serviceStartDate"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkSat2" />
+
+                <TextView
+                    android:id="@+id/monthPickerLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="17dp"
+                    android:text="@string/serviceMonths"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkSat2" />
+
+                <TextView
+                    android:id="@+id/endDateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="40dp"
+                    android:text="@string/serviceEndDate"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/startdateLabel" />
+
+                <TextView
+                    android:id="@+id/nOfMonths"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="36dp"
+                    android:text="@string/serviceNofMonths"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/monthPickerLabel" />
+
+                <Button
+                    android:id="@+id/serviceStartDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="45dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="51dp"
+                    android:onClick="openDateStartPicker"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.466"
+                    app:layout_constraintStart_toEndOf="@+id/startdateLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/checkSat2"
+                    tools:ignore="SpeakableTextPresentCheck,DuplicateClickableBoundsCheck" />
+
+                <Button
+                    android:id="@+id/serviceMonthPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="30dp"
+                    android:onClick="openDateMonthPicker"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toEndOf="@+id/serviceStartDate"
+                    app:layout_constraintTop_toBottomOf="@+id/checkSat2"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <Button
+                    android:id="@+id/serviceLendStartDate"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="9dp"
+                    android:layout_marginEnd="29dp"
+                    android:onClick="openDateLendPicker"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendtimeServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceCarSpace"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/descriptionServiceLabel"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="35dp"
+                    android:text="@string/serviceDescription"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/nameServiceLabel" />
+
+                <Spinner
+                    android:id="@+id/serviceType"
+                    android:layout_width="170dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="9dp"
+                    android:layout_marginTop="67dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/typeServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceLendStartDate"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <Spinner
+                    android:id="@+id/servicePattern"
+                    android:layout_width="184dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@+id/patternServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceLocation"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/daysRecLabel"
+                    android:layout_width="260dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="11dp"
+                    android:text="@string/serviceDaysRec"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceType" />
+
+                <Button
+                    android:id="@+id/serviceEndDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="45dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="44dp"
+                    android:onClick="openDateEndPicker"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.506"
+                    app:layout_constraintStart_toEndOf="@+id/endDateLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceStartDate"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <CheckBox
+                    android:id="@+id/serviceCheck"
+                    android:layout_width="135dp"
+                    android:layout_height="49dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/serviceCheck"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/lendtimeServiceLabel" />
+
+                <TextView
+                    android:id="@+id/typeServiceLabel"
+                    android:layout_width="180dp"
+                    android:layout_height="23dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="25dp"
+                    android:text="@string/serviceType"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceCheck" />
+
+                <TextView
+                    android:id="@+id/carspaceServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceCarSpace"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/lendobjServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/serviceLendObj"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/pickupServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="37dp"
+                    android:text="@string/servicePickupLocation"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/patternServiceLabel" />
+
+                <TextView
+                    android:id="@+id/lendtimeServiceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="40dp"
+                    android:text="@string/serviceLendTime"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/carspaceServiceLabel" />
+
+                <EditText
+                    android:id="@+id/serviceCarSpace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck,DuplicateClickableBoundsCheck" />
+
+                <EditText
+                    android:id="@+id/serviceLendObj"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <EditText
+                    android:id="@+id/servicePickup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="29dp"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/lendobjServiceLabel"
+                    app:layout_constraintTop_toBottomOf="@+id/servicePattern"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkMon"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioMon"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <CheckBox
+                    android:id="@+id/checkSat2"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="60dp"
+                    android:hint="@string/radioSat"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <CheckBox
+                    android:id="@+id/checkSun"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/radioSun"
+                    app:layout_constraintStart_toEndOf="@+id/checkSat2"
+                    app:layout_constraintTop_toBottomOf="@+id/checkTue" />
+
+                <CheckBox
+                    android:id="@+id/checkTue"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioTue"
+                    app:layout_constraintStart_toEndOf="@+id/checkMon"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <CheckBox
+                    android:id="@+id/checkWen"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioWen"
+                    app:layout_constraintStart_toEndOf="@+id/checkTue"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <CheckBox
+                    android:id="@+id/checkThu"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioThu"
+                    app:layout_constraintStart_toEndOf="@+id/checkWen"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <CheckBox
+                    android:id="@+id/checkFri"
+                    android:layout_width="65dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/radioFri"
+                    app:layout_constraintStart_toEndOf="@+id/checkThu"
+                    app:layout_constraintTop_toBottomOf="@+id/daysRecLabel" />
+
+                <EditText
+                    android:id="@+id/nofm"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="216dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="30dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/serviceMonthPicker"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/listOfDates"
+                    android:layout_width="363dp"
+                    android:layout_height="90dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginEnd="16dp"
+                    android:scrollbars="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/nofm" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,7 +25,7 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="0dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/progress_layout"
@@ -45,54 +45,92 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:orientation="horizontal">
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipgroup"
-                android:layout_width="wrap_content"
+            <HorizontalScrollView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:checkedChip="@id/attività"
-                app:selectionRequired="true"
-                app:singleLine="false"
-                app:singleSelection="true">
+                android:layout_weight="1">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/attività"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:checked="true"
-                    android:text="@string/attivitàricorrenti"
-                    android:textSize="10sp" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/servPersona"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:text="@string/servizipersona"
-                    android:textSize="10sp" />
+                    <Space
+                        android:layout_width="15dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/consigliate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checkable="true"
-                    android:text="@string/attivitàconsigliate"
-                    android:textSize="10sp" />
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipgroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:checkedChip="@id/attività"
+                        app:selectionRequired="true"
+                        app:singleLine="false"
+                        app:singleSelection="true">
 
-            </com.google.android.material.chip.ChipGroup>
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/attività"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:checked="true"
+                            android:text="@string/attivitàricorrenti"
+                            android:textSize="10sp" />
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/consigliate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="@string/attivitàconsigliate"
+                            android:textSize="10sp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/servRicorrenti"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="@string/serviziricorrenti"
+                            android:textSize="10sp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/servPersona"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="@string/servizipersona"
+                            android:textSize="10sp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/prestito"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="@string/prestito"
+                            android:textSize="10sp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/carsharing"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkable="true"
+                            android:text="@string/carsharing"
+                            android:textSize="10sp" />
+
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <Space
+                        android:layout_width="15dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
         </LinearLayout>
 
         <ScrollView
